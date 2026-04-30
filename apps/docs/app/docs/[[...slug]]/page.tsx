@@ -7,6 +7,22 @@ import {
 } from 'fumadocs-ui/page'
 import { notFound } from 'next/navigation'
 import defaultMdxComponents from 'fumadocs-ui/mdx'
+import {
+  BadgeIntentDemo,
+  BadgeDotDemo,
+  BadgeSizeDemo,
+  BadgeKeywordDemo,
+  BadgeKeywordTable,
+} from '@/components/demos/badge-demo'
+
+const mdxComponents = {
+  ...defaultMdxComponents,
+  BadgeIntentDemo,
+  BadgeDotDemo,
+  BadgeSizeDemo,
+  BadgeKeywordDemo,
+  BadgeKeywordTable,
+}
 
 export default async function Page({
   params,
@@ -17,14 +33,16 @@ export default async function Page({
   const page = source.getPage(slug)
   if (!page) notFound()
 
-  const MDX = page.data.body
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = page.data as any
+  const MDX = data.body
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage toc={data.toc} full={data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX components={{ ...defaultMdxComponents }} />
+        <MDX components={mdxComponents} />
       </DocsBody>
     </DocsPage>
   )

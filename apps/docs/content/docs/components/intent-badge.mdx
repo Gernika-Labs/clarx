@@ -1,37 +1,100 @@
 ---
-title: Intent Badge
-description: A compact label that displays what a user is trying to accomplish.
+title: Badge
+description: A compact label that communicates intent — not just appearance. Covers status, severity, AI agent states, and lifecycle.
 ---
 
 ## Overview
 
-`IntentBadge` surfaces the detected intent behind a user message — useful in copilot UIs where you want to show the AI's understanding before it acts.
+`Badge` is the foundational semantic component in intention/ui. Its API is built around two axes:
 
-## Usage
+- **Intent** — what does this communicate? (`success`, `warning`, `danger`, `neutral`, `info`, `brand`)
+- **Appearance** — how prominent should it be? (`soft` or `solid`)
+
+You never pass a color. You express meaning, and the component translates it into the correct visual output.
+
+## Intent × Appearance
+
+<BadgeIntentDemo />
+
+`soft` is the default — subdued, readable inside a table row or card. `solid` is for when the badge needs to command attention on its own.
+
+## With dot
+
+The `dot` prop adds a status indicator before the label.
+
+- `false` — no dot (default)
+- `"static"` — solid dot, for stable terminal states
+- `"pulse"` — animated dot, for live or in-progress states
+
+<BadgeDotDemo />
 
 ```tsx
-import { IntentBadge } from '@/components/ui/intent-badge'
+<Badge intent="brand" dot="pulse">Running</Badge>
+<Badge intent="success" dot="static">Ready</Badge>
+```
 
-export default function Example() {
-  return (
-    <IntentBadge
-      intent="search"
-      label="Search documentation"
-      confidence={0.94}
-    />
-  )
-}
+## Size
+
+<BadgeSizeDemo />
+
+`md` is the default. Use `sm` in dense contexts like table cells or sidebar labels.
+
+## Keywords
+
+Keywords are the shorthand layer. Common states — `ready`, `pending`, `failed`, `thinking`, `streaming` — are fully pre-resolved. One prop replaces four.
+
+```tsx
+// instead of:
+<Badge intent="brand" appearance="soft" dot="pulse">Running</Badge>
+
+// write:
+<Badge keyword="running" />
+```
+
+<BadgeKeywordDemo />
+
+### Full keyword reference
+
+<BadgeKeywordTable />
+
+## AI-specific keywords
+
+The AI agent states are first-class keywords. They encode temporal meaning that doesn't exist in traditional design systems:
+
+```tsx
+<Badge keyword="thinking" />    // neutral + pulse → model is processing
+<Badge keyword="streaming" />   // brand + pulse → response is coming in
+<Badge keyword="tool-call" />   // info + pulse → agent is calling a tool
+<Badge keyword="uncertain" />   // warning → model expressed low confidence
+<Badge keyword="done" />        // success + static → generation complete
 ```
 
 ## Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `intent` | `string` | — | Intent identifier (e.g. `"search"`, `"create"`) |
-| `label` | `string` | — | Human-readable intent label |
-| `confidence` | `number` | — | 0–1 confidence score |
-| `variant` | `"default" \| "muted" \| "outline"` | `"default"` | Visual style |
+| `keyword` | `BadgeKeyword` | — | Shorthand for a named state. Resolves intent, appearance, dot, and label. |
+| `intent` | `Intent` | `"neutral"` | Semantic meaning. Drives color. |
+| `appearance` | `"soft" \| "solid"` | `"soft"` | Visual weight. |
+| `dot` | `false \| "static" \| "pulse"` | `false` | Status dot before the label. |
+| `size` | `"sm" \| "md"` | `"md"` | Size variant. |
+| `label` | `string` | — | Overrides the keyword's default label. |
+| `children` | `ReactNode` | — | Content. Takes precedence over `label`. |
+| `className` | `string` | — | Layout classes only (`mt-2`, `w-full`). Not for style overrides. |
 
-## Built-in intent icons
+## Design rules
 
-Passing common intent keys like `"search"`, `"create"`, `"delete"`, `"summarize"`, or `"navigate"` automatically shows a matching icon.
+**No color via `className`.** If you find yourself writing `className="text-red-500"` on a Badge, use `intent="danger"` instead. The component owns its color.
+
+**No `!important` overrides.** `!h-5` or `!px-1.5` on a Badge is a signal that the API is missing a variant. Open an issue rather than forcing it.
+
+**Prefer `keyword` for named states.** If the state has a name ("Ready", "Running", "Failed"), it should be a keyword — not a manual combination of `intent` + `dot` + `label`.
+
+## Source
+
+Copy this into `components/ui/badge.tsx` and own it.
+
+```tsx
+// Full source at packages/ui/src/badge.tsx
+// Depends on: class-variance-authority, clsx, tailwind-merge
+```
