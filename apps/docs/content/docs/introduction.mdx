@@ -1,32 +1,43 @@
 ---
 title: Introduction
-description: Why intention/ui exists and who it's for.
+description: intention/ui is an intention-driven design system for modern software.
 ---
 
-## The problem with existing UI libraries for AI
+intention/ui is an intention-driven design system for modern software.
 
-Most UI component libraries were designed for static, form-driven interfaces.
-When you build with them for AI products, you spend most of your time working around them:
+It starts from a simple belief: UI components should communicate meaning, not force developers to manually recreate presentation. Instead of encoding decisions through one-off `className` overrides, intention/ui encourages APIs that describe purpose, state, and emphasis directly.
 
-- No first-class streaming text support
-- No concept of "thinking" or "tool use" states
-- Chat layouts require significant custom work
-- No vocabulary for intent, confidence, or agent actions
+This approach matters more now than ever. Product interfaces are changing faster, AI is increasingly part of the implementation process, and teams need systems that are legible not only to designers and engineers, but also to the tools helping build the product. In that environment, semantic instructions are more durable than visual ones. "This is destructive." "This is pending." "This should be subtle." Those are the decisions that should live in the API.
 
-## What we built instead
+intention/ui treats the design system as a communication layer between design, code, and AI-assisted development. It keeps visual quality high by centralizing styling decisions, while making implementation simpler, more consistent, and easier to evolve.
 
-intention/ui gives you a vocabulary for AI interactions out of the box:
+It is for teams who believe the future of design systems is not more styling flexibility at the callsite, but better expression of intent at the system level.
 
-| Concept | Component |
-|---|---|
-| A message in a conversation | `<ChatMessage>` |
-| Text that streams in token by token | `<StreamingText>` |
-| An action the AI is taking | `<ToolCall>` |
-| What the user is trying to do | `<IntentBadge>` |
-| Agent thinking / working | `<AgentStatus>` |
+## Design systems as communication systems
 
-## Who is it for?
+Design systems should no longer be treated primarily as collections of styled components. They should be treated as communication systems.
 
-- Teams building AI chat products (copilots, assistants, agents)
-- Developers who want production-ready AI UI primitives
-- Designers who want a shared vocabulary for AI interaction patterns
+That communication happens on three levels:
+
+- Between the product and the user
+- Between design and engineering
+- Between humans and AI systems generating or modifying UI
+
+The reason this matters now is that implementation has changed. Increasingly, the person writing UI is not hand-tuning every visual detail. They are specifying meaning, state, priority, and intent — often to another abstraction layer: a component API, a design token system, or an AI assistant. In that world, `px-2 text-red-500 rounded-sm` is low-value instruction. "This is a destructive action with high emphasis" is durable instruction.
+
+## Philosophy
+
+**UI is communication before decoration.**
+A component exists to communicate meaning: status, urgency, confidence, availability, next action, system state. Styling is not the goal; styling is the delivery mechanism.
+
+**Intention should be explicit in the API.**
+Developers should say what something means, not reconstruct its appearance from utility classes. The API should encode semantics like intent, appearance, priority, state, and role.
+
+**Visual decisions should be centralized.**
+Color, spacing, weight, and motion still matter, but they should be decided in the design system — not repeatedly improvised at callsites.
+
+**Design systems must now serve humans and machines.**
+A good component API is no longer just ergonomic for engineers. It must also be legible to AI tools. Semantic props are easier for models to use correctly than scattered visual overrides.
+
+**The system should survive change.**
+If interfaces, platforms, and implementation methods keep changing, the durable layer is meaning. A system built around intention adapts better than one built around frozen visual recipes.
