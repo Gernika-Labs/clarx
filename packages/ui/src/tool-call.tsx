@@ -71,7 +71,7 @@ export function ToolCall({
   return (
     <div
       className={cn(
-        'rounded-xl border ring-1 ring-inset',
+        'overflow-hidden rounded-xl border ring-1 ring-inset',
         RING_CLASS[status],
         className
       )}
@@ -79,7 +79,7 @@ export function ToolCall({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
       >
         <StatusIcon status={status} />
         <span className="flex-1 font-mono text-sm font-medium text-zinc-700 dark:text-zinc-300">
