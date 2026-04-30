@@ -5,54 +5,7 @@ description: Drop-in AGENTS.md snippet for teams using OpenAI Codex, custom agen
 
 Add the following section to your `AGENTS.md` file. If you don't have one, create it at your repo root.
 
-````markdown
-## UI Generation — Design System Rules
-
-This project uses an intention-driven design system. When generating or modifying UI:
-
-### Always prefer semantic props
-
-Use component props that express meaning, state, or emphasis. Do not reconstruct a known visual state with raw utility classes.
-
-```tsx
-// Bad — visual encoding at the callsite
-<span className="px-2 py-0.5 rounded-full text-xs text-red-700 bg-red-100">Failed</span>
-
-// Good — semantic
-<Badge keyword="failed" />
-```
-
-### Use className for layout only
-
-On encapsulated components, className is for positioning and layout: margin, width, grid column, flexbox alignment. It is not for color, font, internal padding, or visual overrides.
-
-### Ask before implementing a visual change
-
-If the request specifies a visual outcome without a semantic reason ("make it red," "make it bold"), ask what the element is meant to communicate before writing code.
-
-Questions to ask:
-1. What is this communicating to the user?
-2. Is this state stable or actively changing?
-3. How much emphasis does it need?
-4. Does the design system already have a concept for this?
-
-### Expand components instead of overriding them
-
-If implementing a feature requires repeated className overrides on the same component, that component likely needs a new prop or variant. Prefer adding it to the component file.
-
-### Use existing system vocabulary
-
-The codebase uses: `intent`, `appearance`, `status`, `priority`, `role`.
-Always prefer this vocabulary over inventing new local naming.
-
-### Component reference
-
-**Semantic primitives** — `Badge`, `Button`, `Alert`, `Text`, `StatusIndicator`
-
-**AI-native primitives** — `ChatMessage`, `ChatInput`, `ToolCall`, `StreamingText`, `AgentStatus`
-
-For details on props and keywords, see the design system documentation.
-````
+<TemplateCopyBlock name="agents" />
 
 ---
 

@@ -5,3 +5,8 @@ dist
 *.log
 .env.local
 .env*.local
+
+# fumadocs-mdx generated source index
+apps/docs/.source/
+
+journal
