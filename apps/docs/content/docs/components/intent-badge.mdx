@@ -1,0 +1,37 @@
+---
+title: Intent Badge
+description: A compact label that displays what a user is trying to accomplish.
+---
+
+## Overview
+
+`IntentBadge` surfaces the detected intent behind a user message — useful in copilot UIs where you want to show the AI's understanding before it acts.
+
+## Usage
+
+```tsx
+import { IntentBadge } from '@/components/ui/intent-badge'
+
+export default function Example() {
+  return (
+    <IntentBadge
+      intent="search"
+      label="Search documentation"
+      confidence={0.94}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `intent` | `string` | — | Intent identifier (e.g. `"search"`, `"create"`) |
+| `label` | `string` | — | Human-readable intent label |
+| `confidence` | `number` | — | 0–1 confidence score |
+| `variant` | `"default" \| "muted" \| "outline"` | `"default"` | Visual style |
+
+## Built-in intent icons
+
+Passing common intent keys like `"search"`, `"create"`, `"delete"`, `"summarize"`, or `"navigate"` automatically shows a matching icon.

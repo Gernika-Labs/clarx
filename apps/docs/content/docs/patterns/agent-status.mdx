@@ -1,0 +1,34 @@
+---
+title: Agent Status
+description: Communicate what an AI agent is currently doing across multi-step tasks.
+---
+
+## Overview
+
+When an agent runs multiple steps, users need feedback on progress without being overwhelmed. The Agent Status pattern uses a compact status line above the message thread.
+
+## States
+
+| State | Description |
+|---|---|
+| `idle` | Agent is waiting for input |
+| `thinking` | Agent is processing the request |
+| `using-tool` | Agent is executing a tool call |
+| `responding` | Agent is streaming a response |
+| `done` | Task completed |
+| `error` | Something went wrong |
+
+## Usage
+
+```tsx
+import { AgentStatus } from '@/components/ui/agent-status'
+
+export default function Example() {
+  return (
+    <AgentStatus
+      state="using-tool"
+      label="Searching documentation..."
+    />
+  )
+}
+```

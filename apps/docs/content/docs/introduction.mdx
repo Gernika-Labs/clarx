@@ -1,0 +1,32 @@
+---
+title: Introduction
+description: Why intention/ui exists and who it's for.
+---
+
+## The problem with existing UI libraries for AI
+
+Most UI component libraries were designed for static, form-driven interfaces.
+When you build with them for AI products, you spend most of your time working around them:
+
+- No first-class streaming text support
+- No concept of "thinking" or "tool use" states
+- Chat layouts require significant custom work
+- No vocabulary for intent, confidence, or agent actions
+
+## What we built instead
+
+intention/ui gives you a vocabulary for AI interactions out of the box:
+
+| Concept | Component |
+|---|---|
+| A message in a conversation | `<ChatMessage>` |
+| Text that streams in token by token | `<StreamingText>` |
+| An action the AI is taking | `<ToolCall>` |
+| What the user is trying to do | `<IntentBadge>` |
+| Agent thinking / working | `<AgentStatus>` |
+
+## Who is it for?
+
+- Teams building AI chat products (copilots, assistants, agents)
+- Developers who want production-ready AI UI primitives
+- Designers who want a shared vocabulary for AI interaction patterns

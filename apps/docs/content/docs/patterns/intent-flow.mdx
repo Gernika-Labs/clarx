@@ -1,0 +1,16 @@
+---
+title: Intent Flow
+description: Show the AI's intent detection step before it takes action.
+---
+
+## Overview
+
+In agentic UIs, it can be valuable to surface the AI's interpretation of a request before it acts. The Intent Flow pattern shows a detected intent badge, waits for implicit or explicit confirmation, then proceeds.
+
+## Steps
+
+1. User sends message
+2. AI detects intent → show `<IntentBadge>`
+3. Short pause or explicit "Confirm" button
+4. AI executes → show `<ToolCall>` sequence
+5. AI responds → show `<ChatMessage>` with result

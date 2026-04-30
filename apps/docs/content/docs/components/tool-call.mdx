@@ -1,0 +1,43 @@
+---
+title: Tool Call
+description: Visualize an AI agent's tool invocations with input, output, and status states.
+---
+
+## Overview
+
+`ToolCall` renders a collapsible card showing what tool an AI called, with what arguments, and what it returned. It supports `pending`, `running`, `success`, and `error` states.
+
+## Usage
+
+```tsx
+import { ToolCall } from '@/components/ui/tool-call'
+
+export default function Example() {
+  return (
+    <ToolCall
+      name="search_web"
+      status="success"
+      input={{ query: 'Tokyo weather today' }}
+      output={{ results: ['22°C, partly cloudy'] }}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `name` | `string` | — | Tool name |
+| `status` | `"pending" \| "running" \| "success" \| "error"` | `"pending"` | Execution state |
+| `input` | `Record<string, unknown>` | — | Tool input arguments |
+| `output` | `unknown` | — | Tool output |
+| `error` | `string` | — | Error message if status is `"error"` |
+| `defaultOpen` | `boolean` | `false` | Expand details by default |
+
+## Status states
+
+- **pending** — tool call is queued, shown with a muted ring
+- **running** — animated spinner, shown while executing
+- **success** — green checkmark, output visible on expand
+- **error** — red ring, error message shown inline

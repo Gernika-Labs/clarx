@@ -1,0 +1,116 @@
+---
+title: Chat Message
+description: A single message in a conversation, supporting user and assistant roles with streaming-aware rendering.
+---
+
+## Overview
+
+`ChatMessage` is the core building block of any conversational interface.
+It handles layout, avatar, role-based styling, and streaming state.
+
+## Usage
+
+```tsx
+import { ChatMessage } from '@/components/ui/chat-message'
+
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-4">
+      <ChatMessage role="user" content="What is the weather in Tokyo?" />
+      <ChatMessage
+        role="assistant"
+        content="The current weather in Tokyo is 22°C with partly cloudy skies."
+      />
+    </div>
+  )
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `role` | `"user" \| "assistant" \| "system"` | — | Who sent the message |
+| `content` | `string \| ReactNode` | — | Message content |
+| `isStreaming` | `boolean` | `false` | Shows a streaming cursor |
+| `avatar` | `ReactNode` | — | Custom avatar element |
+| `timestamp` | `string` | — | Optional timestamp label |
+| `className` | `string` | — | Additional class names |
+
+## Variants
+
+### User message
+
+User messages are right-aligned with a muted background by default.
+
+### Assistant message
+
+Assistant messages are left-aligned and support Markdown rendering via children.
+
+### Streaming state
+
+When `isStreaming` is `true`, a blinking cursor is appended to the content.
+
+```tsx
+<ChatMessage
+  role="assistant"
+  content="Analyzing your request"
+  isStreaming
+/>
+```
+
+## Source
+
+```tsx
+// components/ui/chat-message.tsx
+import { cn } from '@/lib/utils'
+
+type ChatMessageProps = {
+  role: 'user' | 'assistant' | 'system'
+  content: React.ReactNode
+  isStreaming?: boolean
+  avatar?: React.ReactNode
+  timestamp?: string
+  className?: string
+}
+
+export function ChatMessage({
+  role,
+  content,
+  isStreaming,
+  avatar,
+  timestamp,
+  className,
+}: ChatMessageProps) {
+  const isUser = role === 'user'
+
+  return (
+    <div
+      className={cn(
+        'flex gap-3 w-full',
+        isUser ? 'flex-row-reverse' : 'flex-row',
+        className
+      )}
+    >
+      {avatar && (
+        <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden">
+          {avatar}
+        </div>
+      )}
+      <div
+        className={cn(
+          'rounded-2xl px-4 py-2.5 max-w-[80%] text-sm leading-relaxed',
+          isUser
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted text-foreground'
+        )}
+      >
+        {content}
+        {isStreaming && (
+          <span className="ml-0.5 inline-block w-0.5 h-4 bg-current animate-pulse" />
+        )}
+      </div>
+    </div>
+  )
+}
+```

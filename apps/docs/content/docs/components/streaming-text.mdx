@@ -1,0 +1,43 @@
+---
+title: Streaming Text
+description: Render text that arrives token by token, with smooth progressive display.
+---
+
+## Overview
+
+`StreamingText` wraps a string that grows over time (e.g. from an AI stream) and renders it with an optional cursor, smooth token fade-in, and Markdown support.
+
+## Usage
+
+```tsx
+'use client'
+
+import { StreamingText } from '@/components/ui/streaming-text'
+import { useState, useEffect } from 'react'
+
+const chunks = ['Hello', ', ', 'world', '!']
+
+export default function Example() {
+  const [text, setText] = useState('')
+
+  useEffect(() => {
+    let i = 0
+    const id = setInterval(() => {
+      if (i < chunks.length) setText((t) => t + chunks[i++])
+      else clearInterval(id)
+    }, 200)
+    return () => clearInterval(id)
+  }, [])
+
+  return <StreamingText text={text} isStreaming={text.length < 13} />
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | — | The current accumulated text |
+| `isStreaming` | `boolean` | `false` | Show blinking cursor at end |
+| `markdown` | `boolean` | `true` | Render Markdown |
+| `className` | `string` | — | Additional class names |

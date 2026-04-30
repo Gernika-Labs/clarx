@@ -1,0 +1,60 @@
+---
+title: Installation
+description: How to add intention/ui components to your project.
+---
+
+intention/ui follows the same philosophy as shadcn/ui: **you own the code**.
+There is no package to install. You copy components into your project and modify them freely.
+
+## Prerequisites
+
+- Next.js 14+ (App Router) or any React 18+ project
+- Tailwind CSS v4
+- TypeScript
+
+## Setup
+
+### 1. Install Tailwind CSS
+
+```bash
+pnpm add tailwindcss @tailwindcss/postcss postcss
+```
+
+Add to your `globals.css`:
+
+```css
+@import 'tailwindcss';
+```
+
+### 2. Copy a component
+
+Browse the components section and use the copy button on any component to add it to your project.
+Components are placed in `components/ui/` by convention.
+
+### 3. Use it
+
+```tsx
+import { ChatMessage } from '@/components/ui/chat-message'
+
+export default function Page() {
+  return (
+    <ChatMessage
+      role="assistant"
+      content="How can I help you today?"
+    />
+  )
+}
+```
+
+## Dependencies
+
+Some components rely on lightweight utilities:
+
+- `class-variance-authority` — for variant management
+- `clsx` + `tailwind-merge` — for conditional class merging
+
+Install them once:
+
+```bash
+pnpm add class-variance-authority clsx tailwind-merge
+```

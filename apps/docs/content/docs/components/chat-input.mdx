@@ -1,0 +1,40 @@
+---
+title: Chat Input
+description: A multiline input for sending messages, with attachment and submit controls.
+---
+
+## Overview
+
+`ChatInput` is a composable input bar for conversational UIs. It supports multiline text, keyboard shortcuts, streaming-aware disabled states, and slot-based action buttons.
+
+## Usage
+
+```tsx
+import { ChatInput } from '@/components/ui/chat-input'
+
+export default function Example() {
+  return (
+    <ChatInput
+      placeholder="Ask anything..."
+      onSubmit={(value) => console.log(value)}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `placeholder` | `string` | `"Message..."` | Input placeholder text |
+| `onSubmit` | `(value: string) => void` | — | Called when the user submits |
+| `onStop` | `() => void` | — | Called when the user clicks Stop during streaming |
+| `isStreaming` | `boolean` | `false` | Shows Stop button instead of Send |
+| `disabled` | `boolean` | `false` | Disables the input |
+| `actions` | `ReactNode` | — | Slot for extra action buttons (attach, voice, etc.) |
+
+## Keyboard behavior
+
+- `Enter` — submit
+- `Shift+Enter` — newline
+- `Escape` — clear input

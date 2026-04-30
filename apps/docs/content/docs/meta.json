@@ -1,0 +1,20 @@
+{
+  "title": "intention/ui",
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "introduction",
+    "installation",
+    "theming",
+    "---Primitives---",
+    "components/chat-message",
+    "components/chat-input",
+    "components/intent-badge",
+    "components/tool-call",
+    "components/streaming-text",
+    "---Patterns---",
+    "patterns/conversation-layout",
+    "patterns/intent-flow",
+    "patterns/agent-status"
+  ]
+}

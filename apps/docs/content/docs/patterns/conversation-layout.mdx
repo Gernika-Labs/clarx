@@ -1,0 +1,41 @@
+---
+title: Conversation Layout
+description: Full-page layout pattern for chat and agent interfaces.
+---
+
+## Overview
+
+A conversation layout has three zones: a **header** with context, a **message thread** that scrolls, and a **sticky input bar** at the bottom.
+
+## Usage
+
+```tsx
+import { ChatMessage } from '@/components/ui/chat-message'
+import { ChatInput } from '@/components/ui/chat-input'
+
+export default function ConversationPage() {
+  return (
+    <div className="flex flex-col h-screen">
+      {/* Header */}
+      <header className="shrink-0 border-b px-6 py-3 flex items-center gap-3">
+        <span className="font-semibold">Assistant</span>
+      </header>
+
+      {/* Thread */}
+      <main className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
+        <ChatMessage role="assistant" content="How can I help?" />
+      </main>
+
+      {/* Input */}
+      <footer className="shrink-0 border-t px-6 py-4">
+        <ChatInput placeholder="Ask anything..." onSubmit={() => {}} />
+      </footer>
+    </div>
+  )
+}
+```
+
+## Accessibility
+
+- The thread region should have `role="log"` and `aria-live="polite"` so screen readers announce new messages.
+- The input should have a visible label or `aria-label`.
