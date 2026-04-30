@@ -1,0 +1,50 @@
+---
+title: Principles
+description: The operating rules of an intention-driven design system.
+---
+
+These are not guidelines. They are constraints. A design system that violates them is not intention-driven — it is a styled component library with philosophy branding.
+
+## 1. UI is communication before decoration
+
+A component exists to communicate meaning: status, urgency, confidence, availability, next action, system state. Styling is the delivery mechanism — not the goal.
+
+Before any implementation decision, the question is: what does this need to communicate? The visual treatment follows from the answer.
+
+## 2. The API should express meaning
+
+Props should say what something is, not describe how it looks.
+
+```tsx
+// This says what it is
+<Badge intent="danger" />
+
+// This says what it looks like — and nothing else
+<Badge className="text-red-700 bg-red-100" />
+```
+
+If you cannot describe a prop in terms of purpose, state, role, or emphasis — the API is incomplete.
+
+## 3. Components own their presentation
+
+A component that encapsulates meaning must also encapsulate its visual expression of that meaning. Callsites should not need to reconstruct the appearance of a known state.
+
+`className` is reserved for layout needs: margin, width, grid placement, positioning. It is not a styling escape hatch.
+
+## 4. Repeated styling patterns are system vocabulary
+
+If the same visual override appears in more than one place, it is evidence that the system is missing a concept.
+
+The correct response is not to standardize the override. The correct response is to give it a name, add it to the component, and let the callsite say the name.
+
+## 5. Semantics are more durable than visual recipes
+
+Colors change. Spacing scales change. Dark mode inverts expectations. Platforms diverge.
+
+What does not change: whether something is dangerous, pending, successful, or in progress. A system built around meaning survives visual changes better than one built around a specific look.
+
+## 6. AI follows the same semantic rules as humans
+
+When an AI assistant generates or modifies UI, it should use the same system vocabulary as a human engineer. Semantic props are more legible to models than scattered utilities. A well-designed intention-driven API is also a well-designed prompt target.
+
+The design system is now part of how you guide AI. Build accordingly.

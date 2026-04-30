@@ -1,0 +1,73 @@
+---
+title: Core Rules
+description: The behavior rules AI should follow when working in an intention-driven codebase.
+---
+
+These rules define how AI assistants should behave when generating or modifying UI in a codebase that uses intention-driven design. They are written to be pasted directly into `CLAUDE.md`, Cursor rules, or equivalent files.
+
+---
+
+## Rule 1: Prefer semantics over styling
+
+When working with design-system components, prefer props that express meaning, state, or emphasis over raw utility classes.
+
+**Avoid:**
+```tsx
+<Badge className="text-red-700 bg-red-100" />
+```
+
+**Prefer:**
+```tsx
+<Badge intent="danger" />
+```
+
+---
+
+## Rule 2: Treat `className` as layout-first
+
+On encapsulated components, `className` is for positioning: margin, width, grid placement, alignment. It is not for color, font, padding, or visual overrides.
+
+**Avoid:**
+```tsx
+<Button className="bg-red-600 text-white px-6">Delete</Button>
+```
+
+**Prefer:**
+```tsx
+<Button intent="danger" size="lg">Delete</Button>
+```
+
+---
+
+## Rule 3: Ask about meaning when a request is visual
+
+If a request describes a visual outcome ("make this red," "make it smaller," "make it stand out"), first determine what the element is communicating. Then map it to the correct system prop.
+
+Questions to ask:
+- What is this communicating? (status, severity, emphasis, system state)
+- Is the system already expressing this concept somewhere?
+- Which prop or component encodes that meaning?
+
+---
+
+## Rule 4: Repeated overrides are a design-system signal
+
+If the same `className` override appears in multiple places, that is evidence the component API is missing a variant. The correct response is to add the variant to the component — not to standardize the override at callsites.
+
+---
+
+## Rule 5: Use the codebase's existing vocabulary
+
+If the codebase already has concepts like `intent`, `appearance`, `status`, `priority`, or `role`, use them consistently. Do not invent local variations of vocabulary that already exists.
+
+---
+
+## Rule 6: Do not encode meaning only through color
+
+The UI should communicate state through system-level semantics, with color as one expression of that meaning — not the only one. A screen reader cannot see `text-red-500`. `intent="danger"` is legible to everything.
+
+---
+
+## Rule 7: Prefer system expansion over callsite workarounds
+
+If a feature requires many styling overrides on an encapsulated component, consider whether the component should gain a new prop or variant. A design system that requires constant workarounds is not serving its purpose.

@@ -1,0 +1,74 @@
+---
+title: CLAUDE.md Template
+description: Drop-in CLAUDE.md for Claude Code users building with an intention-driven design system.
+---
+
+Add this file to your repo root as `CLAUDE.md`. Claude Code reads it automatically at the start of every session.
+
+Copy the block below and update the component list to match what your project uses.
+
+````markdown
+# UI Design System Rules
+
+This project uses an intention-driven design system. When generating or modifying UI code, follow these rules.
+
+## Prefer semantic props over styling
+
+Use props that express meaning, state, or emphasis. Do not reconstruct the appearance of a known state with raw utility classes.
+
+Bad:
+```tsx
+<Badge className="text-red-700 bg-red-100" />
+```
+
+Good:
+```tsx
+<Badge intent="danger" />
+```
+
+## Use `className` for layout only
+
+On encapsulated components, `className` is for margin, width, grid placement, and positioning — not for color, font, padding, or visual overrides.
+
+## Ask about meaning before implementing visual changes
+
+If a request says "make this red," "make it smaller," or "make it stand out," first determine what the element needs to communicate. Then map it to the correct system prop.
+
+Before implementing, ask:
+1. What is this communicating? (status, severity, emphasis, system state, role)
+2. Is this state stable or actively changing?
+3. How much emphasis should it have?
+4. Does the design system already have a concept for this?
+
+## Expand the system instead of working around it
+
+If the same styling override appears in more than one place, that is a signal the component API is missing a variant. Add the variant to the component — don't standardize the override.
+
+## Use the project's existing vocabulary
+
+If the codebase uses `intent`, `appearance`, `status`, `priority`, or `role` as prop names, use that vocabulary. Don't invent local variations.
+
+## Available components
+
+Semantic primitives:
+- `Badge` — status labels, severity, AI agent states (props: intent, appearance, dot, keyword)
+- `Button` — actions (props: intent, appearance, size)
+- `Alert` — block-level notices (props: intent, appearance, title)
+- `Text` — typography with semantic role (props: role, as)
+- `StatusIndicator` — inline state dot (props: state, size, label)
+
+AI-native primitives:
+- `ChatMessage` — conversation bubbles (props: role, content, isStreaming)
+- `ChatInput` — message composer (props: onSubmit, isStreaming)
+- `ToolCall` — agent tool invocation (props: name, status, input, output)
+- `StreamingText` — text with streaming cursor (props: content, isStreaming)
+- `AgentStatus` — agent lifecycle state (props: state)
+````
+
+---
+
+## Notes
+
+- Keep the component list current as you add to your system. The more specific it is, the better Claude can use it.
+- If you have a `keyword` map (like `<Badge keyword="failed" />`), mention the available keywords.
+- Add your project's own semantic vocabulary if it differs from the defaults above.

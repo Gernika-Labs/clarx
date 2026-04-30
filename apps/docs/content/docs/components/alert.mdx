@@ -1,0 +1,90 @@
+---
+title: Alert
+description: A block-level notice component. Expresses the same intent × appearance model as Badge, at paragraph scale.
+---
+
+`Alert` is `Badge` at block scale. The same `intent` and `appearance` axes apply. You say what the notice is communicating — the component handles the visual treatment.
+
+## Intent
+
+<AlertIntentDemo />
+
+```tsx
+<Alert intent="success" title="Deployment complete">Your changes are live.</Alert>
+<Alert intent="warning" title="Approaching limit">90% of quota used.</Alert>
+<Alert intent="danger" title="Action required">Payment method failed.</Alert>
+<Alert intent="info" title="Scheduled maintenance">Downtime Sunday 2–4 AM UTC.</Alert>
+<Alert intent="neutral" title="Note">Changes take effect on next login.</Alert>
+```
+
+## Appearance
+
+<AlertAppearanceDemo />
+
+`soft` (default) is appropriate for contextual notices inline on a page. `solid` is for critical, blocking alerts that must command attention.
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `intent` | `Intent` | `"neutral"` | What this alert communicates. Drives color. |
+| `appearance` | `"soft" \| "solid"` | `"soft"` | Visual weight. |
+| `title` | `string` | — | Optional bold title rendered above the body. |
+| `children` | `ReactNode` | — | Alert body content. |
+| `className` | `string` | — | Layout overrides only. |
+
+## Source
+
+Copy this into `components/ui/alert.tsx` and own it.
+
+```tsx
+import * as React from 'react'
+import { cva } from 'class-variance-authority'
+import { cn } from './utils'
+
+const alertVariants = cva('rounded-xl border p-4', {
+  variants: {
+    intent: {
+      success: '', warning: '', danger: '', neutral: '', info: '', brand: '',
+    },
+    appearance: { soft: '', solid: '' },
+  },
+  compoundVariants: [
+    { intent: 'success', appearance: 'soft',  className: 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300' },
+    { intent: 'warning', appearance: 'soft',  className: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300' },
+    { intent: 'danger',  appearance: 'soft',  className: 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300' },
+    { intent: 'neutral', appearance: 'soft',  className: 'border-zinc-200 bg-zinc-50 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300' },
+    { intent: 'info',    appearance: 'soft',  className: 'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-300' },
+    { intent: 'brand',   appearance: 'soft',  className: 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300' },
+    { intent: 'success', appearance: 'solid', className: 'border-transparent bg-green-600 text-white dark:bg-green-500' },
+    { intent: 'warning', appearance: 'solid', className: 'border-transparent bg-amber-500 text-white' },
+    { intent: 'danger',  appearance: 'solid', className: 'border-transparent bg-red-600 text-white dark:bg-red-500' },
+    { intent: 'neutral', appearance: 'solid', className: 'border-transparent bg-zinc-800 text-white dark:bg-zinc-700' },
+    { intent: 'info',    appearance: 'solid', className: 'border-transparent bg-sky-600 text-white dark:bg-sky-500' },
+    { intent: 'brand',   appearance: 'solid', className: 'border-transparent bg-blue-600 text-white dark:bg-blue-500' },
+  ],
+  defaultVariants: { intent: 'neutral', appearance: 'soft' },
+})
+
+export type AlertProps = {
+  intent?: 'success' | 'warning' | 'danger' | 'neutral' | 'info' | 'brand'
+  appearance?: 'soft' | 'solid'
+  title?: string
+  children?: React.ReactNode
+  className?: string
+}
+
+export function Alert({ intent = 'neutral', appearance = 'soft', title, children, className }: AlertProps) {
+  return (
+    <div
+      role="alert"
+      data-intent={intent}
+      data-appearance={appearance}
+      className={cn(alertVariants({ intent, appearance }), className)}
+    >
+      {title && <p className="mb-1 text-sm font-semibold">{title}</p>}
+      {children && <div className="text-sm">{children}</div>}
+    </div>
+  )
+}
+```

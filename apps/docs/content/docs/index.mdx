@@ -1,24 +1,24 @@
 ---
 title: intention/ui
-description: An AI-first, intention-based design system for conversational interfaces.
+description: An intention-driven design system for modern software.
 ---
 
-## What is intention/ui?
+intention/ui is a three-part system for building interfaces where meaning drives implementation.
 
-intention/ui is a component library and design system built for AI applications.
-Unlike traditional UI libraries, every component here is designed around **user intent** —
-the idea that AI interfaces are fundamentally different from form-based UIs.
+## The three layers
 
-Conversations are not forms. Responses stream. Actions are probabilistic. Errors are recoverable.
+**Philosophy** — A framework for thinking about UI as communication. Components express what things mean, not just how they look. Semantic intent is more durable than visual recipes.
 
-## Design principles
+**Reference implementation** — Copyable components that demonstrate the philosophy in code. `Badge`, `Button`, `Alert`, `Text`, and a set of AI-native primitives built for streaming, tool calls, and agent state. You own the source.
 
-**Intention over instruction** — Components communicate what a user is trying to accomplish,
-not the mechanics of how.
+**AI rules layer** — Portable instructions for AI tools. Drop a `CLAUDE.md` or Cursor rules file into your repo and your AI assistant starts generating semantic, system-consistent UI instead of inventing patterns from scratch.
 
-**Conversational by default** — Every component is aware of context and conversation state.
+Each layer is independently useful. Teams can adopt the philosophy without replacing their component library. They can adopt the AI rules without adopting the components. Or they can use all three together.
 
-**AI-native states** — Loading, streaming, thinking, tool calls, and errors are first-class states,
-not afterthoughts.
+## Start here
 
-**Copy, don't install** — Like shadcn/ui, you own the components. Copy the source, modify it, ship it.
+- [Introduction](/docs/introduction) — what intention-driven design means and why it matters now
+- [Manifesto](/docs/manifesto) — the worldview in full
+- [Principles](/docs/principles) — the operating rules
+- [Installation](/docs/installation) — copy your first component
+- [AI Rules Layer](/docs/ai-rules/overview) — guide AI to build with intention

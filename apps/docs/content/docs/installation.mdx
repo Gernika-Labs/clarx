@@ -3,58 +3,80 @@ title: Installation
 description: How to add intention/ui components to your project.
 ---
 
-intention/ui follows the same philosophy as shadcn/ui: **you own the code**.
-There is no package to install. You copy components into your project and modify them freely.
+intention/ui components are yours to own. There is no package to install — you copy the source into your project and modify it freely.
+
+This is intentional. When a design system encodes meaning at the API level, you need to be able to adapt those semantics to your product: change what "pending" looks like, add a keyword your domain uses, adjust the visual weight of a state. You cannot do that with a locked-in dependency. You can do it when you own the code.
 
 ## Prerequisites
 
-- Next.js 14+ (App Router) or any React 18+ project
+- React 18+ project (Next.js 14+, Vite, Remix, or similar)
 - Tailwind CSS v4
 - TypeScript
 
 ## Setup
 
-### 1. Install Tailwind CSS
+### 1. Install shared utilities
+
+All components depend on three lightweight packages. Install them once across your project:
+
+```bash
+pnpm add class-variance-authority clsx tailwind-merge
+```
+
+### 2. Add the `cn` utility
+
+Create `lib/utils.ts` in your project. Every component imports from here:
+
+```ts
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
+
+### 3. Set up Tailwind CSS v4
 
 ```bash
 pnpm add tailwindcss @tailwindcss/postcss postcss
 ```
 
-Add to your `globals.css`:
+In your `globals.css`:
 
 ```css
 @import 'tailwindcss';
 ```
 
-### 2. Copy a component
+### 4. Copy a component
 
-Browse the components section and use the copy button on any component to add it to your project.
-Components are placed in `components/ui/` by convention.
+Each component page has a **Source** section at the bottom with the full implementation. Copy it into `components/ui/` in your project.
 
-### 3. Use it
+For example, copy the Badge source into `components/ui/badge.tsx`. Update the import path for `cn` to match your project structure.
+
+### 5. Use it
 
 ```tsx
-import { ChatMessage } from '@/components/ui/chat-message'
+import { Badge } from '@/components/ui/badge'
 
-export default function Page() {
-  return (
-    <ChatMessage
-      role="assistant"
-      content="How can I help you today?"
-    />
-  )
+export default function StatusCell({ job }) {
+  return <Badge keyword={job.status} />
 }
 ```
 
-## Dependencies
+The `keyword` prop encodes intent, appearance, dot style, and label in a single value. The component resolves presentation. You declare meaning — the system handles the rest.
 
-Some components rely on lightweight utilities:
+## Adapting components
 
-- `class-variance-authority` — for variant management
-- `clsx` + `tailwind-merge` — for conditional class merging
+Because you own the source, you can extend it directly. Adding a keyword your product uses:
 
-Install them once:
-
-```bash
-pnpm add class-variance-authority clsx tailwind-merge
+```ts
+// components/ui/badge.tsx
+export const BADGE_KEYWORDS = {
+  // ...existing keywords
+  'in-review': { intent: 'info', appearance: 'soft', dot: 'pulse', label: 'In review' },
+  'approved':  { intent: 'success', appearance: 'solid', label: 'Approved' },
+}
 ```
+
+This is the model. Not configuration files, not theme overrides — just code you own and can change.

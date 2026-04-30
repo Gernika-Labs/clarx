@@ -1,0 +1,70 @@
+---
+title: Cursor Rules Template
+description: Drop-in Cursor rules for projects using an intention-driven design system.
+---
+
+Create a file at `.cursor/rules/design-system.mdc` in your project root. Cursor applies rules matching the `globs` pattern to relevant file edits.
+
+```markdown
+---
+description: Intention-driven design system rules
+globs: ["**/*.tsx", "**/*.ts", "**/*.jsx"]
+alwaysApply: true
+---
+
+# Design System — UI Generation Rules
+
+## Semantic props over styling
+
+Prefer component props that express meaning over raw Tailwind classes.
+
+Bad: `<Badge className="text-red-500 bg-red-50" />`
+Good: `<Badge intent="danger" />`
+
+## className is for layout only
+
+On encapsulated components, use className for margin, width, grid position, and alignment only — not for color, font, padding, or visual overrides.
+
+## Ask about meaning before implementing
+
+If the request describes a visual outcome ("make it red," "make it prominent," "make it smaller"), ask what the element should communicate before implementing.
+
+The core questions:
+- What is this communicating?
+- Is the state stable or live/changing?
+- How much emphasis should it have?
+- Does the system already have a concept for this?
+
+## Repeated overrides signal a missing variant
+
+If the same className pattern appears in more than one place, the component likely needs a new prop or variant. Prefer adding it to the system over repeating the override.
+
+## Use existing vocabulary
+
+The codebase uses: intent, appearance, status, priority, role, emphasis.
+Use these concepts. Don't introduce new local naming for the same ideas.
+
+## Component reference
+
+Semantic primitives:
+- Badge: intent, appearance, dot, size, keyword, label
+- Button: intent, appearance, size
+- Alert: intent, appearance, title
+- Text: role (heading | body | label | caption | muted | code), as
+- StatusIndicator: state, size, label
+
+AI-native primitives:
+- ChatMessage: role (user | assistant | system), content, isStreaming
+- ChatInput: onSubmit, isStreaming, placeholder
+- ToolCall: name, status (pending | running | success | error), input, output, error
+- StreamingText: content, isStreaming
+- AgentStatus: state (idle | thinking | running | done | error | interrupted)
+```
+
+---
+
+## Notes
+
+- The `alwaysApply: true` flag ensures rules apply to all matching files, not just ones you manually attach.
+- Update the component reference section to match what your project actually exports.
+- If you use a monorepo, you can scope the globs to specific packages: `["apps/web/**/*.tsx"]`.

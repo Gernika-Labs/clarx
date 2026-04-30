@@ -32,6 +32,20 @@ import {
 import { AgentStatusAllStatesDemo } from '@/components/demos/agent-status-demo'
 import { ConversationLayoutDemo } from '@/components/demos/conversation-layout-demo'
 import { IntentFlowDemo } from '@/components/demos/intent-flow-demo'
+import {
+  ButtonIntentDemo,
+  ButtonSizeDemo,
+  ButtonDestructiveDemo,
+} from '@/components/demos/button-demo'
+import { TextRoleDemo } from '@/components/demos/text-demo'
+import {
+  AlertIntentDemo,
+  AlertAppearanceDemo,
+} from '@/components/demos/alert-demo'
+import {
+  StatusIndicatorAllStatesDemo,
+  StatusIndicatorSizeDemo,
+} from '@/components/demos/status-indicator-demo'
 
 const mdxComponents = {
   ...defaultMdxComponents,
@@ -52,6 +66,14 @@ const mdxComponents = {
   AgentStatusAllStatesDemo,
   ConversationLayoutDemo,
   IntentFlowDemo,
+  ButtonIntentDemo,
+  ButtonSizeDemo,
+  ButtonDestructiveDemo,
+  TextRoleDemo,
+  AlertIntentDemo,
+  AlertAppearanceDemo,
+  StatusIndicatorAllStatesDemo,
+  StatusIndicatorSizeDemo,
 }
 
 export default async function Page({

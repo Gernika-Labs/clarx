@@ -28,6 +28,8 @@ description: Visualize an AI agent's tool invocations with input, output, and st
 
 ## Source
 
+Copy this into `components/ui/tool-call.tsx` and own it.
+
 ```tsx
 'use client'
 
@@ -46,6 +48,46 @@ export type ToolCallProps = {
   className?: string
 }
 
+const RING_CLASS: Record<ToolCallStatus, string> = {
+  pending: 'ring-zinc-200 dark:ring-zinc-700',
+  running: 'ring-blue-200 dark:ring-blue-800',
+  success: 'ring-green-200 dark:ring-green-800',
+  error:   'ring-red-200 dark:ring-red-800',
+}
+
+function StatusIcon({ status }: { status: ToolCallStatus }) {
+  if (status === 'pending') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-zinc-400" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="8" cy="8" r="6.5" />
+        <path d="M8 4.5v4l2.5 1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+  if (status === 'running') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="animate-spin text-blue-500">
+        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.25" />
+        <path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    )
+  }
+  if (status === 'success') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-green-500" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="8" cy="8" r="6.5" />
+        <path d="M5 8.5l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-red-500" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M8 5v4M8 11v.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export function ToolCall({
   name,
   status = 'pending',
@@ -59,18 +101,32 @@ export function ToolCall({
   const [open, setOpen] = React.useState(autoOpen)
 
   return (
-    <div className={cn('rounded-xl border ring-1 ring-inset', RING_CLASS[status], className)}>
+    <div
+      className={cn(
+        'overflow-hidden rounded-xl border ring-1 ring-inset',
+        RING_CLASS[status],
+        className
+      )}
+    >
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
       >
         <StatusIcon status={status} />
         <span className="flex-1 font-mono text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {name}
         </span>
-        <ChevronIcon open={open} />
+        <svg
+          width="14" height="14" viewBox="0 0 14 14"
+          fill="none" stroke="currentColor" strokeWidth="1.5"
+          strokeLinecap="round" strokeLinejoin="round"
+          className={cn('shrink-0 text-zinc-400 transition-transform duration-200', open && 'rotate-90')}
+        >
+          <path d="M5 3l4 4-4 4" />
+        </svg>
       </button>
+
       {open && (
         <div className="space-y-3 border-t px-4 pb-4 pt-3">
           {input !== undefined && (

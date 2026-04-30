@@ -1,36 +1,54 @@
 ---
 title: Theming
-description: How to customize colors, typography, and tokens.
+description: How to customize the visual output of intention/ui components.
 ---
 
-intention/ui uses CSS custom properties (variables) for theming, compatible with Tailwind CSS v4's `@theme` directive.
+Because you own the source, customization is direct. You don't override a theme file — you edit the component.
 
-## Default tokens
+## How visual decisions are encoded
 
-```css
-@theme {
-  --color-intent-primary: oklch(0.6 0.2 250);
-  --color-intent-secondary: oklch(0.8 0.1 250);
-  --color-intent-muted: oklch(0.95 0.02 250);
-  --color-agent-thinking: oklch(0.7 0.15 60);
-  --color-agent-success: oklch(0.7 0.2 145);
-  --color-agent-error: oklch(0.65 0.25 25);
-}
+Each component uses [CVA (class-variance-authority)](https://cva.style) to map semantic props to Tailwind utility classes. The intent × appearance combinations are declared as compound variants in the component file:
+
+```ts
+// badge.tsx
+cva(base, {
+  compoundVariants: [
+    { intent: 'success', appearance: 'soft', className: 'bg-green-50 text-green-700 ...' },
+    { intent: 'success', appearance: 'solid', className: 'bg-green-600 text-white ...' },
+    // ...
+  ]
+})
 ```
+
+To change what `success` looks like, edit those classes. That's the entire theming model.
 
 ## Dark mode
 
-All components use Tailwind's `dark:` variant. Enable dark mode in your root layout by toggling the `dark` class on `<html>`.
+All components use Tailwind's `dark:` variant. Toggle dark mode by adding the `dark` class to your root `<html>` element.
 
-## Custom theme
+## Extending keywords
 
-Override any token in your `globals.css`:
+The `keyword` prop is a record you own. Adding a domain-specific state:
+
+```ts
+// components/ui/badge.tsx
+export const BADGE_KEYWORDS = {
+  // ...existing keywords
+  'in-review': { intent: 'info', appearance: 'soft', dot: 'pulse', label: 'In review' },
+  'approved':  { intent: 'success', appearance: 'solid', label: 'Approved' },
+}
+```
+
+## Tailwind CSS v4
+
+Components use Tailwind utility classes directly. No custom theme variables are required. If you want to define shared color tokens for your project:
 
 ```css
 @import 'tailwindcss';
 
 @theme {
-  /* Your brand primary */
-  --color-intent-primary: oklch(0.55 0.22 300);
+  --color-brand-500: oklch(0.55 0.22 300);
 }
 ```
+
+Then reference `text-brand-500`, `bg-brand-500`, etc. in your component variants.

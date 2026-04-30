@@ -1,0 +1,144 @@
+---
+title: Migration Examples
+description: Before-and-after examples of moving from override-heavy UI to semantic APIs.
+---
+
+These examples show the same UI written two ways: the common override approach, and the semantic approach. The semantic version is not shorter for its own sake — it is shorter because meaning was centralized where it belongs.
+
+## Status badge
+
+**Before — visual encoding at the callsite:**
+
+```tsx
+{status === 'failed' && (
+  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100">
+    <span className="size-1.5 rounded-full bg-red-500" />
+    Failed
+  </span>
+)}
+{status === 'running' && (
+  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100">
+    <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
+    Running
+  </span>
+)}
+```
+
+**After — semantic:**
+
+```tsx
+<Badge keyword={status} />
+```
+
+The keyword resolves intent, appearance, dot animation, and label. The callsite states what the thing is. The component handles the rest.
+
+---
+
+## Confirmation dialog buttons
+
+**Before:**
+
+```tsx
+<div className="flex gap-3">
+  <button className="px-4 py-2 rounded-lg border text-sm font-medium text-zinc-700">
+    Cancel
+  </button>
+  <button className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700">
+    Delete account
+  </button>
+</div>
+```
+
+**After:**
+
+```tsx
+<div className="flex gap-3">
+  <Button intent="neutral" appearance="outline">Cancel</Button>
+  <Button intent="danger">Delete account</Button>
+</div>
+```
+
+The intent props are legible to the next developer, to a design reviewer, and to an AI. The styling is consistent with every other destructive action in the system — not improvised for this specific dialog.
+
+---
+
+## Inline alert
+
+**Before:**
+
+```tsx
+<div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+  <p className="font-semibold">Approaching limit</p>
+  <p className="mt-1">You have used 90% of your monthly quota.</p>
+</div>
+```
+
+**After:**
+
+```tsx
+<Alert intent="warning" title="Approaching limit">
+  You have used 90% of your monthly quota.
+</Alert>
+```
+
+The visual treatment is now a system decision, not a callsite decision. A future rebrand or dark mode improvement applies everywhere, not just here.
+
+---
+
+## Connection status dot
+
+**Before:**
+
+```tsx
+<div className="flex items-center gap-1.5">
+  <div className="size-2 rounded-full bg-green-500" />
+  <span className="text-xs text-zinc-600">Connected</span>
+</div>
+```
+
+**After:**
+
+```tsx
+<StatusIndicator state="success" label="Connected" />
+```
+
+---
+
+## AI streaming state
+
+**Before:**
+
+```tsx
+{isStreaming ? (
+  <div className="flex items-center gap-2 text-sm text-zinc-500">
+    <div className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
+    Generating...
+  </div>
+) : (
+  <p className="text-sm text-zinc-700">{response}</p>
+)}
+```
+
+**After:**
+
+```tsx
+<StreamingText content={response} isStreaming={isStreaming} />
+```
+
+Or, for the badge:
+
+```tsx
+<Badge keyword={isStreaming ? 'streaming' : 'done'} />
+```
+
+---
+
+## The pattern
+
+In every example above, the migration follows the same shape:
+
+1. Extract the meaning — what is this communicating?
+2. Find the system concept — which component and which prop expresses that?
+3. Replace the reconstruction with the declaration
+
+The result is callsites that say what they mean, and components that know how to express it.

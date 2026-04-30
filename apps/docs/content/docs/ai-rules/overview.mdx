@@ -1,0 +1,40 @@
+---
+title: AI Rules Layer
+description: How to teach AI tools to build UI with intention-driven principles.
+---
+
+Teams increasingly build UI with AI assistance — through Claude, Cursor, Copilot, or custom agents. Without guidance, these tools tend toward the path of least resistance: raw utility classes, improvised patterns, meaning encoded in color. The output works, but it does not compose. It does not stay consistent. It does not respect the design system.
+
+The AI rules layer is the answer to that problem. It is a set of portable instructions that teams can add to their repos and tools to guide AI toward semantic, intention-driven implementation.
+
+## What the rules layer does
+
+### Guide generation
+
+When AI creates new UI, it should reach for the design system first — using semantic props and existing components rather than constructing visual patterns from scratch.
+
+### Guide clarification
+
+When a request is visually specific but semantically unclear ("make this red," "make it stand out"), the AI should ask what it needs to communicate before writing code.
+
+### Guide migration
+
+When a codebase has accumulated override-heavy patterns, AI can help identify repeated overrides and convert them into system vocabulary.
+
+### Guide review
+
+When AI reviews UI code, it should flag places where meaning is being encoded through styling instead of system-level semantics.
+
+## What the layer contains
+
+- **[Core rules](/docs/ai-rules/core-rules)** — the behavioral rules AI should follow
+- **[Clarification protocol](/docs/ai-rules/clarification-protocol)** — when and how to ask about intent
+- **[CLAUDE.md template](/docs/ai-rules/templates/claude)** — drop-in file for Claude Code users
+- **[Cursor rules](/docs/ai-rules/templates/cursor)** — drop-in rules for Cursor users
+- **[AGENTS.md template](/docs/ai-rules/templates/agents)** — snippet for any agent tool
+
+## Why this is part of the core system
+
+A design system that only ships components but not guidance for how AI should use them is incomplete. AI will use those components incorrectly — or not at all — unless the system tells it how.
+
+The AI rules layer turns your design system from a set of files into a set of instructions. Teams can adopt the components and the rules together, or adopt the rules alone with their existing system. Either way, the AI starts building more consistently.

@@ -1,0 +1,44 @@
+---
+title: Manifesto
+description: The worldview behind intention/ui.
+---
+
+The interface is not a decoration layer. It is a communication layer.
+
+Every visible element in your product is saying something to someone. A button says: this is what happens next. A badge says: this is the current state of this thing. A color says: pay attention, or don't. Those are not aesthetic choices. They are communication decisions — and they should be made at the system level, not improvised at the callsite.
+
+This is the problem with `className="text-red-500 bg-red-50"`. It is not wrong because it is ugly. It is wrong because it says nothing. It places a visual decision where a semantic decision should live. The component that reads those classes has no idea whether the red means danger, or whether the developer just liked the color. The next person to read the code has no idea either.
+
+---
+
+**Styling is not meaning. Styling is the expression of meaning.**
+
+The right question is never "what color should this be?" The right question is "what does this need to communicate?" — and then the system should know what color to use.
+
+`intent="danger"` is not shorthand for red. It is a statement about purpose. The component can be red. It can also gain an icon, a different animation, an accessibility attribute, or a different visual treatment in a future rebrand — all without a callsite change. The meaning is stable. The expression can evolve.
+
+---
+
+**The API is where decisions live.**
+
+Traditional design systems delegate visual decisions to the callsite. Every engineer who renders a status badge picks a color. Every team that builds a confirmation dialog chooses its own button style. The system provides ingredients; the product improvises the meal.
+
+That model breaks down at scale. It breaks down when teams grow. It breaks down when design changes. And it breaks down when AI starts writing the code, because AI will optimize for local completion: pick something plausible-looking, move on. If the system does not speak in meaning, neither will the AI.
+
+An intention-driven API changes the contract. You say what something is. The system decides how to show it.
+
+---
+
+**Design systems must now serve humans and machines.**
+
+Implementation is changing. Increasingly, the person "writing" UI is not hand-authoring every detail. They are describing intent — to another developer, to a design handoff tool, or to an AI assistant. In that world, `px-2 text-red-500 rounded-sm` is low-value instruction. "This is a destructive action with high emphasis" is durable instruction.
+
+A component API that speaks in intent is more legible to AI than one that speaks in utilities. It is also easier for humans to review, easier to audit for consistency, and easier to evolve when the visual language changes.
+
+This is not speculative. It is the practical consequence of how product teams now work.
+
+---
+
+**Intention over implementation. Meaning over mechanics. The system over the callsite.**
+
+That is the bet this project makes. Not because it is more philosophically correct, but because it produces more durable, more consistent, more legible interfaces — built faster, by more people, with fewer surprises.

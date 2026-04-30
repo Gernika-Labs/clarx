@@ -1,0 +1,53 @@
+---
+title: Clarification Protocol
+description: When AI should pause and ask about intent before implementing UI.
+---
+
+Good AI behavior in a design system is not just about what to generate — it is about knowing when to ask. Implementing the wrong semantic is harder to fix than asking one clarifying question first.
+
+## When to ask
+
+Ask before implementing when:
+
+- **The request is visually specific but semantically unclear.** "Make this red" describes an appearance, not a meaning. Danger and brand and emphasis can all be red.
+- **The state could map to a system concept.** If the request describes something that sounds like a status, severity, emphasis, or lifecycle state, check whether the system already has a concept for it.
+- **Implementation would require styling overrides on an encapsulated component.** That is a signal the semantic fit is wrong.
+- **A new pattern is being introduced.** Before creating a new ad hoc pattern, ask whether it deserves a first-class component.
+
+---
+
+## The core clarifying questions
+
+### What does this communicate?
+
+Is this informing, warning, confirming, labeling, or drawing attention? What would a user understand from seeing this?
+
+### Is this state stable or live?
+
+Is it a fixed attribute, a terminal status, or something actively changing? (This determines whether a dot animation is appropriate, and which keywords apply.)
+
+### How much emphasis should it have?
+
+Should this element quietly support the interface, or demand immediate attention? This maps to the `appearance` axis (`soft` vs `solid`).
+
+### Does the design system already have a concept for this?
+
+Check existing components, keyword maps, and variants before introducing a new pattern. The right answer is usually already there.
+
+---
+
+## Example
+
+**Request:** "Add a red label next to the model name when the API key is invalid."
+
+**Before implementing, ask:**
+- "Should this label communicate an error state, or is it more of a warning about a configuration issue?"
+- "Do you want it to animate, or is this a stable state that persists until fixed?"
+
+**After getting answers:** map to `<Badge intent="danger">` or `<Badge keyword="error">` — not to a manually styled span.
+
+---
+
+## The principle
+
+A request that is easy to satisfy with a raw className is often a request where the semantic question was not answered. Getting the semantic right makes the implementation simpler, more consistent, and easier for the next person — human or AI — to understand.
