@@ -1,0 +1,100 @@
+---
+title: Engine Overview
+description: The Clarx analysis engine that powers the CLI and any custom integrations.
+---
+
+# Clarx Engine
+
+`@clarxai/engine` is the analysis core that powers the CLI. It is published separately so it can be embedded in editors, CI platforms, or custom tooling without taking a dependency on the CLI's command layer.
+
+---
+
+## What it does
+
+The engine takes a filesystem path (and optionally a manifest) and returns a structured analysis result:
+
+1. **Filesystem scan** — discovers all source files, excludes generated paths
+2. **Metric collection** — measures file sizes, directory structure, naming patterns, import counts
+3. **Import graph analysis** — resolves TypeScript/JavaScript imports to detect cycles, fan-in, and graph depth (when possible)
+4. **Rule evaluation** — applies all 25 rules from the standard against collected metrics
+5. **Score calculation** — computes pillar scores, overall score, hard failures, and confidence level
+
+---
+
+## Install
+
+```bash
+npm install @clarxai/engine
+```
+
+---
+
+## Basic usage
+
+```typescript
+import { analyze } from '@clarxai/engine';
+
+const result = await analyze({
+  root: '/path/to/repo',
+  manifest: './clarx-manifest.json', // optional
+});
+
+console.log(result.score);        // 74
+console.log(result.confidence);   // 'medium'
+console.log(result.hardFailures); // []
+console.log(result.pillars);      // { discoverability: 85, ... }
+```
+
+---
+
+## Two-pass model
+
+The engine runs analysis in two passes:
+
+### Pass 1: Deterministic structural analysis
+- Fast, cheap, always runs
+- Filesystem heuristics, file size checks, naming pattern checks
+- Does not require import resolution
+
+### Pass 2: Import graph analysis
+- Runs when TypeScript project references or JS/TS imports are resolvable
+- Detects circular dependencies (B1), fan-in (C4), and graph depth (C5)
+- Skipped if the engine cannot resolve imports — confidence drops to `low` or `medium`
+
+---
+
+## Architecture
+
+```
+packages/engine/src/
+  index.ts          — public API
+  types.ts          — AnalysisResult, RuleResult, PillarScore
+  analyzers/
+    filesystem.ts   — file tree scan, exclusions
+    naming.ts       — D4, E3 naming checks
+    structure.ts    — D1, D3, D5, B4, E2
+    imports.ts      — B1, C3, C4, C5 import graph
+    filesize.ts     — C2, E1
+    guidance.ts     — O1–O5
+    boundaries.ts   — B2, B3, E4, E5
+  scoring/
+    pillar.ts       — per-pillar score calculation
+    overall.ts      — weighted average + hard failure floor
+  manifest.ts       — manifest parsing and validation
+```
+
+---
+
+## Framework detection
+
+The engine auto-detects common frameworks and adjusts analysis accordingly:
+
+| Framework | Detected by | Auto-excluded |
+|-----------|-------------|---------------|
+| Next.js | `next.config.*` | `.next/`, `.source/` |
+| Vite | `vite.config.*` | `dist/` |
+| Turborepo | `turbo.json` | per-package `dist/` |
+| Nx | `nx.json` | `dist/` |
+| Create React App | `react-scripts` in deps | `build/` |
+
+Declarations in `clarx-manifest.json` always override auto-detection.

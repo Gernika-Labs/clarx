@@ -1,0 +1,73 @@
+---
+title: Standard Overview
+description: What the Clarx AI-First Codebase Standard is and why it exists.
+---
+
+# Clarx AI-First Codebase Standard
+
+**Version:** 0.1 · **Status:** Draft · **Date:** 2026-04-30
+
+An AI-first codebase is not one that is easy to autocomplete. It is one where an agent can:
+
+- Identify the right files quickly
+- Infer ownership and module boundaries correctly
+- Avoid loading irrelevant context
+- Predict where a change should go
+- Make safe, local edits with low ambiguity
+- Verify its changes with clear commands
+
+This standard is technology-agnostic. It applies to any language, framework, or monorepo structure.
+
+---
+
+## Why a standard?
+
+Without a standard, every analysis is vague and inconsistent. A standard makes scoring deterministic, comparable across repos, and improvable over time.
+
+The Clarx standard defines:
+
+- **25 rules** across five pillars
+- **Three severity levels**: hard failure, warning, recommendation
+- **A scoring model** from 0 to 100 with hard failure floors
+- **A confidence model** based on available analysis signals
+- **A manifest format** (`clarx-manifest.json`) for repos to declare intent
+
+---
+
+## Pillars
+
+| Pillar | Weight | Core question |
+|--------|--------|---------------|
+| [Discoverability](/docs/standard/pillars#discoverability) | 20% | Can an agent find the right file in two attempts? |
+| [Boundary Clarity](/docs/standard/pillars#boundary-clarity) | 20% | Can an agent infer module ownership without reading implementations? |
+| [Context Efficiency](/docs/standard/pillars#context-efficiency) | 20% | Can an agent complete a task loading ≤5 files? |
+| [Operational Guidance](/docs/standard/pillars#operational-guidance) | 20% | Does the repo tell an agent how to work in it? |
+| [Edit Safety](/docs/standard/pillars#edit-safety) | 20% | Does the structure minimize the chance of incorrect changes? |
+
+---
+
+## Hard failures
+
+Three rules produce a hard failure that caps any repo score at 50:
+
+| Rule | Description |
+|------|-------------|
+| **B1** | Circular imports between packages or workspaces |
+| **C1** | Generated artifacts inside the source tree |
+| **O1** | No machine-readable guidance file (CLAUDE.md, AGENTS.md, or clarx-manifest.json) |
+
+A repo can still improve from a hard failure. Fixing any one of these is the highest-leverage change.
+
+---
+
+## Anti-patterns
+
+| Anti-pattern | Pillars affected | Description |
+|---|---|---|
+| **Flat dumping ground** | D, C, E | All files in one directory regardless of type or domain |
+| **God file** | C, E | Single file handling unrelated responsibilities, often 500+ lines |
+| **Shadow generated** | C, O | Generated artifacts living beside hand-written source |
+| **Implicit shared** | B, E | Code copy-pasted across packages instead of extracted |
+| **Convention-only boundaries** | B, E | Module separation declared but not enforced by tooling |
+| **Silent entry** | D, B | Package with no declared exports or README |
+| **Undeclared blast radius** | C, O | High fan-in files with no documentation or manifest entry |

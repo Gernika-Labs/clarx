@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { StreamingText } from '@intention-ui/ui'
+import { StreamingText } from '@clarxai/ui'
 import { Preview, PreviewGrid, PreviewRow } from '@/components/preview'
 
 const SENTENCE = 'The agent analyzed 47 documents and identified 3 key patterns in the data.'

@@ -1,0 +1,22 @@
+{
+  "name": "@clarxai/cli",
+  "version": "0.1.0",
+  "description": "Clarx CLI — score any codebase against the AI-First Standard",
+  "type": "module",
+  "bin": {
+    "clarx": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@clarxai/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0"
+  }
+}

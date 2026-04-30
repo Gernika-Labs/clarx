@@ -1,0 +1,151 @@
+---
+title: Commands
+description: Full reference for all Clarx CLI commands.
+---
+
+# Commands
+
+## `clarx score`
+
+Score a codebase against the AI-First Standard.
+
+```bash
+clarx score [path] [options]
+```
+
+**Arguments:**
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `path` | Directory to analyze | Current directory |
+
+**Options:**
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--format` | Output format: `text`, `json`, `markdown`, `sarif` | `text` |
+| `--min-score` | Exit code 1 if overall score is below this value | none |
+| `--min-pillar-score` | Exit code 1 if any pillar score is below this value | none |
+| `--ignore` | Comma-separated glob patterns to exclude | none |
+| `--manifest` | Path to a custom manifest file | `./clarx-manifest.json` |
+| `--no-manifest` | Skip manifest resolution entirely | false |
+| `--verbose` | Include passing rules in output | false |
+
+**Examples:**
+
+```bash
+# Score current directory
+clarx score
+
+# Score a specific path
+clarx score ./my-repo
+
+# CI gate: fail if score < 70
+clarx score --min-score 70
+
+# JSON output for programmatic use
+clarx score --format json > clarx-report.json
+
+# Fail if any pillar drops below 60
+clarx score --min-pillar-score 60
+```
+
+---
+
+## `clarx init`
+
+Generate a starter `clarx-manifest.json` based on the current repo structure.
+
+```bash
+clarx init [path]
+```
+
+The command:
+1. Detects monorepo structure (Turborepo, Nx, Lerna, etc.)
+2. Identifies common generated directories (`.next`, `dist`, `.source`, etc.)
+3. Discovers workspaces and reads their READMEs for purpose statements
+4. Pre-fills `verificationCommands` from `package.json` scripts
+5. Writes `clarx-manifest.json` and prints a diff for review
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Print the manifest without writing it |
+| `--overwrite` | Overwrite an existing manifest |
+
+---
+
+## `clarx explain`
+
+Print the full description, rationale, and remediation guidance for a rule.
+
+```bash
+clarx explain <rule-id>
+```
+
+**Examples:**
+
+```bash
+clarx explain C2
+clarx explain O1
+clarx explain B1
+```
+
+**Output includes:**
+- Rule description
+- Why it matters for AI navigability
+- How to fix it
+- How to declare an exemption in the manifest (where applicable)
+
+---
+
+## `clarx diff`
+
+Compare scores between two git refs (branches, commits, or tags).
+
+```bash
+clarx diff [base] [head]
+```
+
+**Arguments:**
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `base` | Base git ref | `main` |
+| `head` | Head git ref | `HEAD` |
+
+**Examples:**
+
+```bash
+# Compare current branch to main
+clarx diff
+
+# Compare two specific commits
+clarx diff abc1234 def5678
+
+# Output as JSON
+clarx diff --format json
+```
+
+This is useful in PR checks to confirm a branch does not regress the score.
+
+---
+
+## `clarx report`
+
+Generate a full report and write it to a file.
+
+```bash
+clarx report [path] --out <file>
+```
+
+**Examples:**
+
+```bash
+# Write markdown report
+clarx report --format markdown --out clarx-report.md
+
+# Write JSON report
+clarx report --format json --out clarx-report.json
+```

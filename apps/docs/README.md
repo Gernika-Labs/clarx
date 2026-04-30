@@ -1,6 +1,6 @@
 # apps/docs
 
-Documentation site for intention/ui. Next.js 15 + fumadocs.
+Documentation site for Clarx. Next.js 15 + fumadocs.
 
 ## Key files
 

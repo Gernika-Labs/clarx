@@ -1,0 +1,50 @@
+import { exit } from 'node:process';
+
+const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pillar: string; why: string; fix: string }> = {
+  D1: { title: 'Root directory has ≤10 meaningful entries', severity: 'warning', pillar: 'Discoverability', why: 'Noise at the root forces an agent to scan everything before understanding anything. Every extra entry is a context cost.', fix: 'Move config files into a config/ directory, consolidate scripts, and ensure only top-level workspace directories are visible at the root.' },
+  D2: { title: 'Every workspace or package has a one-line purpose statement', severity: 'warning', pillar: 'Discoverability', why: 'An agent that cannot read purpose from a file name alone must open the file — that costs context.', fix: 'Add a README.md to each workspace/package with at least one sentence describing what it owns. Or declare workspaces in clarx-manifest.json.' },
+  D3: { title: 'Source, test, config, and generated directories are segregated', severity: 'warning', pillar: 'Discoverability', why: 'Mixing file types forces an agent to classify every file before using it.', fix: 'Move tests to __tests__/ or co-locate them with source files. Keep config in a dedicated directory.' },
+  D4: { title: 'No utility dumping ground files', severity: 'warning', pillar: 'Discoverability', why: 'Files named utils.ts, helpers.ts, misc.ts, or common.ts carry no semantic information. An agent must read the whole file to understand what\'s inside.', fix: 'Split utility files by domain. utils/date.ts, utils/formatting.ts, utils/validation.ts are all better than utils.ts.' },
+  D5: { title: 'Directory depth does not exceed 5 levels before a module boundary', severity: 'recommendation', pillar: 'Discoverability', why: 'Deep nesting without semantic meaning forces an agent to traverse multiple directories to understand structure.', fix: 'Introduce a package or clear domain directory boundary before depth 5.' },
+  B1: { title: 'No circular imports between packages or workspaces', severity: 'hard_failure', pillar: 'Boundary Clarity', why: 'Circular dependencies make it impossible to reason about change scope. No agent can safely modify either side of a cycle in isolation.', fix: 'Use madge or tsc --project to detect cycles. Extract shared code into a third package that neither side owns.' },
+  B2: { title: 'Shared code lives in a declared shared package', severity: 'warning', pillar: 'Boundary Clarity', why: 'Duplicated logic across packages means a change in one place does not propagate. An agent has no way to know which copy is canonical.', fix: 'Create a packages/shared (or packages/common) package and extract duplicated code there.' },
+  B3: { title: 'Each package or workspace declares a public API surface', severity: 'warning', pillar: 'Boundary Clarity', why: 'Without an index.ts, an agent cannot know what is internal versus stable surface without reading every file.', fix: 'Add an index.ts to each package that explicitly exports only the public interface.' },
+  C1: { title: 'Generated artifacts are excluded from the source tree', severity: 'hard_failure', pillar: 'Context Efficiency', why: 'An agent that encounters generated files in a source tree cannot tell what is hand-written versus computed. It may attempt to edit generated output.', fix: 'Add generated directories to .gitignore and declare them in clarx-manifest.json. Never commit build output to source directories.' },
+  C2: { title: 'No source file exceeds 400 lines', severity: 'warning', pillar: 'Context Efficiency', why: 'An agent asked to make a targeted change to a 900-line file must load the entire file to locate the relevant section.', fix: 'Split large files by responsibility. Extract types, constants, and helpers into separate files. Declare justified exceptions (registries, token maps) in clarx-manifest.json.' },
+  O1: { title: 'A machine-readable guidance file exists', severity: 'hard_failure', pillar: 'Operational Guidance', why: 'Without any guidance file, an agent has no declared entry point for understanding the project. It must guess at conventions and structure.', fix: 'Create a CLAUDE.md or AGENTS.md at the repo root, or add a clarx-manifest.json. These are not optional — they are the minimum contract between the repo and any AI agent.' },
+  O2: { title: 'Guidance file declares generated directories', severity: 'warning', pillar: 'Operational Guidance', why: 'An agent that edits generated output wastes a full round trip and may break the build.', fix: 'Add a "generated" section to clarx-manifest.json or a "Do not edit" section to CLAUDE.md listing all generated directories.' },
+  O3: { title: 'Guidance file declares verification commands', severity: 'warning', pillar: 'Operational Guidance', why: 'An agent that cannot verify its changes cannot close the loop. It must ask or guess.', fix: 'Add verificationCommands to clarx-manifest.json with at minimum typecheck, test, and lint.' },
+  O4: { title: 'Guidance file declares where common changes belong', severity: 'warning', pillar: 'Operational Guidance', why: 'An agent should never guess where a standard change goes. That guess costs a round trip at minimum.', fix: 'Add a commonTasks section to clarx-manifest.json or a "Common changes" section to CLAUDE.md.' },
+  E1: { title: 'No multi-purpose controller or route files exceeding 300 lines', severity: 'warning', pillar: 'Edit Safety', why: 'A route handler mixing auth, validation, business logic, and formatting is a hazard. Any change risks corrupting another concern.', fix: 'Split by responsibility. Extract auth middleware, validation schemas, and business logic into separate files. The handler should only coordinate.' },
+  E3: { title: 'No utility file exports more than 20 unrelated functions', severity: 'warning', pillar: 'Edit Safety', why: 'A grab-bag utility with 35 exports across unrelated domains gives an agent no safe edit surface.', fix: 'Split by domain. date.ts, formatting.ts, validation.ts are all better than utils.ts with 35 exports.' },
+  E5: { title: 'Each package has a single declared entry point', severity: 'warning', pillar: 'Edit Safety', why: 'Packages with arbitrary internal import paths have no encapsulation. An agent will follow the path of least resistance.', fix: 'Ensure all package consumers import only from the package name (e.g. @clarxai/ui), never from internal paths.' },
+};
+
+export async function explainCommand(args: string[]) {
+  const ruleId = args[0]?.toUpperCase();
+
+  if (!ruleId) {
+    console.error('Usage: clarx explain <rule-id>  (e.g. clarx explain C2)');
+    exit(3);
+  }
+
+  const rule = RULE_EXPLANATIONS[ruleId];
+  if (!rule) {
+    console.error(`Unknown rule: ${ruleId}`);
+    console.error('Valid rules: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5');
+    exit(3);
+  }
+
+  console.log(`
+${ruleId} — ${rule.title}
+${'─'.repeat(60)}
+Pillar:   ${rule.pillar}
+Severity: ${rule.severity}
+
+Why this matters:
+  ${rule.why}
+
+How to fix it:
+  ${rule.fix}
+`);
+}

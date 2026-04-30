@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       tree={source.pageTree}
       nav={{
         title: (
-          <span className="font-semibold tracking-tight">intention/ui</span>
+          <span className="font-semibold tracking-tight">Clarx</span>
         ),
       }}
       sidebar={{

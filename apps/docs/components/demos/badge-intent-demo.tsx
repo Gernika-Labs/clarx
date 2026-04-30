@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge } from '@intention-ui/ui'
+import { Badge } from '@clarxai/ui'
 import { PreviewGrid, PreviewRow } from '@/components/preview'
 
 const INTENTS = ['success', 'warning', 'danger', 'neutral', 'info', 'brand'] as const

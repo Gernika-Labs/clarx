@@ -1,4 +1,4 @@
-import { Text } from '@intention-ui/ui'
+import { Text } from '@clarxai/ui'
 import { Preview } from '@/components/preview'
 
 export function TextRoleDemo() {

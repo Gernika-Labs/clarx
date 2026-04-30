@@ -1,0 +1,179 @@
+---
+title: The Five Pillars
+description: Rules and rationale for all five pillars of the Clarx standard.
+---
+
+# The Five Pillars
+
+Each pillar has five rules. Rules have three severity levels:
+
+- **hard_failure** — sets the score floor to 50 for the entire repo
+- **warning** — reduces the pillar score proportionally
+- **recommendation** — no score impact, but worth addressing
+
+---
+
+## Discoverability
+
+**Weight:** 20% · **Question:** Can an agent find the right file in the first two attempts?
+
+Discoverability measures how quickly an AI agent can orient itself in a repo. A discoverable repo has a clean root, meaningful names, and clear separation between types of files.
+
+### D1 — Root directory has ≤10 meaningful entries
+Severity: `warning`
+
+The repo root should contain only top-level directories and essential config files. Count excludes dotfiles and lockfiles. Noise at the root forces an agent to scan everything before understanding anything.
+
+### D2 — Every workspace or package has a one-line purpose statement
+Severity: `warning`
+
+Each package or workspace must have a README with at least one sentence describing what it owns. An agent that cannot read purpose from a file name alone must open the file — that costs context.
+
+### D3 — Source, test, config, and generated directories are segregated
+Severity: `warning`
+
+Source code, tests, configuration, and generated artifacts must not coexist in the same flat directory. Mixing them forces an agent to classify every file before using it.
+
+### D4 — No utility dumping ground files
+Severity: `warning`
+
+Files named `utils.ts`, `helpers.ts`, `misc.ts`, `common.ts`, `shared.ts`, or similar are banned. These names carry no semantic information. An agent has no basis for deciding whether to look there without reading the whole file.
+
+### D5 — Directory depth does not exceed 5 levels before a module boundary
+Severity: `recommendation`
+
+Deep nesting without semantic meaning forces an agent to traverse multiple directories to understand structure. A module boundary (package, workspace, clear domain directory) should appear within 5 levels.
+
+---
+
+## Boundary Clarity
+
+**Weight:** 20% · **Question:** Can an agent infer module ownership without reading implementation?
+
+Boundary clarity measures how clearly a codebase separates concerns. An agent working on a well-bounded codebase can confidently limit its context to a single module.
+
+### B1 — No circular imports between packages or workspaces
+Severity: `hard_failure`
+
+Circular dependencies make it impossible to reason about change scope. If module A depends on module B which depends on module A, no agent can safely modify either in isolation.
+
+### B2 — Shared code lives in a declared shared package
+Severity: `warning`
+
+Code used by multiple packages must live in a single declared location. Duplicated logic across packages means a change in one place does not propagate — an agent has no way to know which copy is canonical.
+
+### B3 — Each package or workspace declares a public API surface
+Severity: `warning`
+
+Every package must have an `index.ts` (or equivalent) that explicitly exports its public interface. Without it, an agent cannot know what is internal versus stable surface without reading every file.
+
+### B4 — UI primitives and application logic are in separate locations
+Severity: `recommendation`
+
+Generic reusable components must not live in the same directory as application-specific logic. An agent building a new screen should never have to decide whether a file in the primitives directory is reusable.
+
+### B5 — Test files mirror source structure or are co-located
+Severity: `recommendation`
+
+Tests must either live next to the source file they test or in a directory that mirrors the source tree. Scattered test files force an agent to search for coverage rather than predict it.
+
+---
+
+## Context Efficiency
+
+**Weight:** 20% · **Question:** Can an agent complete a typical task by loading ≤5 files?
+
+Context efficiency measures how much of the codebase an agent needs to load to complete a representative task. Every unnecessary file loaded is tokens burned and coherence lost.
+
+### C1 — Generated artifacts are excluded from the source tree
+Severity: `hard_failure`
+
+Generated directories (build output, compiled files, framework artifacts) must not live inside authored source directories. An agent that encounters generated files in a source tree cannot tell what is hand-written versus computed. Must be declared in `.gitignore` and in a manifest file.
+
+### C2 — No source file exceeds 400 lines
+Severity: `warning`
+
+Files over 400 lines are almost always doing more than one thing. An agent asked to make a targeted change to a 900-line file must load the entire file to locate the relevant section.
+
+**Exception:** files that are explicitly declarative registries (e.g. a route config, a token map) may exceed this limit if declared in the manifest.
+
+### C3 — No file imports from more than 15 distinct modules
+Severity: `warning`
+
+A file with 20+ imports is likely a coordination layer mixing concerns that belong in separate files. Every import is a potential context chain an agent must follow.
+
+### C4 — High fan-in files are documented
+Severity: `recommendation`
+
+Files imported by 10 or more other files are architectural load-bearing points. Changes to them have wide blast radius. They must be identified in the manifest or in an architecture document.
+
+### C5 — Import graph depth does not exceed 8 hops from entry to leaf
+Severity: `recommendation`
+
+Deep import chains mean a small change can trigger a wide re-evaluation. An agent navigating a chain of 12 imports loses coherence before reaching the relevant code.
+
+---
+
+## Operational Guidance
+
+**Weight:** 20% · **Question:** Does the repo tell an AI agent how to work in it?
+
+Operational guidance measures how explicitly a codebase declares its own conventions, structure, and verification paths. This is the pillar most directly improved by human action — it requires writing, not refactoring.
+
+### O1 — A machine-readable guidance file exists
+Severity: `hard_failure`
+
+The repo must contain at least one of: `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`, or `clarx-manifest.json`. Without any guidance file, an agent has no declared entry point for understanding the project.
+
+### O2 — Guidance file declares generated directories
+Severity: `warning`
+
+The guidance file must explicitly list directories that are generated and should not be edited. An agent that edits generated output wastes a full round trip.
+
+### O3 — Guidance file declares verification commands
+Severity: `warning`
+
+The guidance file must include at minimum: how to typecheck, how to run tests, and how to lint. An agent that cannot verify its changes cannot close the loop.
+
+### O4 — Guidance file declares where common changes belong
+Severity: `warning`
+
+For the most frequent types of changes (e.g. "add a component", "add an API route", "add a test"), the guidance file must say which directory to work in. An agent should never guess the right location for a standard task.
+
+### O5 — Architecture document identifies high-risk files
+Severity: `recommendation`
+
+A `CLAUDE.md`, `ARCHITECTURE.md`, or similar document must identify high fan-in files, shared utilities, and other locations where a change has wide blast radius.
+
+---
+
+## Edit Safety
+
+**Weight:** 20% · **Question:** Does the structure minimize the chance of an incorrect or overly broad change?
+
+Edit safety measures how well a codebase is structured to contain the blast radius of changes.
+
+### E1 — No multi-purpose controller or route files exceeding 300 lines
+Severity: `warning`
+
+A route handler or controller that mixes authentication, validation, business logic, and response formatting in a single 400-line file is an edit safety hazard. Split by responsibility.
+
+### E2 — Related files are co-located or grouped
+Severity: `recommendation`
+
+A component, its types, its tests, and its styles (if any) should live together or in a predictable adjacent location. An agent that cannot find the type definition for a component it is editing may invent one.
+
+### E3 — No utility file exports more than 20 unrelated functions
+Severity: `warning`
+
+A utility file with 35 exports across unrelated domains is a grab-bag. An agent asked to "update the date formatting utility" cannot tell where to look or what else it might affect. Split by domain.
+
+### E4 — Package boundaries are enforced by tooling
+Severity: `recommendation`
+
+Cross-package imports should be enforced by TypeScript path configuration, ESLint import rules, or workspace configuration — not just by convention. Unenforced boundaries are boundaries an agent will cross accidentally.
+
+### E5 — Each package has a single declared entry point
+Severity: `warning`
+
+Packages that can be imported via arbitrary internal paths (`import x from '@clarxai/ui/src/internal/thing'`) have no encapsulation. An agent will follow the path of least resistance, which is often not the intended API surface.

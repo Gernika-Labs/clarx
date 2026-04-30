@@ -1,0 +1,115 @@
+---
+title: Scoring Model
+description: How Clarx calculates scores, confidence levels, and hard failure floors.
+---
+
+# Scoring Model
+
+Every codebase receives:
+
+- **An overall score** from 0 to 100
+- **Five pillar scores**, each from 0 to 100
+- **A confidence level**: `high`, `medium`, or `low`
+- **Hard failure flags** that apply a score floor
+
+---
+
+## Overall score
+
+```
+overall = Σ (pillar_score × pillar_weight)
+```
+
+Each pillar contributes equally (20%). The overall score is the weighted average.
+
+### Pillar score calculation
+
+Within each pillar, each failing rule reduces the pillar score proportionally by its `scoreImpact`. A pillar with no failing rules scores 100.
+
+| Rule | Severity | Score impact |
+|------|----------|-------------|
+| `hard_failure` | Sets overall floor to 50 | — |
+| `warning` | Deducts from pillar score | Varies by rule |
+| `recommendation` | No score impact | — |
+
+---
+
+## Hard failures
+
+A hard failure caps the entire repo score at 50, regardless of pillar scores.
+
+| Rule | Description |
+|------|-------------|
+| **B1** | Circular imports between packages or workspaces |
+| **C1** | Generated artifacts inside the source tree |
+| **O1** | No machine-readable guidance file |
+
+Hard failures are structural — they undermine AI navigability in ways that no amount of clean naming or documentation can compensate for.
+
+---
+
+## Confidence levels
+
+Confidence is reported alongside the score. A score of 78 at `low` confidence is less meaningful than 78 at `high` confidence.
+
+| Level | Condition |
+|-------|-----------|
+| `high` | Manifest file, full import graph, and filesystem all available |
+| `medium` | Filesystem and partial import graph available |
+| `low` | Filesystem only, no manifest, no import resolution |
+
+### How to improve confidence
+
+- Add a `clarx-manifest.json` to the repo root
+- Ensure TypeScript project references are configured so import graphs can be resolved
+- Declare generated directories in the manifest so the engine can exclude them from analysis
+
+---
+
+## Score examples
+
+### High-scoring repo (87/100, high confidence)
+
+```
+my-app/
+  packages/
+    ui/           README.md, index.ts, src/ (components only)
+    api/          README.md, index.ts, src/ (routes only)
+    db/           README.md, index.ts, prisma/
+  apps/
+    web/          README.md, src/ clean structure
+  CLAUDE.md       declares generated dirs, verification commands, common tasks
+  clarx-manifest.json
+```
+
+- Root is clean (D1 ✓)
+- Every package has README and index.ts (D2 ✓, B3 ✓)
+- CLAUDE.md present with full content (O1 ✓, O2 ✓, O3 ✓, O4 ✓)
+- No utility dumping grounds (D4 ✓, E3 ✓)
+- No circular deps (B1 ✓)
+
+### Low-scoring repo (34/100, medium confidence)
+
+```
+my-app/
+  src/
+    components/
+    utils.ts      (80 exports, unrelated domains)
+    helpers.ts    (40 exports)
+    api/
+      routes.ts   (600 lines, mixed concerns)
+    .next/        (generated, inside source tree)
+  README.md       (marketing copy only)
+```
+
+Failures:
+- `.next/` in source tree → **C1 hard failure** → score capped at 50
+- No guidance file → **O1 hard failure**
+- `utils.ts`, `helpers.ts` → D4, E3
+- `routes.ts` at 600 lines → C2, E1
+
+---
+
+## Machine-readable rubric
+
+The full scoring rubric is available at `standard/rubric/scoring.json` in the Clarx repo. The CLI engine reads this file directly so rule weights and score impacts stay in sync with the spec.

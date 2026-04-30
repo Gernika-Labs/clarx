@@ -1,6 +1,6 @@
 'use client'
 
-import { ToolCall } from '@intention-ui/ui'
+import { ToolCall } from '@clarxai/ui'
 import { Preview } from '@/components/preview'
 
 export function ToolCallStatusDemo() {

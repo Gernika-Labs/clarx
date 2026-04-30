@@ -1,4 +1,4 @@
-import { Alert } from '@intention-ui/ui'
+import { Alert } from '@clarxai/ui'
 import { Preview, PreviewGrid, PreviewRow } from '@/components/preview'
 
 const INTENTS = ['success', 'warning', 'danger', 'info', 'neutral', 'brand'] as const

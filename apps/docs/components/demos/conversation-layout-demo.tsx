@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatMessage } from '@intention-ui/ui'
+import { ChatMessage } from '@clarxai/ui'
 
 export function ConversationLayoutDemo() {
   return (

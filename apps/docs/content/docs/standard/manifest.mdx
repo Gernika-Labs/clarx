@@ -1,0 +1,107 @@
+---
+title: clarx-manifest.json
+description: The optional repo-level file that declares architectural intent and improves analysis accuracy.
+---
+
+# clarx-manifest.json
+
+The manifest is an optional file at the repo root that lets a repository declare its own structure to the Clarx engine. The more fields provided, the higher the confidence level of the analysis.
+
+---
+
+## Why it exists
+
+Many of the most important AI-navigability signals are not inferable from code alone:
+
+- Which directories are generated (and should not be edited)
+- What each workspace or package owns
+- Where common changes belong
+- Which files have high fan-in and are risky to modify
+- How to verify changes
+
+The manifest is the contract between the repo and the analysis engine.
+
+---
+
+## Format
+
+```json
+{
+  "version": "0.1",
+  "generated": [
+    "apps/docs/.source",
+    "apps/docs/.next",
+    "**/dist",
+    "**/node_modules"
+  ],
+  "workspaces": {
+    "packages/ui": "Semantic UI component library",
+    "packages/engine": "Codebase analysis engine",
+    "packages/cli": "CLI tool wrapping engine"
+  },
+  "highFanIn": [
+    "packages/ui/src/tokens.ts",
+    "apps/docs/lib/mdx-components.ts"
+  ],
+  "verificationCommands": {
+    "typecheck": "pnpm typecheck",
+    "test": "pnpm test",
+    "lint": "pnpm lint"
+  },
+  "commonTasks": {
+    "add a component": "packages/ui/src/ — follow badge.tsx pattern",
+    "add a doc page": "apps/docs/content/docs/ — register in meta.json"
+  }
+}
+```
+
+All fields are optional.
+
+---
+
+## Fields
+
+### `version`
+The manifest schema version. Currently `"0.1"`.
+
+### `generated`
+Glob patterns or paths that are generated artifacts. The engine will exclude these from source analysis and verify they are not committed as source. Declaring these correctly satisfies **O2** and helps resolve **C1**.
+
+### `workspaces`
+A map of workspace paths to one-line purpose statements. Satisfies **D2** when provided here instead of (or in addition to) per-package READMEs.
+
+### `highFanIn`
+Files imported by 10 or more other files. Declaring these satisfies **C4** and enables the engine to warn when these files are modified. These are the files where changes have the widest blast radius.
+
+### `verificationCommands`
+Commands for `typecheck`, `test`, and `lint`. Satisfies **O3**. The CLI uses these when suggesting how to verify changes.
+
+### `commonTasks`
+A map of common task descriptions to the file or directory where that work belongs. Satisfies **O4**. Examples:
+- `"add a component"` → where component files live
+- `"add an API route"` → where route handlers live
+- `"add a migration"` → where database migrations live
+
+---
+
+## Confidence impact
+
+| Fields present | Confidence level |
+|---------------|-----------------|
+| manifest + full import graph + filesystem | `high` |
+| filesystem + partial import graph | `medium` |
+| filesystem only | `low` |
+
+Adding a `clarx-manifest.json` with at minimum `generated` and `verificationCommands` is the fastest single action that raises both the confidence level and the Operational Guidance pillar score.
+
+---
+
+## Initializing a manifest
+
+Run `clarx init` to generate a starter manifest based on your repo structure:
+
+```bash
+npx clarx init
+```
+
+The command detects common patterns (Next.js, Turborepo, Vite, etc.) and pre-fills what it can. Review and commit the result.

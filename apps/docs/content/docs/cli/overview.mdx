@@ -1,0 +1,96 @@
+---
+title: CLI Overview
+description: The Clarx CLI scores any codebase against the AI-First Standard locally and in CI.
+---
+
+# Clarx CLI
+
+The CLI is the primary way to run Clarx analysis. It scores a local codebase against the [AI-First Standard](/docs/standard/overview), outputs a human-readable report, and exits with a non-zero code when thresholds are not met.
+
+---
+
+## Install
+
+```bash
+npm install -g clarx
+# or run without installing
+npx clarx
+```
+
+---
+
+## Quick start
+
+```bash
+# Score the current directory
+clarx score
+
+# Score with JSON output
+clarx score --format json
+
+# Score and fail CI if overall score is below 70
+clarx score --min-score 70
+
+# Generate a starter manifest
+clarx init
+
+# Explain a specific rule
+clarx explain C2
+```
+
+---
+
+## Output
+
+The default report is human-readable:
+
+```
+Clarx AI-First Score — v0.1
+Confidence: medium
+
+  Overall         72 / 100
+
+  Discoverability     85
+  Boundary Clarity    90
+  Context Efficiency  60  ⚠
+  Operational Guidance 50  ⚠
+  Edit Safety         80
+
+Warnings (4):
+  C2  3 files exceed 400 lines:
+        apps/api/src/routes/auth.ts (847 lines)
+        packages/ui/src/tokens.ts (512 lines)  [declared in manifest — exempt]
+        apps/web/src/pages/dashboard.tsx (601 lines)
+  O2  Guidance file does not declare generated directories
+  O3  Guidance file does not declare verification commands
+  O4  Guidance file does not declare where common changes belong
+
+Recommendations (2):
+  C4  High fan-in files not declared in manifest:
+        packages/ui/src/tokens.ts (imported by 23 files)
+  E4  Package boundaries not enforced by tooling
+
+Run `clarx explain <rule>` for guidance on any rule.
+```
+
+---
+
+## Formats
+
+| Flag | Output |
+|------|--------|
+| `--format text` (default) | Human-readable terminal report |
+| `--format json` | Machine-readable JSON for dashboards and CI |
+| `--format markdown` | Markdown summary for PR comments |
+| `--format sarif` | SARIF for GitHub Code Scanning and editor annotations |
+
+---
+
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Analysis complete, score at or above threshold |
+| `1` | Analysis complete, score below threshold |
+| `2` | Hard failure detected |
+| `3` | Analysis error (could not read repo) |

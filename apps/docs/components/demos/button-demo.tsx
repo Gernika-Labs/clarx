@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@intention-ui/ui'
+import { Button } from '@clarxai/ui'
 import { Preview, PreviewGrid, PreviewRow } from '@/components/preview'
 
 const INTENTS = ['neutral', 'brand', 'danger', 'success'] as const

@@ -1,7 +1,6 @@
 {
-  "title": "intention/ui",
+  "title": "Clarx",
   "pages": [
-    "index",
     "---Philosophy---",
     "introduction",
     "manifesto",
@@ -33,6 +32,18 @@
     "ai-rules/templates/cursor",
     "ai-rules/templates/agents",
     "---Migration---",
-    "migration-examples"
+    "migration-examples",
+    "---Standard---",
+    "standard/overview",
+    "standard/pillars",
+    "standard/scoring",
+    "standard/manifest",
+    "---CLI---",
+    "cli/overview",
+    "cli/commands",
+    "cli/ci-integration",
+    "---Engine---",
+    "engine/overview",
+    "engine/output-format"
   ]
 }

@@ -1,0 +1,32 @@
+{
+  "version": "0.1",
+  "generated": [
+    "apps/docs/.source",
+    "apps/docs/.next",
+    "**/dist",
+    "**/node_modules",
+    "**/coverage"
+  ],
+  "workspaces": {
+    "packages/ui": "Semantic UI component library — reusable intention-driven components",
+    "packages/engine": "Codebase analysis engine — scores repos against the Clarx standard",
+    "packages/cli": "CLI tool wrapping the engine — clarx score, init, explain",
+    "apps/docs": "Documentation site — Next.js 15 + fumadocs"
+  },
+  "highFanIn": [
+    "packages/ui/src/tokens.ts",
+    "apps/docs/lib/mdx-components.ts"
+  ],
+  "verificationCommands": {
+    "typecheck": "pnpm typecheck",
+    "test": "pnpm test",
+    "lint": "pnpm lint"
+  },
+  "commonTasks": {
+    "add a UI component": "packages/ui/src/ — follow badge.tsx pattern, export from index.ts",
+    "add a doc page": "apps/docs/content/docs/ — register in meta.json",
+    "add a demo component": "apps/docs/components/demos/ — register in apps/docs/lib/mdx-components.ts",
+    "add an engine rule": "packages/engine/src/scoring/rules.ts — add RuleResult, update overall.ts",
+    "add a CLI command": "packages/cli/src/commands/ — wire up in cli.ts"
+  }
+}

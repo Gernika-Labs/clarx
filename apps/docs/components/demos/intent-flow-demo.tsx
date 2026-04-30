@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatMessage, Badge, ToolCall } from '@intention-ui/ui'
+import { ChatMessage, Badge, ToolCall } from '@clarxai/ui'
 
 export function IntentFlowDemo() {
   return (

@@ -1,0 +1,141 @@
+---
+title: CI Integration
+description: How to add Clarx scoring to GitHub Actions, GitLab CI, and other pipelines.
+---
+
+# CI Integration
+
+Clarx is designed to run in CI. Add it to any pipeline to enforce a minimum score on every pull request.
+
+---
+
+## GitHub Actions
+
+### Basic score gate
+
+```yaml
+# .github/workflows/clarx.yml
+name: Clarx AI-First Score
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npx clarx score --min-score 70
+```
+
+### PR comment with score diff
+
+```yaml
+name: Clarx Score
+
+on:
+  pull_request:
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed for clarx diff
+
+      - name: Score current branch
+        run: npx clarx score --format markdown --out clarx-report.md
+
+      - name: Post score as PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('clarx-report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Enforce minimum score
+        run: npx clarx score --min-score 65
+```
+
+### SARIF upload (for inline PR annotations)
+
+```yaml
+      - name: Run Clarx (SARIF)
+        run: npx clarx score --format sarif --out clarx.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: clarx.sarif
+```
+
+---
+
+## GitLab CI
+
+```yaml
+clarx:
+  image: node:20
+  script:
+    - npx clarx score --min-score 70 --format json | tee clarx-report.json
+  artifacts:
+    reports:
+      codequality: clarx-report.json
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+```
+
+---
+
+## Recommended thresholds
+
+Start conservative. A low threshold that passes lets teams adopt Clarx without blocking work. Raise it incrementally.
+
+| Phase | Recommended threshold |
+|-------|----------------------|
+| Initial adoption | `--min-score 50` (blocks only hard failures) |
+| Stabilized baseline | `--min-score 65` |
+| Target state | `--min-score 80` |
+
+Do not set a threshold higher than the current score on `main`. The first run should always pass on the existing codebase.
+
+---
+
+## Caching
+
+Clarx analysis is fast on most repos. If you want to cache the manifest resolution:
+
+```yaml
+      - uses: actions/cache@v4
+        with:
+          path: .clarx-cache
+          key: clarx-${{ hashFiles('clarx-manifest.json') }}
+
+      - run: npx clarx score --cache-dir .clarx-cache
+```
+
+---
+
+## Ignoring paths
+
+Use `--ignore` to exclude generated directories that are not in `.gitignore`:
+
+```bash
+npx clarx score --ignore "**/.next,**/dist,**/coverage"
+```
+
+Or declare them in `clarx-manifest.json` under `generated` — the engine always excludes declared generated paths automatically.

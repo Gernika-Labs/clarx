@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatInput } from '@intention-ui/ui'
+import { ChatInput } from '@clarxai/ui'
 import { Preview } from '@/components/preview'
 
 export function ChatInputDefaultDemo() {

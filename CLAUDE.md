@@ -1,16 +1,20 @@
-# intention/ui
+# Clarx
 
-An intention-driven design system. Three layers: philosophy (docs), reference implementation (`packages/ui`), and an AI rules layer (`content/docs/ai-rules/`).
+AI-first codebase standard, analysis engine, and design system. Four workspaces:
 
 ## Monorepo layout
 
 ```
 packages/ui/src/          — reusable semantic UI components (production code)
+packages/engine/src/      — codebase analysis engine (@clarxai/engine)
+packages/cli/src/         — CLI wrapping the engine (@clarxai/cli)
 apps/docs/                — documentation site (Next.js 15 + fumadocs)
 apps/docs/content/docs/   — MDX pages (edit here to change doc content)
 apps/docs/components/demos/ — live demo components referenced by MDX pages
 apps/docs/lib/            — shared utilities for the docs app
+standard/                 — versioned Clarx standard spec and rubric
 journal/                  — architecture decisions and audits
+clarx-manifest.json       — machine-readable repo guidance (also our own dogfood)
 ```
 
 ## Component pattern (`packages/ui/src/`)
@@ -38,6 +42,19 @@ Every component follows this exact shape — read `badge.tsx` as the reference:
 
 1. Create MDX file in `apps/docs/content/docs/`
 2. Add it to `apps/docs/content/docs/meta.json` in the right position
+
+## Adding an engine rule
+
+1. Add the rule evaluation to `packages/engine/src/scoring/rules.ts`
+2. Update pillar score calculation in `packages/engine/src/scoring/overall.ts` if needed
+3. Add the rule explanation to `packages/cli/src/commands/explain.ts`
+4. Document the rule in `apps/docs/content/docs/standard/pillars.mdx`
+
+## Adding a CLI command
+
+1. Create `packages/cli/src/commands/[name].ts`
+2. Wire it up in `packages/cli/src/cli.ts`
+3. Document it in `apps/docs/content/docs/cli/commands.mdx`
 
 ## How MDX demos work
 

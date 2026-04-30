@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, BADGE_KEYWORDS } from '@intention-ui/ui'
+import { Badge, BADGE_KEYWORDS } from '@clarxai/ui'
 import { PreviewGrid, PreviewRow } from '@/components/preview'
 
 type AnyKeywordDef = { intent: string; appearance?: string; dot?: string; label: string }

@@ -9,7 +9,7 @@ export default function HomePage() {
           Early preview
         </div>
         <h1 className="text-5xl font-bold tracking-tight mb-4">
-          intention/ui
+          Clarx
         </h1>
         <p className="text-xl text-muted-foreground mb-8">
           An AI-first, intention-based design system for conversational

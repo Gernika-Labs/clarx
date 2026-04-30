@@ -1,0 +1,62 @@
+{
+  "version": "0.1",
+  "pillars": {
+    "discoverability": {
+      "weight": 0.20,
+      "rules": {
+        "D1": { "description": "Root directory has 10 or fewer meaningful entries", "severity": "warning", "scoreImpact": 20 },
+        "D2": { "description": "Every workspace or package has a one-line purpose statement", "severity": "warning", "scoreImpact": 20 },
+        "D3": { "description": "Source, test, config, and generated directories are segregated", "severity": "warning", "scoreImpact": 25 },
+        "D4": { "description": "No utility dumping ground files (utils.ts, helpers.ts, misc.ts, common.ts)", "severity": "warning", "scoreImpact": 20 },
+        "D5": { "description": "Directory depth does not exceed 5 levels before a module boundary", "severity": "recommendation", "scoreImpact": 15 }
+      }
+    },
+    "boundary_clarity": {
+      "weight": 0.20,
+      "rules": {
+        "B1": { "description": "No circular imports between packages or workspaces", "severity": "hard_failure", "scoreImpact": 100 },
+        "B2": { "description": "Shared code lives in a declared shared package", "severity": "warning", "scoreImpact": 25 },
+        "B3": { "description": "Each package or workspace declares a public API surface (index.ts)", "severity": "warning", "scoreImpact": 25 },
+        "B4": { "description": "UI primitives and application logic are in separate locations", "severity": "recommendation", "scoreImpact": 25 },
+        "B5": { "description": "Test files mirror source structure or are co-located", "severity": "recommendation", "scoreImpact": 15 }
+      }
+    },
+    "context_efficiency": {
+      "weight": 0.20,
+      "rules": {
+        "C1": { "description": "Generated artifacts are excluded from the source tree", "severity": "hard_failure", "scoreImpact": 100 },
+        "C2": { "description": "No source file exceeds 400 lines", "severity": "warning", "scoreImpact": 25 },
+        "C3": { "description": "No file imports from more than 15 distinct modules", "severity": "warning", "scoreImpact": 20 },
+        "C4": { "description": "High fan-in files (10+ dependents) are documented", "severity": "recommendation", "scoreImpact": 20 },
+        "C5": { "description": "Import graph depth does not exceed 8 hops from entry to leaf", "severity": "recommendation", "scoreImpact": 15 }
+      }
+    },
+    "operational_guidance": {
+      "weight": 0.20,
+      "rules": {
+        "O1": { "description": "A machine-readable guidance file exists (CLAUDE.md, AGENTS.md, clarx-manifest.json)", "severity": "hard_failure", "scoreImpact": 100 },
+        "O2": { "description": "Guidance file declares generated directories", "severity": "warning", "scoreImpact": 25 },
+        "O3": { "description": "Guidance file declares verification commands", "severity": "warning", "scoreImpact": 25 },
+        "O4": { "description": "Guidance file declares where common changes belong", "severity": "warning", "scoreImpact": 25 },
+        "O5": { "description": "Architecture document identifies high-risk files", "severity": "recommendation", "scoreImpact": 15 }
+      }
+    },
+    "edit_safety": {
+      "weight": 0.20,
+      "rules": {
+        "E1": { "description": "No multi-purpose controller or route files exceeding 300 lines", "severity": "warning", "scoreImpact": 25 },
+        "E2": { "description": "Related files are co-located or grouped predictably", "severity": "recommendation", "scoreImpact": 20 },
+        "E3": { "description": "No utility file exports more than 20 unrelated functions", "severity": "warning", "scoreImpact": 25 },
+        "E4": { "description": "Package boundaries are enforced by tooling", "severity": "recommendation", "scoreImpact": 20 },
+        "E5": { "description": "Each package has a single declared entry point", "severity": "warning", "scoreImpact": 20 }
+      }
+    }
+  },
+  "hardFailures": ["B1", "C1", "O1"],
+  "hardFailureScoreFloor": 50,
+  "confidenceLevels": {
+    "high": "Manifest file, full import graph, and filesystem all available",
+    "medium": "Filesystem and partial import graph available",
+    "low": "Filesystem only"
+  }
+}

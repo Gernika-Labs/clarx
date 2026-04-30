@@ -1,4 +1,4 @@
-# @intention-ui/ui
+# @clarxai/ui
 
 Semantic UI component library. Copy-and-own model — no install, you own the source.
 

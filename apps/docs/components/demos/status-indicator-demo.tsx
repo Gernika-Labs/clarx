@@ -1,4 +1,4 @@
-import { StatusIndicator } from '@intention-ui/ui'
+import { StatusIndicator } from '@clarxai/ui'
 import { Preview, PreviewGrid, PreviewRow } from '@/components/preview'
 
 const STATES = ['active', 'pending', 'idle', 'success', 'warning', 'error'] as const

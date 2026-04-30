@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge } from '@intention-ui/ui'
+import { Badge } from '@clarxai/ui'
 import { Preview } from '@/components/preview'
 
 export function BadgeSizeDemo() {

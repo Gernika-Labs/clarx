@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cn } from '@intention-ui/ui'
+import { cn } from '@clarxai/ui'
 
 export function Preview({
   children,
