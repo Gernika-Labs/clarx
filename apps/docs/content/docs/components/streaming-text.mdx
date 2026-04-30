@@ -1,43 +1,77 @@
 ---
 title: Streaming Text
-description: Render text that arrives token by token, with smooth progressive display.
+description: Render text that arrives token by token with an animated blinking cursor.
 ---
 
-## Overview
+`StreamingText` wraps a string that grows over time and appends a CSS-only blinking cursor while `isStreaming` is `true`. It is a server component with no local state.
 
-`StreamingText` wraps a string that grows over time (e.g. from an AI stream) and renders it with an optional cursor, smooth token fade-in, and Markdown support.
+<StreamingTextLiveDemo />
 
-## Usage
+## States
 
-```tsx
-'use client'
-
-import { StreamingText } from '@/components/ui/streaming-text'
-import { useState, useEffect } from 'react'
-
-const chunks = ['Hello', ', ', 'world', '!']
-
-export default function Example() {
-  const [text, setText] = useState('')
-
-  useEffect(() => {
-    let i = 0
-    const id = setInterval(() => {
-      if (i < chunks.length) setText((t) => t + chunks[i++])
-      else clearInterval(id)
-    }, 200)
-    return () => clearInterval(id)
-  }, [])
-
-  return <StreamingText text={text} isStreaming={text.length < 13} />
-}
-```
+<StreamingTextStatesDemo />
 
 ## Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `text` | `string` | — | The current accumulated text |
-| `isStreaming` | `boolean` | `false` | Show blinking cursor at end |
-| `markdown` | `boolean` | `true` | Render Markdown |
-| `className` | `string` | — | Additional class names |
+| `isStreaming` | `boolean` | `false` | Appends a blinking cursor to the end |
+| `className` | `string` | — | Additional class names on the span |
+
+## Usage
+
+Drive `text` and `isStreaming` from your streaming state. The cursor disappears automatically when `isStreaming` becomes `false`.
+
+```tsx
+'use client'
+
+import { StreamingText } from '@intention-ui/ui'
+import { useState, useEffect } from 'react'
+
+const CHUNKS = ['Hello', ', ', 'world', '!']
+
+export function Example() {
+  const [text, setText] = useState('')
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    let i = 0
+    const id = setInterval(() => {
+      if (i < CHUNKS.length) {
+        setText((t) => t + CHUNKS[i++])
+      } else {
+        setDone(true)
+        clearInterval(id)
+      }
+    }, 200)
+    return () => clearInterval(id)
+  }, [])
+
+  return <StreamingText text={text} isStreaming={!done} />
+}
+```
+
+## Source
+
+```tsx
+import * as React from 'react'
+import { cn } from './utils'
+
+export type StreamingTextProps = {
+  text: string
+  isStreaming?: boolean
+  className?: string
+}
+
+export function StreamingText({ text, isStreaming, className }: StreamingTextProps) {
+  return (
+    <span className={cn(className)}>
+      {text}
+      {isStreaming && (
+        <span className="ml-0.5 inline-block h-[1em] w-0.5 translate-y-[0.1em] animate-pulse rounded-sm bg-current" />
+      )}
+    </span>
+  )
+}
+```

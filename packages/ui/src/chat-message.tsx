@@ -1,38 +1,3 @@
----
-title: Chat Message
-description: A single message in a conversation, supporting user, assistant, and system roles with streaming-aware rendering.
----
-
-`ChatMessage` is the core building block of any conversational interface. It handles layout, avatar placement, role-based styling, optional timestamps, and a streaming cursor state. All three roles — user, assistant, and system — are supported out of the box.
-
-<ChatMessageVariantsDemo />
-
-## Streaming state
-
-Set `isStreaming={true}` to append a blinking cursor to the message content. Use this while the model is mid-response.
-
-<ChatMessageStreamingDemo />
-
-## With timestamps
-
-Pass a `timestamp` string to render a label beneath the bubble.
-
-<ChatMessageTimestampDemo />
-
-## Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `role` | `"user" \| "assistant" \| "system"` | — | Who sent the message |
-| `content` | `React.ReactNode` | — | Message content |
-| `isStreaming` | `boolean` | `false` | Appends an animated blinking cursor |
-| `avatar` | `React.ReactNode` | — | Custom avatar element (defaults to "U" / "AI" circle) |
-| `timestamp` | `string` | — | Optional label shown below the bubble |
-| `className` | `string` | — | Additional class names on the outer wrapper |
-
-## Source
-
-```tsx
 import * as React from 'react'
 import { cn } from './utils'
 
@@ -112,4 +77,3 @@ export function ChatMessage({
     </div>
   )
 }
-```

@@ -1,47 +1,3 @@
----
-title: Chat Input
-description: An auto-resizing textarea with a send or stop button, designed for AI chat interfaces.
----
-
-`ChatInput` is a controlled textarea that auto-resizes as the user types, submits on `Enter`, and switches to a stop button during streaming. It is a `'use client'` component.
-
-<ChatInputDefaultDemo />
-
-## Streaming state
-
-When `isStreaming={true}`, the textarea is disabled and the send button becomes a stop icon. Wire `onStop` to cancel the in-flight request.
-
-<ChatInputStreamingDemo />
-
-## Disabled
-
-Use `disabled` to lock the input when a conversation has ended or the user lacks permissions.
-
-<ChatInputDisabledDemo />
-
-## Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `placeholder` | `string` | `"Message..."` | Textarea placeholder |
-| `onSubmit` | `(value: string) => void` | — | Called with trimmed text on submit |
-| `onStop` | `() => void` | — | Called when the stop button is clicked during streaming |
-| `isStreaming` | `boolean` | `false` | Shows stop button and disables textarea |
-| `disabled` | `boolean` | `false` | Fully disables the input |
-| `actions` | `React.ReactNode` | — | Extra elements rendered between textarea and send button |
-| `className` | `string` | — | Additional class names on the outer wrapper |
-
-## Keyboard shortcuts
-
-| Key | Action |
-|-----|--------|
-| `Enter` | Submit the message |
-| `Shift + Enter` | Insert a newline |
-| `Escape` | Clear the input |
-
-## Source
-
-```tsx
 'use client'
 
 import * as React from 'react'
@@ -107,13 +63,13 @@ export function ChatInput({
   const hasValue = value.trim().length > 0
 
   return (
-    <div className={cn(
-      'flex items-end gap-2 rounded-2xl border bg-white px-4 py-3 shadow-sm',
-      'focus-within:ring-2 focus-within:ring-zinc-900/10',
-      'dark:bg-zinc-900 dark:focus-within:ring-zinc-100/10',
-      disabled && 'opacity-60 cursor-not-allowed',
-      className
-    )}>
+    <div
+      className={cn(
+        'flex items-end gap-2 rounded-2xl border bg-white px-4 py-3 shadow-sm focus-within:ring-2 focus-within:ring-zinc-900/10 dark:bg-zinc-900 dark:focus-within:ring-zinc-100/10',
+        disabled && 'opacity-60 cursor-not-allowed',
+        className
+      )}
+    >
       <textarea
         ref={textareaRef}
         value={value}
@@ -132,16 +88,21 @@ export function ChatInput({
         disabled={disabled || (!isStreaming && !hasValue)}
         className={cn(
           'flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors',
-          isStreaming || hasValue
+          isStreaming
             ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-            : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'
+            : hasValue
+            ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+            : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500',
+          'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       >
         {isStreaming ? (
+          // Stop icon
           <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
             <rect x="0" y="0" width="10" height="10" rx="1" />
           </svg>
         ) : (
+          // Up-arrow icon
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 12V2M3 6l4-4 4 4" />
           </svg>
@@ -150,4 +111,3 @@ export function ChatInput({
     </div>
   )
 }
-```

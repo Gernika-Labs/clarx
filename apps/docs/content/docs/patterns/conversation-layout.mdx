@@ -3,31 +3,43 @@ title: Conversation Layout
 description: Full-page layout pattern for chat and agent interfaces.
 ---
 
-## Overview
+A conversation layout composes three zones into a full-height panel: a context header, a scrollable message thread, and a sticky input bar. Below is a self-contained 440px mockup.
 
-A conversation layout has three zones: a **header** with context, a **message thread** that scrolls, and a **sticky input bar** at the bottom.
+<ConversationLayoutDemo />
 
-## Usage
+## Zone breakdown
+
+**Header** — `shrink-0`, sits above the thread. Contains agent identity, status indicator, or action buttons. Use `border-b` to visually separate.
+
+**Thread** — `flex-1 overflow-y-auto`, grows to fill available space. Render `ChatMessage` components in a `flex flex-col gap-4` container. Add `bg-zinc-50/50` for a subtle inset feel.
+
+**Input** — `shrink-0 border-t`, pinned to the bottom. Wraps `ChatInput` with comfortable padding.
+
+## Code structure
 
 ```tsx
-import { ChatMessage } from '@/components/ui/chat-message'
-import { ChatInput } from '@/components/ui/chat-input'
+import { ChatMessage } from '@intention-ui/ui'
+import { ChatInput } from '@intention-ui/ui'
 
-export default function ConversationPage() {
+export function ConversationPage() {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col">
       {/* Header */}
-      <header className="shrink-0 border-b px-6 py-3 flex items-center gap-3">
-        <span className="font-semibold">Assistant</span>
+      <header className="shrink-0 border-b px-4 py-3 flex items-center gap-2 bg-white dark:bg-zinc-900">
+        <span className="text-sm font-medium">Assistant</span>
       </header>
 
       {/* Thread */}
-      <main className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
+      <main
+        role="log"
+        aria-live="polite"
+        className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 bg-zinc-50/50 dark:bg-zinc-950/50"
+      >
         <ChatMessage role="assistant" content="How can I help?" />
       </main>
 
       {/* Input */}
-      <footer className="shrink-0 border-t px-6 py-4">
+      <footer className="shrink-0 border-t px-4 py-3 bg-white dark:bg-zinc-900">
         <ChatInput placeholder="Ask anything..." onSubmit={() => {}} />
       </footer>
     </div>
@@ -35,7 +47,8 @@ export default function ConversationPage() {
 }
 ```
 
-## Accessibility
+## Accessibility notes
 
-- The thread region should have `role="log"` and `aria-live="polite"` so screen readers announce new messages.
-- The input should have a visible label or `aria-label`.
+- Add `role="log"` and `aria-live="polite"` to the thread region so screen readers announce new messages.
+- Give `ChatInput` an `aria-label` or ensure a visible label is associated with the textarea.
+- New messages appended at the bottom will be announced automatically by `aria-live`.

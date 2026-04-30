@@ -3,41 +3,100 @@ title: Tool Call
 description: Visualize an AI agent's tool invocations with input, output, and status states.
 ---
 
-## Overview
+`ToolCall` renders a collapsible card showing what tool an AI called, with what arguments, and what it returned. It supports four execution states: `pending`, `running`, `success`, and `error`. Error cards auto-expand; others respect `defaultOpen`.
 
-`ToolCall` renders a collapsible card showing what tool an AI called, with what arguments, and what it returned. It supports `pending`, `running`, `success`, and `error` states.
+<ToolCallStatusDemo />
 
-## Usage
+## Status states
 
-```tsx
-import { ToolCall } from '@/components/ui/tool-call'
-
-export default function Example() {
-  return (
-    <ToolCall
-      name="search_web"
-      status="success"
-      input={{ query: 'Tokyo weather today' }}
-      output={{ results: ['22°C, partly cloudy'] }}
-    />
-  )
-}
-```
+- **pending** — tool call is queued; muted ring, clock icon
+- **running** — animated spinner, blue ring; tool is currently executing
+- **success** — green checkmark ring; output visible on expand
+- **error** — red ring, auto-expands to show the error message inline
 
 ## Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `name` | `string` | — | Tool name |
+| `name` | `string` | — | Tool function name, rendered in monospace |
 | `status` | `"pending" \| "running" \| "success" \| "error"` | `"pending"` | Execution state |
-| `input` | `Record<string, unknown>` | — | Tool input arguments |
-| `output` | `unknown` | — | Tool output |
-| `error` | `string` | — | Error message if status is `"error"` |
-| `defaultOpen` | `boolean` | `false` | Expand details by default |
+| `input` | `Record<string, unknown>` | — | Tool input arguments, pretty-printed as JSON |
+| `output` | `unknown` | — | Tool output (shown only on `success`) |
+| `error` | `string` | — | Error message shown when `status="error"` |
+| `defaultOpen` | `boolean` | `false` | Expand details on mount (error always opens) |
+| `className` | `string` | — | Additional class names |
 
-## Status states
+## Source
 
-- **pending** — tool call is queued, shown with a muted ring
-- **running** — animated spinner, shown while executing
-- **success** — green checkmark, output visible on expand
-- **error** — red ring, error message shown inline
+```tsx
+'use client'
+
+import * as React from 'react'
+import { cn } from './utils'
+
+export type ToolCallStatus = 'pending' | 'running' | 'success' | 'error'
+
+export type ToolCallProps = {
+  name: string
+  status?: ToolCallStatus
+  input?: Record<string, unknown>
+  output?: unknown
+  error?: string
+  defaultOpen?: boolean
+  className?: string
+}
+
+export function ToolCall({
+  name,
+  status = 'pending',
+  input,
+  output,
+  error,
+  defaultOpen,
+  className,
+}: ToolCallProps) {
+  const autoOpen = status === 'error' ? true : (defaultOpen ?? false)
+  const [open, setOpen] = React.useState(autoOpen)
+
+  return (
+    <div className={cn('rounded-xl border ring-1 ring-inset', RING_CLASS[status], className)}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+      >
+        <StatusIcon status={status} />
+        <span className="flex-1 font-mono text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {name}
+        </span>
+        <ChevronIcon open={open} />
+      </button>
+      {open && (
+        <div className="space-y-3 border-t px-4 pb-4 pt-3">
+          {input !== undefined && (
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Input</p>
+              <pre className="overflow-auto rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-800">
+                {JSON.stringify(input, null, 2)}
+              </pre>
+            </div>
+          )}
+          {status === 'success' && output !== undefined && (
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Output</p>
+              <pre className="overflow-auto rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-800">
+                {JSON.stringify(output, null, 2)}
+              </pre>
+            </div>
+          )}
+          {status === 'error' && error && (
+            <p className="rounded-lg bg-red-50 p-3 text-xs text-red-600 dark:bg-red-950 dark:text-red-400">
+              {error}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+```

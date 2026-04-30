@@ -3,32 +3,42 @@ title: Agent Status
 description: Communicate what an AI agent is currently doing across multi-step tasks.
 ---
 
-## Overview
+`AgentStatus` shows a compact inline status with a colored dot and label. Use it above a message thread or in a header to give users real-time feedback on agent progress without cluttering the conversation.
 
-When an agent runs multiple steps, users need feedback on progress without being overwhelmed. The Agent Status pattern uses a compact status line above the message thread.
+<AgentStatusAllStatesDemo />
 
-## States
+## States table
 
-| State | Description |
-|---|---|
-| `idle` | Agent is waiting for input |
-| `thinking` | Agent is processing the request |
-| `using-tool` | Agent is executing a tool call |
-| `responding` | Agent is streaming a response |
-| `done` | Task completed |
-| `error` | Something went wrong |
+| State | Dot | Color | Default label |
+|-------|-----|-------|---------------|
+| `idle` | none | zinc-400 | Idle |
+| `thinking` | pulse | zinc-400 | Thinking... |
+| `using-tool` | pulse | blue-500 | Using tool... |
+| `responding` | pulse | violet-500 | Responding... |
+| `done` | static | green-500 | Done |
+| `error` | static | red-500 | Error |
 
 ## Usage
 
 ```tsx
-import { AgentStatus } from '@/components/ui/agent-status'
+import { AgentStatus } from '@intention-ui/ui'
 
-export default function Example() {
-  return (
-    <AgentStatus
-      state="using-tool"
-      label="Searching documentation..."
-    />
-  )
-}
+// Basic usage
+<AgentStatus state="thinking" />
+
+// Custom label
+<AgentStatus state="using-tool" label="Searching documentation..." />
+
+// Cycle through states as the agent progresses
+const [state, setState] = useState<AgentState>('idle')
+// ... update state as stream events arrive
+<AgentStatus state={state} />
 ```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `state` | `AgentState` | — | Current agent state |
+| `label` | `string` | — | Overrides the default label for the given state |
+| `className` | `string` | — | Additional class names |

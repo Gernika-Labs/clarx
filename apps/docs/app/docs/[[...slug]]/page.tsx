@@ -14,6 +14,24 @@ import {
   BadgeKeywordDemo,
   BadgeKeywordTable,
 } from '@/components/demos/badge-demo'
+import {
+  ChatMessageVariantsDemo,
+  ChatMessageStreamingDemo,
+  ChatMessageTimestampDemo,
+} from '@/components/demos/chat-message-demo'
+import {
+  ChatInputDefaultDemo,
+  ChatInputStreamingDemo,
+  ChatInputDisabledDemo,
+} from '@/components/demos/chat-input-demo'
+import { ToolCallStatusDemo } from '@/components/demos/tool-call-demo'
+import {
+  StreamingTextLiveDemo,
+  StreamingTextStatesDemo,
+} from '@/components/demos/streaming-text-demo'
+import { AgentStatusAllStatesDemo } from '@/components/demos/agent-status-demo'
+import { ConversationLayoutDemo } from '@/components/demos/conversation-layout-demo'
+import { IntentFlowDemo } from '@/components/demos/intent-flow-demo'
 
 const mdxComponents = {
   ...defaultMdxComponents,
@@ -22,6 +40,18 @@ const mdxComponents = {
   BadgeSizeDemo,
   BadgeKeywordDemo,
   BadgeKeywordTable,
+  ChatMessageVariantsDemo,
+  ChatMessageStreamingDemo,
+  ChatMessageTimestampDemo,
+  ChatInputDefaultDemo,
+  ChatInputStreamingDemo,
+  ChatInputDisabledDemo,
+  ToolCallStatusDemo,
+  StreamingTextLiveDemo,
+  StreamingTextStatesDemo,
+  AgentStatusAllStatesDemo,
+  ConversationLayoutDemo,
+  IntentFlowDemo,
 }
 
 export default async function Page({
