@@ -6,7 +6,8 @@ import { resolve } from 'node:path';
 import { exit } from 'node:process';
 import { formatText } from '../reporters/text.js';
 import { formatMarkdown } from '../reporters/markdown.js';
-import { formatExplanation } from './explain.js';
+import { formatExplanation, getRuleCopyText } from './explain.js';
+import { copyToClipboard } from '../utils/clipboard.js';
 import { Spinner } from '../utils/spinner.js';
 
 const isTTY = process.stdout.isTTY;
@@ -25,6 +26,7 @@ interface ScoreOpts {
   verbose: boolean;
   minScore: number | null;
   minPillarScore: number | null;
+  copyAll: boolean;
 }
 
 export async function scoreCommand(args: string[]) {
@@ -39,6 +41,7 @@ export async function scoreCommand(args: string[]) {
     verbose: args.includes('--verbose'),
     minScore: getFlag(args, '--min-score'),
     minPillarScore: getFlag(args, '--min-pillar-score'),
+    copyAll: args.includes('--copy-all'),
   };
 
   if (watchMode) {
@@ -46,6 +49,11 @@ export async function scoreCommand(args: string[]) {
   } else {
     const { result, code } = await runOnce(opts);
     if (opts.format === 'text') showFooter(result, false);
+    if (opts.copyAll) {
+      const text = buildCopyAllText(result);
+      const ok = copyToClipboard(text);
+      console.log(ok ? `  \x1b[92m✓\x1b[0m \x1b[2mAll failing rules copied to clipboard\x1b[0m\n` : `  \x1b[2mClipboard not available on this system\x1b[0m\n`);
+    }
     exit(code);
   }
 }
@@ -100,7 +108,7 @@ function showFooter(result: AnalysisResult, watching: boolean) {
 
   if (parts.length > 0) {
     console.log(`  ${parts.join('    ')}`);
-    console.log(`  ${dim('Type a rule ID + Enter for details')}  ${dim('·')}  ${magenta('e.g. C1')}`);
+    console.log(`  ${dim('Type a rule ID for details')}  ${dim('·')}  ${dim('copy <rule> or copy all')}  ${dim('·')}  ${magenta('e.g. C1')}  ${magenta('copy E2')}  ${magenta('copy all')}`);
   }
 
   if (watching) {
@@ -146,6 +154,35 @@ async function runWatch(opts: ScoreOpts) {
         return;
       }
 
+      if (id === 'COPY ALL') {
+        const text = buildCopyAllText(result);
+        const ok = copyToClipboard(text);
+        console.log(ok
+          ? `  \x1b[92m✓\x1b[0m \x1b[2mAll failing rules copied to clipboard\x1b[0m`
+          : `  \x1b[2mClipboard not available on this system\x1b[0m`
+        );
+        console.log('');
+        prompt();
+        return;
+      }
+
+      if (id.startsWith('COPY ')) {
+        const ruleId = id.slice(5).trim();
+        const text = getRuleCopyText(ruleId);
+        if (text) {
+          const ok = copyToClipboard(text);
+          console.log(ok
+            ? `  \x1b[92m✓\x1b[0m \x1b[2mCopied fix for ${ruleId} to clipboard\x1b[0m`
+            : `  \x1b[2mClipboard not available on this system\x1b[0m`
+          );
+        } else {
+          console.log(`  ${dim(`Unknown rule "${ruleId}". Valid: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5`)}`);
+        }
+        console.log('');
+        prompt();
+        return;
+      }
+
       const explanation = formatExplanation(id);
       if (explanation) {
         console.log(explanation);
@@ -178,6 +215,34 @@ async function runWatch(opts: ScoreOpts) {
   });
 
   await render();
+}
+
+function buildCopyAllText(result: AnalysisResult): string {
+  const rules = Object.values(result.rules).filter(Boolean) as NonNullable<(typeof result.rules)[keyof typeof result.rules]>[];
+  const failing = rules.filter(r => !r.passed);
+  if (failing.length === 0) return `Clarx AI-First Score: ${result.score}/100 — No issues found.`;
+
+  const sep = '─'.repeat(56);
+  const sections: string[] = [
+    `Clarx AI-First Score: ${result.score}/100`,
+    `Confidence: ${result.confidence}`,
+    '',
+  ];
+
+  for (const severity of ['hard_failure', 'warning', 'recommendation'] as const) {
+    const group = failing.filter(r => r.severity === severity);
+    if (group.length === 0) continue;
+    const label = severity === 'hard_failure' ? 'HARD FAILURES' : severity === 'warning' ? 'WARNINGS' : 'RECOMMENDATIONS';
+    sections.push(label);
+    sections.push(sep);
+    for (const rule of group) {
+      const copy = getRuleCopyText(rule.id);
+      if (copy) sections.push(copy);
+      sections.push('');
+    }
+  }
+
+  return sections.join('\n');
 }
 
 function getFlag(args: string[], flag: string): number | null {

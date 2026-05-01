@@ -36,7 +36,7 @@ clarx — AI-First Codebase Standard v0.1
 Usage:
   clarx score [path] [options]    Score a codebase
   clarx init [path]               Generate a starter clarx-manifest.json
-  clarx explain <rule-id>         Explain a rule (e.g. clarx explain C2)
+  clarx explain <rule-id> [--copy] Explain a rule and optionally copy the fix to clipboard
 
 Options for score:
   --format text|json|markdown     Output format (default: text)
@@ -45,6 +45,7 @@ Options for score:
   --min-pillar-score <n>          Exit 1 if any pillar score is below n
   --ignore <globs>                Comma-separated glob patterns to exclude
   --verbose                       Include passing rules in output
+  --copy-all                      Copy all failing rules and fixes to clipboard
 
 Examples:
   clarx score

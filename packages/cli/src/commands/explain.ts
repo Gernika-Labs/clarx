@@ -1,4 +1,5 @@
 import { exit } from 'node:process';
+import { copyToClipboard } from '../utils/clipboard.js';
 
 const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pillar: string; why: string; fix: string }> = {
   D1: { title: 'Root directory has ≤10 meaningful entries', severity: 'warning', pillar: 'Discoverability', why: 'Noise at the root forces an agent to scan everything before understanding anything. Every extra entry is a context cost.', fix: 'Move config files into a config/ directory, consolidate scripts, and ensure only top-level workspace directories are visible at the root.' },
@@ -28,6 +29,23 @@ const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pilla
   E5: { title: 'Each package has a single declared entry point', severity: 'warning', pillar: 'Edit Safety', why: 'Packages with arbitrary internal import paths have no encapsulation. An agent will follow the path of least resistance.', fix: 'Ensure all package consumers import only from the package name (e.g. @clarxai/ui), never from internal paths.' },
 };
 
+export function getRuleCopyText(ruleId: string): string | null {
+  const rule = RULE_EXPLANATIONS[ruleId.toUpperCase()];
+  if (!rule) return null;
+  return [
+    `${ruleId.toUpperCase()} — ${rule.title}`,
+    '─'.repeat(56),
+    `Pillar:   ${rule.pillar}`,
+    `Severity: ${rule.severity}`,
+    '',
+    'Why this matters:',
+    `  ${rule.why}`,
+    '',
+    'How to fix it:',
+    `  ${rule.fix}`,
+  ].join('\n');
+}
+
 export function formatExplanation(ruleId: string): string | null {
   const rule = RULE_EXPLANATIONS[ruleId.toUpperCase()];
   if (!rule) return null;
@@ -46,10 +64,11 @@ export function formatExplanation(ruleId: string): string | null {
 }
 
 export async function explainCommand(args: string[]) {
-  const ruleId = args[0]?.toUpperCase();
+  const ruleId = args.find(a => !a.startsWith('--'))?.toUpperCase();
+  const wantCopy = args.includes('--copy');
 
   if (!ruleId) {
-    console.error('Usage: clarx explain <rule-id>  (e.g. clarx explain C2)');
+    console.error('Usage: clarx explain <rule-id> [--copy]  (e.g. clarx explain C2)');
     exit(3);
   }
 
@@ -72,4 +91,10 @@ Why this matters:
 How to fix it:
   ${rule.fix}
 `);
+
+  if (wantCopy) {
+    const text = getRuleCopyText(ruleId)!;
+    const ok = copyToClipboard(text);
+    console.log(ok ? `✓ Copied to clipboard` : `✗ Clipboard not available on this system`);
+  }
 }
