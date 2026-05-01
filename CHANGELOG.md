@@ -9,6 +9,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.1] - 2026-05-01
+
+### Changed
+
+**CLI output polish**
+- Recommendations section now renders rule ID and message in cyan, matching the color treatment of Failures (red) and Warnings (yellow)
+- Footer hint text (`e.g. C1`, `r`, `Ctrl+C`) rendered in magenta to distinguish them from actionable rule IDs
+- Watch mode footer: `r` refresh command added; `Ctrl+C` label updated to match new color scheme
+- Score summary always appears at the bottom of output; findings scroll above it naturally
+
+---
+
 ## [0.1.0] - 2026-05-01
 
 ### Added
