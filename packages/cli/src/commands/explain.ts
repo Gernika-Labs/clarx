@@ -28,6 +28,23 @@ const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pilla
   E5: { title: 'Each package has a single declared entry point', severity: 'warning', pillar: 'Edit Safety', why: 'Packages with arbitrary internal import paths have no encapsulation. An agent will follow the path of least resistance.', fix: 'Ensure all package consumers import only from the package name (e.g. @clarxai/ui), never from internal paths.' },
 };
 
+export function formatExplanation(ruleId: string): string | null {
+  const rule = RULE_EXPLANATIONS[ruleId.toUpperCase()];
+  if (!rule) return null;
+  return `
+  ${ruleId.toUpperCase()} — ${rule.title}
+  ${'─'.repeat(56)}
+  Pillar:   ${rule.pillar}
+  Severity: ${rule.severity}
+
+  Why this matters:
+    ${rule.why}
+
+  How to fix it:
+    ${rule.fix}
+`;
+}
+
 export async function explainCommand(args: string[]) {
   const ruleId = args[0]?.toUpperCase();
 

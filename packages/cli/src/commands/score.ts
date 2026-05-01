@@ -1,47 +1,183 @@
 import { analyze } from '@clarxai/engine';
+import type { AnalysisResult } from '@clarxai/engine';
+import { watch } from 'node:fs';
+import * as readline from 'node:readline';
 import { resolve } from 'node:path';
 import { exit } from 'node:process';
 import { formatText } from '../reporters/text.js';
 import { formatMarkdown } from '../reporters/markdown.js';
+import { formatExplanation } from './explain.js';
+import { Spinner } from '../utils/spinner.js';
+
+const isTTY = process.stdout.isTTY;
+const dim   = (s: string) => isTTY ? `\x1b[2m${s}\x1b[0m` : s;
+const bold  = (s: string) => isTTY ? `\x1b[1m${s}\x1b[0m` : s;
+const cyan    = (s: string) => isTTY ? `\x1b[36m${s}\x1b[0m` : s;
+const magenta = (s: string) => isTTY ? `\x1b[95m${s}\x1b[0m` : s;
+const red     = (s: string) => isTTY ? `\x1b[91m${s}\x1b[0m` : s;
+const yellow = (s: string) => isTTY ? `\x1b[93m${s}\x1b[0m` : s;
+const divider = isTTY ? `\x1b[2m${'─'.repeat(52)}\x1b[0m` : '─'.repeat(52);
+
+interface ScoreOpts {
+  root: string;
+  format: string;
+  ignore: string[];
+  verbose: boolean;
+  minScore: number | null;
+  minPillarScore: number | null;
+}
 
 export async function scoreCommand(args: string[]) {
   const pathArg = args.find(a => !a.startsWith('--')) ?? '.';
   const root = resolve(pathArg);
+  const watchMode = args.includes('--watch') || args.includes('-w');
 
-  const minScore = getFlag(args, '--min-score');
-  const minPillarScore = getFlag(args, '--min-pillar-score');
-  const format = getFlagValue(args, '--format') ?? 'text';
-  const ignoreFlag = getFlagValue(args, '--ignore');
-  const ignore = ignoreFlag ? ignoreFlag.split(',') : [];
-  const verbose = args.includes('--verbose');
+  const opts: ScoreOpts = {
+    root,
+    format: getFlagValue(args, '--format') ?? 'text',
+    ignore: (getFlagValue(args, '--ignore') ?? '').split(',').filter(Boolean),
+    verbose: args.includes('--verbose'),
+    minScore: getFlag(args, '--min-score'),
+    minPillarScore: getFlag(args, '--min-pillar-score'),
+  };
 
-  const result = await analyze({ root, ignore });
+  if (watchMode) {
+    await runWatch(opts);
+  } else {
+    const { result, code } = await runOnce(opts);
+    if (opts.format === 'text') showFooter(result, false);
+    exit(code);
+  }
+}
 
-  switch (format) {
+async function runOnce(opts: ScoreOpts): Promise<{ result: AnalysisResult; code: number }> {
+  const spinner = new Spinner(`Scanning ${opts.root} …`);
+  spinner.start();
+
+  let result: AnalysisResult;
+  try {
+    result = await analyze({ root: opts.root, ignore: opts.ignore });
+  } finally {
+    spinner.stop();
+  }
+
+  switch (opts.format) {
     case 'json':
       console.log(JSON.stringify(result, null, 2));
       break;
     case 'markdown':
     case 'md':
-      console.log(formatMarkdown(result, { verbose }));
+      console.log(formatMarkdown(result, { verbose: opts.verbose }));
       break;
-    case 'text':
     default:
-      console.log(formatText(result, { verbose }));
+      console.log(formatText(result, { verbose: opts.verbose }));
   }
 
-  if (result.hardFailures.length > 0) {
-    exit(2);
+  let code = 0;
+  if (result.hardFailures.length > 0) code = 2;
+  else if (opts.minScore !== null && result.score < opts.minScore) code = 1;
+  else if (opts.minPillarScore !== null) {
+    const scores = Object.values(result.pillars).map(p => p.score);
+    if (scores.some(s => s < opts.minPillarScore!)) code = 1;
   }
-  if (minScore !== null && result.score < minScore) {
+
+  return { result, code };
+}
+
+function showFooter(result: AnalysisResult, watching: boolean) {
+  const rules = Object.values(result.rules).filter(Boolean) as NonNullable<(typeof result.rules)[keyof typeof result.rules]>[];
+
+  const hard  = rules.filter(r => !r.passed && r.severity === 'hard_failure').map(r => red(r.id));
+  const warns = rules.filter(r => !r.passed && r.severity === 'warning').map(r => yellow(r.id));
+  const recs  = rules.filter(r => !r.passed && r.severity === 'recommendation').map(r => cyan(r.id));
+
+  const parts: string[] = [];
+  if (hard.length)  parts.push(`${dim('Failures')}  ${hard.join('  ')}`);
+  if (warns.length) parts.push(`${dim('Warnings')}  ${warns.join('  ')}`);
+  if (recs.length)  parts.push(`${dim('Recs')}  ${recs.join('  ')}`);
+
+  console.log(`\n  ${divider}`);
+
+  if (parts.length > 0) {
+    console.log(`  ${parts.join('    ')}`);
+    console.log(`  ${dim('Type a rule ID + Enter for details')}  ${dim('·')}  ${magenta('e.g. C1')}`);
+  }
+
+  if (watching) {
+    console.log(`  ${dim('↺  Watching for changes')}  ${dim('·')}  ${magenta('r')} ${dim('to refresh')}  ${dim('·')}  ${magenta('Ctrl+C')} ${dim('to stop')}`);
+  }
+
+  console.log('');
+}
+
+async function runWatch(opts: ScoreOpts) {
+  const clear = () => process.stdout.write('\x1b[2J\x1b[H');
+
+  let rl: readline.Interface | null = null;
+  let debounce: ReturnType<typeof setTimeout> | null = null;
+
+  const render = async (changedFile?: string) => {
+    if (rl) { rl.close(); rl = null; }
+    if (changedFile) {
+      clear();
+      console.log(`\n  ${dim(`↺  ${changedFile} changed — re-analyzing…`)}\n`);
+    }
+
+    const { result } = await runOnce(opts);
+    showFooter(result, true);
+    startPrompt(result);
+  };
+
+  const startPrompt = (result: AnalysisResult) => {
+    if (!isTTY) return;
+    rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+    const prompt = () => process.stdout.write(`  ${bold('›')} `);
+    prompt();
+
+    rl.on('line', (input) => {
+      const id = input.trim().toUpperCase();
+      if (!id) { prompt(); return; }
+
+      if (id === 'R') {
+        rl!.close();
+        rl = null;
+        render();
+        return;
+      }
+
+      const explanation = formatExplanation(id);
+      if (explanation) {
+        console.log(explanation);
+      } else {
+        console.log(`  ${dim(`Unknown rule "${input.trim()}". Valid: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5`)}`);
+        console.log('');
+      }
+      prompt();
+    });
+  };
+
+  let watcher: ReturnType<typeof watch>;
+  try {
+    watcher = watch(opts.root, { recursive: true }, (_event, filename) => {
+      if (!filename) return;
+      if (/node_modules|[/\\]dist[/\\]|\.git|\.next/.test(filename)) return;
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(() => render(filename), 400);
+    });
+  } catch {
+    console.error('  Watch mode is not supported on this platform.');
     exit(1);
   }
-  if (minPillarScore !== null) {
-    const pillarScores = Object.values(result.pillars).map(p => p.score);
-    if (pillarScores.some(s => s < minPillarScore)) {
-      exit(1);
-    }
-  }
+
+  process.on('SIGINT', () => {
+    if (rl) rl.close();
+    watcher.close();
+    console.log(`\n  ${dim('Stopped.')}\n`);
+    process.exit(0);
+  });
+
+  await render();
 }
 
 function getFlag(args: string[], flag: string): number | null {

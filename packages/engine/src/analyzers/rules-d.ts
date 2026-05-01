@@ -18,7 +18,7 @@ const D1_IGNORED = new Set([
   'dist', 'build', 'out', 'coverage',
   '.gitignore', '.gitattributes', '.npmrc', '.nvmrc', '.node-version',
   '.prettierrc', '.prettierignore', '.eslintrc', '.eslintignore',
-  'LICENSE', 'LICENSE.md', 'CHANGELOG.md',
+  'LICENSE', 'LICENSE.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md',
   'pnpm-lock.yaml', 'yarn.lock', 'package-lock.json', 'bun.lockb',
 ]);
 

@@ -40,6 +40,7 @@ Usage:
 
 Options for score:
   --format text|json|markdown     Output format (default: text)
+  --watch, -w                     Re-run on file changes
   --min-score <n>                 Exit 1 if score is below n
   --min-pillar-score <n>          Exit 1 if any pillar score is below n
   --ignore <globs>                Comma-separated glob patterns to exclude
