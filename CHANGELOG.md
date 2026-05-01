@@ -9,6 +9,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.5] - 2026-05-01
+
+### Added
+
+**CLI — anonymous telemetry (opt-out)**
+- First-run disclosure shown once before the first score run; explains exactly what is and isn't sent
+- `clarx telemetry status` — shows current state, session ID, and what data is collected
+- `clarx telemetry off` / `clarx telemetry on` — toggle at any time; preference stored in `~/.clarx/config.json`
+- `NO_CLARX_TELEMETRY=1` or `DO_NOT_TRACK=1` env vars disable telemetry without touching config
+- Implicit signals tracked: `score` runs, `explain` and `copy` actions per rule — no code, paths, or identity ever sent
+- All telemetry is fire-and-forget with a 2.5s timeout; the CLI never blocks on it
+
+---
+
 ## [0.1.4] - 2026-05-01
 
 ### Changed

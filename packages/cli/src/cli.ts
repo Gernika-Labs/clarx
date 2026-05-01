@@ -3,6 +3,7 @@ import { argv, exit } from 'node:process';
 import { scoreCommand } from './commands/score.js';
 import { initCommand } from './commands/init.js';
 import { explainCommand } from './commands/explain.js';
+import { telemetryCommand } from './commands/telemetry.js';
 
 const [, , command, ...args] = argv;
 
@@ -16,6 +17,9 @@ async function main() {
       break;
     case 'explain':
       await explainCommand(args);
+      break;
+    case 'telemetry':
+      await telemetryCommand(args);
       break;
     case undefined:
     case '--help':
@@ -37,6 +41,7 @@ Usage:
   clarx score [path] [options]    Score a codebase
   clarx init [path]               Generate a starter clarx-manifest.json
   clarx explain <rule-id> [--copy] Explain a rule and optionally copy the fix to clipboard
+  clarx telemetry [on|off|status]  Manage anonymous usage telemetry
 
 Options for score:
   --format text|json|markdown     Output format (default: text)

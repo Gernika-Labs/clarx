@@ -9,6 +9,7 @@ import { formatMarkdown } from '../reporters/markdown.js';
 import { formatExplanation, getRuleCopyText } from './explain.js';
 import { copyToClipboard } from '../utils/clipboard.js';
 import { Spinner } from '../utils/spinner.js';
+import { showDisclosureIfNeeded, track } from '../utils/telemetry.js';
 
 const isTTY = process.stdout.isTTY;
 const dim   = (s: string) => isTTY ? `\x1b[2m${s}\x1b[0m` : s;
@@ -43,6 +44,8 @@ export async function scoreCommand(args: string[]) {
     minPillarScore: getFlag(args, '--min-pillar-score'),
     copyAll: args.includes('--copy-all'),
   };
+
+  await showDisclosureIfNeeded();
 
   if (watchMode) {
     await runWatch(opts);
@@ -80,6 +83,18 @@ async function runOnce(opts: ScoreOpts): Promise<{ result: AnalysisResult; code:
     default:
       console.log(formatText(result, { verbose: opts.verbose }));
   }
+
+  track({
+    action: 'score',
+    score: result.score,
+    hardFailures: result.hardFailures.length,
+    confidence: result.confidence,
+    filesScanned: result.meta.filesScanned,
+    manifestFound: result.meta.manifestFound,
+    pillarScores: Object.fromEntries(
+      Object.entries(result.pillars).map(([k, v]) => [k, v.score])
+    ),
+  });
 
   let code = 0;
   if (result.hardFailures.length > 0) code = 2;
@@ -161,6 +176,7 @@ async function runWatch(opts: ScoreOpts) {
           ? `  \x1b[92m✓\x1b[0m \x1b[2mAll failing rules copied to clipboard\x1b[0m`
           : `  \x1b[2mClipboard not available on this system\x1b[0m`
         );
+        track({ action: 'copy_all', score: result.score });
         console.log('');
         prompt();
         return;
@@ -175,6 +191,7 @@ async function runWatch(opts: ScoreOpts) {
             ? `  \x1b[92m✓\x1b[0m \x1b[2mCopied fix for ${ruleId} to clipboard\x1b[0m`
             : `  \x1b[2mClipboard not available on this system\x1b[0m`
           );
+          track({ action: 'copy', rule: ruleId, score: result.score });
         } else {
           console.log(`  ${dim(`Unknown rule "${ruleId}". Valid: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5`)}`);
         }
@@ -186,6 +203,7 @@ async function runWatch(opts: ScoreOpts) {
       const explanation = formatExplanation(id);
       if (explanation) {
         console.log(explanation);
+        track({ action: 'explain', rule: id, score: result.score });
       } else {
         console.log(`  ${dim(`Unknown rule "${input.trim()}". Valid: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5`)}`);
         console.log('');

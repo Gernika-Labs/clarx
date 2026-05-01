@@ -1,5 +1,6 @@
 import { exit } from 'node:process';
 import { copyToClipboard } from '../utils/clipboard.js';
+import { track } from '../utils/telemetry.js';
 
 const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pillar: string; why: string; fix: string }> = {
   D1: { title: 'Root directory has ≤10 meaningful entries', severity: 'warning', pillar: 'Discoverability', why: 'Noise at the root forces an agent to scan everything before understanding anything. Every extra entry is a context cost.', fix: 'Move config files into a config/ directory, consolidate scripts, and ensure only top-level workspace directories are visible at the root.' },
@@ -96,5 +97,8 @@ How to fix it:
     const text = getRuleCopyText(ruleId)!;
     const ok = copyToClipboard(text);
     console.log(ok ? `✓ Copied to clipboard` : `✗ Clipboard not available on this system`);
+    track({ action: 'copy', rule: ruleId });
+  } else {
+    track({ action: 'explain', rule: ruleId });
   }
 }
