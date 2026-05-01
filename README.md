@@ -4,13 +4,13 @@ AI-first codebase standard, analysis engine, and design system.
 
 ## What's in here
 
-| Package | Name | Description |
-|---|---|---|
-| `packages/ui` | `@clarxai/ui` | Semantic React component library for AI interfaces |
+| Package           | Name              | Description                                                        |
+| ----------------- | ----------------- | ------------------------------------------------------------------ |
+| `packages/ui`     | `@clarxai/ui`     | Semantic React component library for AI interfaces                 |
 | `packages/engine` | `@clarxai/engine` | Codebase analysis engine — scores repos against the Clarx standard |
-| `packages/cli` | `@clarxai/cli` | CLI tool: `clarx score`, `clarx init`, `clarx explain` |
-| `apps/docs` | — | Documentation site (Next.js 15 + fumadocs) |
-| `standard/` | — | Versioned Clarx AI-First Standard spec and rubric |
+| `packages/cli`    | `@clarxai/cli`    | CLI tool: `clarx score`, `clarx init`, `clarx explain`             |
+| `apps/docs`       | —                 | Documentation site (Next.js 15 + fumadocs)                         |
+| `standard/`       | —                 | Versioned Clarx AI-First Standard spec and rubric                  |
 
 ## Prerequisites
 
@@ -82,13 +82,13 @@ clarx explain <rule-id>         Explain a specific rule (e.g. clarx explain C2)
 
 ### Score options
 
-| Flag | Description |
-|---|---|
-| `--format text\|json\|markdown` | Output format (default: `text`) |
-| `--min-score <n>` | Exit 1 if overall score is below n |
-| `--min-pillar-score <n>` | Exit 1 if any pillar score is below n |
-| `--ignore <globs>` | Comma-separated glob patterns to exclude |
-| `--verbose` | Include passing rules in output |
+| Flag                            | Description                              |
+| ------------------------------- | ---------------------------------------- |
+| `--format text\|json\|markdown` | Output format (default: `text`)          |
+| `--min-score <n>`               | Exit 1 if overall score is below n       |
+| `--min-pillar-score <n>`        | Exit 1 if any pillar score is below n    |
+| `--ignore <globs>`              | Comma-separated glob patterns to exclude |
+| `--verbose`                     | Include passing rules in output          |
 
 ### Examples
 
