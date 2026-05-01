@@ -4,13 +4,15 @@
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "node scripts/dev.mjs",
     "build": "turbo build",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,mdx}\""
   },
   "devDependencies": {
-    "turbo": "^2.5.3",
-    "prettier": "^3.5.3"
+    "@types/blessed": "^0.1.27",
+    "blessed": "^0.1.81",
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.3"
   }
 }
