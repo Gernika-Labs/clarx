@@ -41,10 +41,11 @@ export function evaluateC1(
   }
 
   // Hard failure only if generated files are actually committed to git.
-  // If they exist in the working tree but are gitignored, downgrade to warning.
+  // If git info is unavailable or dirs are gitignored, downgrade to warning —
+  // never hard-fail without positive evidence of committed generated output.
   const committedDirs = gitTrackedPaths.size > 0
     ? leakedDirs.filter(dir => [...gitTrackedPaths].some(p => p === dir || p.startsWith(dir + '/')))
-    : leakedDirs; // no git info — assume worst case
+    : []; // can't confirm tracking status — warn, don't hard-fail
 
   if (committedDirs.length > 0) {
     return {

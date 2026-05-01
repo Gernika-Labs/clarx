@@ -9,18 +9,55 @@ const UTILITY_DUMP_NAMES = new Set([
   'shared', 'tools', 'tool', 'lib',
 ]);
 
-// D1 — root directory has ≤10 meaningful entries
-const D1_LIMIT = 10;
+// D1 — root directory has ≤N meaningful entries
+const D1_LIMIT_DEFAULT = 10;
+const D1_LIMIT_MONOREPO = 20;
 
-// Entries that don't count as meaningful (config/tooling clutter)
-const D1_IGNORED = new Set([
+// Exact-match names that don't count as meaningful
+const D1_IGNORED_EXACT = new Set([
   'node_modules', '.git', '.github', '.turbo', '.next', '.cache',
   'dist', 'build', 'out', 'coverage',
   '.gitignore', '.gitattributes', '.npmrc', '.nvmrc', '.node-version',
   '.prettierrc', '.prettierignore', '.eslintrc', '.eslintignore',
   'LICENSE', 'LICENSE.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md',
   'pnpm-lock.yaml', 'yarn.lock', 'package-lock.json', 'bun.lockb',
+  'pnpm-workspace.yaml', 'lerna.json', 'nx.json', 'turbo.json', 'rush.json',
+  'components.json', // shadcn/ui config
+  'storybook-static',
 ]);
+
+// Pattern-match for tooling config files with variable names
+const D1_IGNORED_PATTERNS = [
+  /^tsconfig(\..+)?\.json$/,
+  /^vite\.config\./,
+  /^vitest\.config\./,
+  /^jest\.config\./,
+  /^babel\.config\./,
+  /^postcss\.config\./,
+  /^tailwind\.config\./,
+  /^webpack\.config\./,
+  /^rollup\.config\./,
+  /^alias\.config\./,
+  /^eslint\.config\./,
+  /^prettier\.config\./,
+  /^svelte\.config\./,
+  /^next\.config\./,
+  /^nuxt\.config\./,
+  /^astro\.config\./,
+  /^remix\.config\./,
+  /^wrangler\.toml$/,
+  /^\.env(\..+)?$/,
+];
+
+const MONOREPO_SIGNALS = new Set([
+  'pnpm-workspace.yaml', 'lerna.json', 'nx.json', 'turbo.json', 'rush.json',
+]);
+
+function isIgnored(entry: string): boolean {
+  if (entry.startsWith('.')) return true;
+  if (D1_IGNORED_EXACT.has(entry)) return true;
+  return D1_IGNORED_PATTERNS.some(p => p.test(entry));
+}
 
 export async function evaluateD1(root: string): Promise<RuleResult> {
   let entries: string[];
@@ -30,15 +67,17 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
     return { id: 'D1', passed: true, severity: 'warning', scoreImpact: 25, message: 'Could not read root directory' };
   }
 
-  const meaningful = entries.filter(e => !D1_IGNORED.has(e) && !e.startsWith('.'));
+  const isMonorepo = entries.some(e => MONOREPO_SIGNALS.has(e));
+  const limit = isMonorepo ? D1_LIMIT_MONOREPO : D1_LIMIT_DEFAULT;
+  const meaningful = entries.filter(e => !isIgnored(e));
 
-  if (meaningful.length <= D1_LIMIT) {
+  if (meaningful.length <= limit) {
     return {
       id: 'D1',
       passed: true,
       severity: 'warning',
       scoreImpact: 25,
-      message: `Root directory has ${meaningful.length} meaningful entries (≤${D1_LIMIT})`,
+      message: `Root directory has ${meaningful.length} meaningful entries (≤${limit})`,
     };
   }
 
@@ -47,7 +86,7 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
     passed: false,
     severity: 'warning',
     scoreImpact: 25,
-    message: `Root directory has ${meaningful.length} meaningful entries (limit: ${D1_LIMIT})`,
+    message: `Root directory has ${meaningful.length} meaningful entries (limit: ${limit}${isMonorepo ? ', monorepo' : ''})`,
     locations: meaningful.map(e => ({ path: e })),
   };
 }

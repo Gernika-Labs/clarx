@@ -35,11 +35,11 @@ describe('C1 — generated artifacts excluded from source tree', () => {
     expect(result.severity).toBe('warning');
   });
 
-  it('assumes worst case (hard failure) when no git info is available', () => {
+  it('downgrades to warning when no git info is available (cannot confirm tracking)', () => {
     const files = [makeFile('src/index.ts'), makeFile('dist/index.js')];
     const result = evaluateC1(files, null, new Set());
     expect(result.passed).toBe(false);
-    expect(result.severity).toBe('hard_failure');
+    expect(result.severity).toBe('warning');
   });
 
   it('does not flag source dirs that happen to contain a common word', () => {

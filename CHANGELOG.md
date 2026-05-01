@@ -9,6 +9,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.4] - 2026-05-01
+
+### Changed
+
+**Engine — C1 no longer hard-fails without git evidence**
+- C1 now only hard-fails when `git ls-files` positively confirms generated files are committed
+- If git is unavailable or returns no tracked paths, C1 downgrades to a warning ("agent noise, not committed")
+- Removes the "assume worst case" fallback that was causing false hard-failures on gitignored working-tree artifacts
+
+**Engine — D1 monorepo and tooling-aware**
+- Monorepo signal detection: if `pnpm-workspace.yaml`, `lerna.json`, `nx.json`, `turbo.json`, or `rush.json` exists at root, D1 threshold raises from 10 → 20
+- Pattern-based config file exclusion: `tsconfig.*.json`, `vite.config.*`, `vitest.config.*`, `jest.config.*`, `alias.config.*`, `tailwind.config.*`, `eslint.config.*`, `prettier.config.*`, and other common tooling configs no longer count as "meaningful entries"
+- Tooling-heavy frontend stacks and monorepos no longer trip D1 on legitimate config files
+
+---
+
 ## [0.1.3] - 2026-05-01
 
 ### Changed
