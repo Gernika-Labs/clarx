@@ -88,10 +88,11 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
     lines.push(`  ${divider}`);
     lines.push(`  ${c.bCyan('●')} ${c.bold(c.cyan(`Recommendations (${recommendations.length})`))}`);
     for (const rule of recommendations) {
-      lines.push(`  ${c.dim(rule!.id)}  ${c.dim(rule!.message)}`);
+      lines.push('');
+      lines.push(`  ${c.bold(c.bCyan(rule!.id))}  ${c.cyan(rule!.message)}`);
       if (rule!.locations) {
         for (const loc of rule!.locations.slice(0, 5)) {
-          lines.push(`      ${c.dim('→')} ${c.dim(loc.path)}`);
+          lines.push(`      ${c.dim('→')} ${loc.path}`);
         }
         if (rule!.locations.length > 5) {
           lines.push(`      ${c.dim(`… and ${rule!.locations.length - 5} more`)}`);
