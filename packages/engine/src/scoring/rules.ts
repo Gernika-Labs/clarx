@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import type { FileEntry } from '../analyzers/filesystem.js';
 import type { ImportGraph } from '../analyzers/import-graph.js';
 import { evaluateC1, evaluateC2 } from '../analyzers/rules-c.js';
@@ -16,11 +18,25 @@ export type EvaluationResult = {
   importGraphResolved: boolean;
 };
 
+async function readGuidanceContent(root: string, files: FileEntry[]): Promise<string> {
+  const parts: string[] = [];
+  for (const name of ['CLAUDE.md', 'AGENTS.md']) {
+    if (files.some(f => f.relativePath === name)) {
+      try { parts.push(await readFile(join(root, name), 'utf-8')); } catch { /* ignore */ }
+    }
+  }
+  return parts.join('\n');
+}
+
+const COMMAND_RE = /`?(yarn|npm run|pnpm(?: run)?|npx|make|go test|cargo test|pytest|jest|vitest|tsc)\s/i;
+const DIR_RE = /`[a-z][a-z0-9_-]*\/[a-z]/;
+
 export async function evaluateRules(
   root: string,
   files: FileEntry[],
   manifest: Manifest | null,
-  importGraph: ImportGraph
+  importGraph: ImportGraph,
+  gitTrackedPaths: Set<string> = new Set()
 ): Promise<EvaluationResult> {
   const rules: Partial<Record<RuleId, RuleResult>> = {};
 
@@ -42,7 +58,7 @@ export async function evaluateRules(
 
   // ── Context Efficiency ────────────────────────────────────────────────────
 
-  rules['C1'] = evaluateC1(files, manifest);
+  rules['C1'] = evaluateC1(files, manifest, gitTrackedPaths);
   rules['C2'] = evaluateC2(files);
   rules['C3'] = evaluateC3(importGraph, manifest);
   rules['C4'] = evaluateC4(importGraph, manifest);
@@ -75,30 +91,32 @@ export async function evaluateRules(
       : 'No generated directories declared in guidance file or manifest',
   };
 
-  const hasVerificationCommands = manifest !== null &&
-    manifest.verificationCommands != null &&
-    Object.keys(manifest.verificationCommands).length > 0;
+  const guidanceContent = await readGuidanceContent(root, files);
+
+  const hasVerificationCommands = (manifest?.verificationCommands != null &&
+    Object.keys(manifest.verificationCommands).length > 0) ||
+    COMMAND_RE.test(guidanceContent);
   rules['O3'] = {
     id: 'O3',
     passed: hasVerificationCommands,
     severity: 'warning',
     scoreImpact: 25,
     message: hasVerificationCommands
-      ? 'Verification commands declared in manifest'
-      : 'No verification commands declared',
+      ? 'Verification commands declared in guidance'
+      : 'No verification commands found in manifest or guidance files',
   };
 
-  const hasCommonTasks = manifest !== null &&
-    manifest.commonTasks != null &&
-    Object.keys(manifest.commonTasks).length > 0;
+  const hasCommonTasks = (manifest?.commonTasks != null &&
+    Object.keys(manifest.commonTasks).length > 0) ||
+    DIR_RE.test(guidanceContent);
   rules['O4'] = {
     id: 'O4',
     passed: hasCommonTasks,
     severity: 'warning',
     scoreImpact: 25,
     message: hasCommonTasks
-      ? 'Common task locations declared in manifest'
-      : 'No common task locations declared',
+      ? 'Common task locations declared in guidance'
+      : 'No common task locations found in manifest or guidance files',
   };
 
   rules['O5'] = evaluateO5(files, manifest);

@@ -9,6 +9,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.3] - 2026-05-01
+
+### Changed
+
+**Engine — smarter C1 (git-aware artifact detection)**
+- C1 now distinguishes between artifacts *committed to git* (hard failure) and artifacts that are gitignored but present in the working tree (warning — "agent noise, not committed")
+- Uses `git ls-files` to determine tracked state; falls back to worst-case (hard failure) when git is unavailable
+
+**Engine — O3/O4 partial credit for CLAUDE.md and AGENTS.md**
+- O3 (verification commands) now passes when guidance files contain command patterns (`yarn`, `npm run`, `pnpm`, `make`, `tsc`, `vitest`, etc.) — not just when `clarx-manifest.json` has `verificationCommands`
+- O4 (common task locations) now passes when guidance files reference directory paths — not just when manifest has `commonTasks`
+
+**Engine — graduated hard failure floor**
+- 1 hard failure: score capped at 65 (was 50)
+- 2 hard failures: capped at 50
+- 3 hard failures: capped at 35
+- Reduces false-catastrophic scores when a single rule fires on an otherwise healthy repo
+
+---
+
 ## [0.1.2] - 2026-05-01
 
 ### Added

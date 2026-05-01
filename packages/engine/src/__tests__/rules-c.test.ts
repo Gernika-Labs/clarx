@@ -5,38 +5,46 @@ import { makeFile, makeGenerated, makeManifest } from './helpers.js';
 describe('C1 — generated artifacts excluded from source tree', () => {
   it('passes when no generated-looking dirs are present', () => {
     const files = [makeFile('src/index.ts'), makeFile('src/utils.ts')];
-    const result = evaluateC1(files, makeManifest());
+    const result = evaluateC1(files, makeManifest(), new Set());
     expect(result.passed).toBe(true);
   });
 
   it('passes when dist/ is declared in manifest.generated', () => {
     const files = [makeFile('src/index.ts'), makeGenerated('dist/index.js')];
     const manifest = makeManifest({ generated: ['**/dist/**', '**/dist'] });
-    const result = evaluateC1(files, manifest);
+    const result = evaluateC1(files, manifest, new Set());
     expect(result.passed).toBe(true);
   });
 
-  it('fails when a generated dir is present but not declared', () => {
-    // dist/ exists but is NOT in manifest.generated
-    const files = [
-      makeFile('src/index.ts'),
-      makeFile('dist/index.js'),   // not marked generated, not declared
-    ];
-    const result = evaluateC1(files, makeManifest({ generated: [] }));
+  it('hard-fails when a generated dir is committed to git', () => {
+    const files = [makeFile('src/index.ts'), makeFile('dist/index.js')];
+    // git tracks dist/index.js → genuine hard failure
+    const tracked = new Set(['src/index.ts', 'dist/index.js']);
+    const result = evaluateC1(files, makeManifest({ generated: [] }), tracked);
     expect(result.passed).toBe(false);
     expect(result.severity).toBe('hard_failure');
     expect(result.locations?.some(l => l.path === 'dist')).toBe(true);
   });
 
-  it('fails with null manifest when generated dirs are present', () => {
+  it('downgrades to warning when generated dir is gitignored (not committed)', () => {
     const files = [makeFile('src/index.ts'), makeFile('dist/index.js')];
-    const result = evaluateC1(files, null);
+    // git tracks only src — dist is gitignored but present in working tree
+    const tracked = new Set(['src/index.ts']);
+    const result = evaluateC1(files, makeManifest({ generated: [] }), tracked);
     expect(result.passed).toBe(false);
+    expect(result.severity).toBe('warning');
+  });
+
+  it('assumes worst case (hard failure) when no git info is available', () => {
+    const files = [makeFile('src/index.ts'), makeFile('dist/index.js')];
+    const result = evaluateC1(files, null, new Set());
+    expect(result.passed).toBe(false);
+    expect(result.severity).toBe('hard_failure');
   });
 
   it('does not flag source dirs that happen to contain a common word', () => {
     const files = [makeFile('src/build-utils.ts'), makeFile('src/output.ts')];
-    const result = evaluateC1(files, makeManifest());
+    const result = evaluateC1(files, makeManifest(), new Set());
     expect(result.passed).toBe(true);
   });
 });

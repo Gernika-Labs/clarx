@@ -119,7 +119,7 @@ describe('analyze() — happy path', () => {
 // ── Hard failure ──────────────────────────────────────────────────────────────
 
 describe('analyze() — O1 hard failure', () => {
-  it('caps score at 50 and flags O1 when no guidance file exists', async () => {
+  it('caps score at 65 and flags O1 when no guidance file exists', async () => {
     const bareRoot = join(tmpdir(), `clarx-bare-${Date.now()}`);
     try {
       await mkdir(bareRoot, { recursive: true });
@@ -128,7 +128,7 @@ describe('analyze() — O1 hard failure', () => {
 
       const result = await analyze({ root: bareRoot });
       expect(result.hardFailures).toContain('O1');
-      expect(result.score).toBeLessThanOrEqual(50);
+      expect(result.score).toBeLessThanOrEqual(65);
     } finally {
       await rm(bareRoot, { recursive: true, force: true });
     }

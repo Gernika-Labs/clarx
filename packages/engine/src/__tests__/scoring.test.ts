@@ -25,23 +25,28 @@ describe('computeScore', () => {
     expect(hardFailures).toHaveLength(0);
   });
 
-  it('caps score at 50 when a hard failure rule fails', () => {
+  it('caps score at 65 when a single hard failure rule fails', () => {
     const rules = { ...ALL_PASSING, O1: failing('O1', 'hard_failure', 100) };
     const { score, hardFailures } = computeScore(rules, { importGraphResolved: true, manifestFound: true });
-    expect(score).toBeLessThanOrEqual(50);
+    expect(score).toBeLessThanOrEqual(65);
     expect(hardFailures).toContain('O1');
   });
 
-  it('caps score at 50 when C1 fails', () => {
-    const rules = { ...ALL_PASSING, C1: failing('C1', 'hard_failure', 100) };
+  it('caps score at 50 when two hard failures occur', () => {
+    const rules = { ...ALL_PASSING, O1: failing('O1', 'hard_failure', 100), C1: failing('C1', 'hard_failure', 100) };
     const { score } = computeScore(rules, { importGraphResolved: true, manifestFound: true });
     expect(score).toBeLessThanOrEqual(50);
   });
 
-  it('caps score at 50 when B1 fails', () => {
-    const rules = { ...ALL_PASSING, B1: failing('B1', 'hard_failure', 100) };
+  it('caps score at 35 when all three hard failures occur', () => {
+    const rules = {
+      ...ALL_PASSING,
+      O1: failing('O1', 'hard_failure', 100),
+      C1: failing('C1', 'hard_failure', 100),
+      B1: failing('B1', 'hard_failure', 100),
+    };
     const { score } = computeScore(rules, { importGraphResolved: true, manifestFound: true });
-    expect(score).toBeLessThanOrEqual(50);
+    expect(score).toBeLessThanOrEqual(35);
   });
 
   it('deducts from the correct pillar when a warning fails', () => {

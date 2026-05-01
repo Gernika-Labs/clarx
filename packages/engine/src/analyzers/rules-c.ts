@@ -12,21 +12,25 @@ const GENERATED_PATTERNS = [
 // C1 — generated artifacts excluded from source tree
 export function evaluateC1(
   files: FileEntry[],
-  manifest: Manifest | null
+  manifest: Manifest | null,
+  gitTrackedPaths: Set<string>
 ): RuleResult {
   const declaredPatterns = manifest?.generated ?? [];
 
-  // Find files that look generated but are NOT covered by any declared pattern
-  const leaked = files.filter(f => {
-    if (f.isGenerated) return false;
-    const topDir = f.relativePath.split('/')[0];
-    const looksGenerated = GENERATED_PATTERNS.some(p => topDir === p || topDir?.startsWith(`.${p}`));
-    if (!looksGenerated) return false;
-    const declared = declaredPatterns.some(p => minimatch(f.relativePath, p, { dot: true }));
-    return !declared;
-  });
+  // Find top-level dirs that look generated but are NOT covered by any declared pattern
+  const leakedDirs = [...new Set(
+    files
+      .filter(f => {
+        if (f.isGenerated) return false;
+        const topDir = f.relativePath.split('/')[0];
+        const looksGenerated = GENERATED_PATTERNS.some(p => topDir === p || topDir?.startsWith(`.${p}`));
+        if (!looksGenerated) return false;
+        return !declaredPatterns.some(p => minimatch(f.relativePath, p, { dot: true }));
+      })
+      .map(f => f.relativePath.split('/')[0]!)
+  )];
 
-  if (leaked.length === 0) {
+  if (leakedDirs.length === 0) {
     return {
       id: 'C1',
       passed: true,
@@ -36,14 +40,31 @@ export function evaluateC1(
     };
   }
 
-  const dirs = [...new Set(leaked.map(f => f.relativePath.split('/')[0]))];
+  // Hard failure only if generated files are actually committed to git.
+  // If they exist in the working tree but are gitignored, downgrade to warning.
+  const committedDirs = gitTrackedPaths.size > 0
+    ? leakedDirs.filter(dir => [...gitTrackedPaths].some(p => p === dir || p.startsWith(dir + '/')))
+    : leakedDirs; // no git info — assume worst case
+
+  if (committedDirs.length > 0) {
+    return {
+      id: 'C1',
+      passed: false,
+      severity: 'hard_failure',
+      scoreImpact: 100,
+      message: `Generated artifacts committed to source control: ${committedDirs.join(', ')}`,
+      locations: committedDirs.map(d => ({ path: d, detail: 'Remove from git tracking and add to .gitignore' })),
+    };
+  }
+
+  // Gitignored but present in working tree — agent noise, not a hard failure
   return {
     id: 'C1',
     passed: false,
-    severity: 'hard_failure',
-    scoreImpact: 100,
-    message: `Generated artifacts found in source tree: ${dirs.join(', ')}`,
-    locations: dirs.map(d => ({ path: d!, detail: 'Declare in manifest.generated or add to .gitignore' })),
+    severity: 'warning',
+    scoreImpact: 25,
+    message: `Generated directories in working tree but not committed: ${leakedDirs.join(', ')}`,
+    locations: leakedDirs.map(d => ({ path: d, detail: 'Add to .gitignore to reduce agent noise' })),
   };
 }
 

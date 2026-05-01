@@ -8,15 +8,17 @@ const PILLAR_RULES: Record<PillarName, RuleId[]> = {
   edit_safety: ['E1', 'E2', 'E3', 'E4', 'E5'],
 };
 
-const HARD_FAILURE_RULES: RuleId[] = ['B1', 'C1', 'O1'];
-const HARD_FAILURE_FLOOR = 50;
+function hardFailureFloor(count: number): number {
+  if (count <= 0) return Infinity;
+  return Math.max(65 - (count - 1) * 15, 25);
+}
 
 export function computeScore(
   rules: Partial<Record<RuleId, RuleResult>>,
   opts: { importGraphResolved: boolean; manifestFound: boolean }
 ): Pick<AnalysisResult, 'score' | 'confidence' | 'hardFailures' | 'pillars'> {
-  const hardFailures: RuleId[] = HARD_FAILURE_RULES.filter(
-    id => rules[id] && !rules[id]!.passed
+  const hardFailures: RuleId[] = (Object.keys(rules) as RuleId[]).filter(
+    id => rules[id] && !rules[id]!.passed && rules[id]!.severity === 'hard_failure'
   );
 
   const pillars = {} as Record<PillarName, PillarScore>;
@@ -42,7 +44,7 @@ export function computeScore(
 
   let score = Math.round(weightedSum);
   if (hardFailures.length > 0) {
-    score = Math.min(score, HARD_FAILURE_FLOOR);
+    score = Math.min(score, hardFailureFloor(hardFailures.length));
   }
 
   const confidence: Confidence = opts.manifestFound && opts.importGraphResolved
