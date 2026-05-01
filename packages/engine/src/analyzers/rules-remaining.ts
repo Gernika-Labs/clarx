@@ -34,6 +34,7 @@ export function evaluateB4(files: FileEntry[]): RuleResult {
       id: 'B4',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: 'UI primitives and application logic are in separate directories',
     };
@@ -43,6 +44,7 @@ export function evaluateB4(files: FileEntry[]): RuleResult {
     id: 'B4',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: `${violations.length} director${violations.length > 1 ? 'ies' : 'y'} mix primitives and application logic`,
     locations: violations.map(d => ({ path: d, detail: 'Separate reusable components from page/screen-specific logic' })),
@@ -66,6 +68,7 @@ export function evaluateB5(files: FileEntry[]): RuleResult {
       id: 'B5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: 'No test files found',
     };
@@ -93,6 +96,7 @@ export function evaluateB5(files: FileEntry[]): RuleResult {
       id: 'B5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: 'All test files are co-located or in mirrored test directories',
     };
@@ -102,6 +106,7 @@ export function evaluateB5(files: FileEntry[]): RuleResult {
     id: 'B5',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: `${misplaced.length} test file${misplaced.length > 1 ? 's' : ''} are not co-located or mirrored`,
     locations: misplaced.slice(0, 10).map(p => ({ path: p })),
@@ -122,6 +127,7 @@ export function evaluateE2(files: FileEntry[]): RuleResult {
       id: 'E2',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: 'No component files to check',
     };
@@ -145,6 +151,7 @@ export function evaluateE2(files: FileEntry[]): RuleResult {
       id: 'E2',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: `Most component files have co-located companions (${componentFiles.length - lonely.length}/${componentFiles.length})`,
     };
@@ -154,6 +161,7 @@ export function evaluateE2(files: FileEntry[]): RuleResult {
     id: 'E2',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: `${lonely.length}/${componentFiles.length} component files have no co-located test or type file`,
     locations: lonely.slice(0, 10).map(f => ({ path: f.relativePath })),
@@ -210,6 +218,7 @@ export async function evaluateE4(root: string, files: FileEntry[]): Promise<Rule
       id: 'E4',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: `Package boundaries enforced by tooling: ${signals.join(', ')}`,
     };
@@ -219,6 +228,7 @@ export async function evaluateE4(root: string, files: FileEntry[]): Promise<Rule
     id: 'E4',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: 'No package boundary enforcement detected (no tsconfig paths, eslint import rules, or exports field)',
   };

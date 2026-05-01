@@ -17,6 +17,7 @@ export function evaluateB1(
       id: 'B1',
       passed: true,
       severity: 'hard_failure',
+      confidence: 'medium',
       scoreImpact: 100,
       message: 'No workspaces to check for circular imports',
     };
@@ -29,6 +30,7 @@ export function evaluateB1(
       id: 'B1',
       passed: true,
       severity: 'hard_failure',
+      confidence: 'high',
       scoreImpact: 100,
       message: 'No circular imports detected between packages',
     };
@@ -38,6 +40,7 @@ export function evaluateB1(
     id: 'B1',
     passed: false,
     severity: 'hard_failure',
+    confidence: 'high',
     scoreImpact: 100,
     message: `${cycles.length} circular import cycle${cycles.length > 1 ? 's' : ''} detected between packages`,
     locations: cycles.map(cycle => ({
@@ -61,6 +64,7 @@ export function evaluateB2(
       id: 'B2',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'Only one workspace — no cross-package duplication possible',
     };
@@ -97,6 +101,7 @@ export function evaluateB2(
       id: 'B2',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No duplicated source files detected across packages',
     };
@@ -106,6 +111,7 @@ export function evaluateB2(
     id: 'B2',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${duplicates.length} file${duplicates.length > 1 ? 's' : ''} duplicated across packages`,
     locations: duplicates.slice(0, 10).map(d => ({

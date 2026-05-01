@@ -17,6 +17,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
       id: 'C3',
       passed: true,
       severity: 'warning',
+      confidence: 'high',
       scoreImpact: 25,
       message: `No file imports from more than ${C3_LIMIT} distinct modules`,
     };
@@ -26,6 +27,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
     id: 'C3',
     passed: false,
     severity: 'warning',
+    confidence: 'high',
     scoreImpact: 25,
     message: `${violations.length} file${violations.length > 1 ? 's' : ''} import from more than ${C3_LIMIT} modules`,
     locations: violations.slice(0, 10).map(([path, count]) => ({
@@ -51,6 +53,7 @@ export function evaluateC4(
       id: 'C4',
       passed: true,
       severity: 'recommendation',
+      confidence: 'medium',
       scoreImpact: 0,
       message: 'No high fan-in files detected',
     };
@@ -66,6 +69,7 @@ export function evaluateC4(
       id: 'C4',
       passed: true,
       severity: 'recommendation',
+      confidence: 'medium',
       scoreImpact: 0,
       message: `All ${highFanIn.length} high fan-in file${highFanIn.length > 1 ? 's' : ''} are documented in the manifest`,
     };
@@ -75,6 +79,7 @@ export function evaluateC4(
     id: 'C4',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: `${undocumented.length} high fan-in file${undocumented.length > 1 ? 's' : ''} not documented in manifest.highFanIn`,
     locations: undocumented.slice(0, 10).map(([path, count]) => ({
@@ -97,6 +102,7 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
       id: 'C5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'medium',
       scoreImpact: 0,
       message: 'No entry points detected to measure import depth',
     };
@@ -133,6 +139,7 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
       id: 'C5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'medium',
       scoreImpact: 0,
       message: `Maximum import depth is ${maxDepth} hops (limit: ${C5_LIMIT})`,
     };
@@ -142,6 +149,7 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
     id: 'C5',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: `Import graph depth reaches ${maxDepth} hops (limit: ${C5_LIMIT})`,
     locations: [{ path: deepestPath[deepestPath.length - 1] ?? '', detail: `${maxDepth}-hop chain` }],

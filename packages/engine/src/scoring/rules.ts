@@ -74,6 +74,7 @@ export async function evaluateRules(
     id: 'O1',
     passed: hasGuidance || manifest !== null,
     severity: 'hard_failure',
+    confidence: 'medium',
     scoreImpact: 100,
     message: hasGuidance || manifest !== null
       ? 'Machine-readable guidance file found'
@@ -85,6 +86,7 @@ export async function evaluateRules(
     id: 'O2',
     passed: hasGeneratedDeclaration,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: hasGeneratedDeclaration
       ? 'Generated directories declared in manifest'
@@ -100,6 +102,7 @@ export async function evaluateRules(
     id: 'O3',
     passed: hasVerificationCommands,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: hasVerificationCommands
       ? 'Verification commands declared in guidance'
@@ -113,6 +116,7 @@ export async function evaluateRules(
     id: 'O4',
     passed: hasCommonTasks,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: hasCommonTasks
       ? 'Common task locations declared in guidance'

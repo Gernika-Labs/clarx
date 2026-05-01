@@ -19,6 +19,7 @@ export type RuleResult = {
   id: RuleId;
   passed: boolean;
   severity: Severity;
+  confidence: Confidence;
   scoreImpact: number;
   message: string;
   locations?: Location[];

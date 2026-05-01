@@ -9,6 +9,7 @@ export function evaluateO5(files: FileEntry[], manifest: Manifest | null): RuleR
       id: 'O5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'medium',
       scoreImpact: 0,
       message: `${manifest.highFanIn.length} high fan-in file${manifest.highFanIn.length > 1 ? 's' : ''} identified in manifest`,
     };
@@ -22,6 +23,7 @@ export function evaluateO5(files: FileEntry[], manifest: Manifest | null): RuleR
       id: 'O5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'medium',
       scoreImpact: 0,
       message: 'Architecture document found',
     };
@@ -31,6 +33,7 @@ export function evaluateO5(files: FileEntry[], manifest: Manifest | null): RuleR
     id: 'O5',
     passed: false,
     severity: 'recommendation',
+    confidence: 'medium',
     scoreImpact: 0,
     message: 'No high-risk files identified in manifest or architecture document',
   };

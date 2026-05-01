@@ -3,11 +3,11 @@ import { computeScore } from '../scoring/overall.js';
 import type { RuleId, RuleResult } from '../types.js';
 
 function passing(id: RuleId, scoreImpact = 25): RuleResult {
-  return { id, passed: true, severity: 'warning', scoreImpact, message: 'ok' };
+  return { id, passed: true, severity: 'warning', confidence: 'medium', scoreImpact, message: 'ok' };
 }
 
 function failing(id: RuleId, severity: RuleResult['severity'] = 'warning', scoreImpact = 25): RuleResult {
-  return { id, passed: false, severity, scoreImpact, message: 'fail' };
+  return { id, passed: false, severity, confidence: 'medium', scoreImpact, message: 'fail' };
 }
 
 const ALL_PASSING: Partial<Record<RuleId, RuleResult>> = {

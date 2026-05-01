@@ -21,6 +21,7 @@ export async function evaluateB3(
       id: 'B3',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No workspaces detected to check for public API surface',
     };
@@ -40,6 +41,7 @@ export async function evaluateB3(
       id: 'B3',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No library workspaces to check (all are apps or CLI tools)',
     };
@@ -54,6 +56,7 @@ export async function evaluateB3(
       id: 'B3',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'All library workspaces declare a public API surface',
     };
@@ -63,6 +66,7 @@ export async function evaluateB3(
     id: 'B3',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${missing.length} library workspace${missing.length > 1 ? 's' : ''} missing an index file`,
     locations: missing.map(d => ({ path: d, detail: 'Add an index.ts that exports the public API' })),

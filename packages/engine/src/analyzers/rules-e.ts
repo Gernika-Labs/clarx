@@ -26,6 +26,7 @@ export function evaluateE1(files: FileEntry[]): RuleResult {
       id: 'E1',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No route or controller files exceed 300 lines',
     };
@@ -35,6 +36,7 @@ export function evaluateE1(files: FileEntry[]): RuleResult {
     id: 'E1',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${violations.length} route/controller file${violations.length > 1 ? 's' : ''} exceed 300 lines`,
     locations: violations.map(f => ({ path: f.relativePath, detail: `${f.lines} lines` })),
@@ -66,6 +68,7 @@ export async function evaluateE3(root: string, files: FileEntry[]): Promise<Rule
       id: 'E3',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No utility files exceed 20 exports',
     };
@@ -75,6 +78,7 @@ export async function evaluateE3(root: string, files: FileEntry[]): Promise<Rule
     id: 'E3',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${violations.length} utility file${violations.length > 1 ? 's' : ''} exceed 20 exports`,
     locations: violations.map(v => ({ path: v.path, detail: `${v.exports} exports` })),
@@ -129,6 +133,7 @@ export async function evaluateE5(
       id: 'E5',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No library packages to check',
     };
@@ -152,6 +157,7 @@ export async function evaluateE5(
       id: 'E5',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'All library packages declare an entry point',
     };
@@ -161,6 +167,7 @@ export async function evaluateE5(
     id: 'E5',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${missing.length} library package${missing.length > 1 ? 's' : ''} missing a declared entry point`,
     locations: missing.map(d => ({ path: d, detail: 'Add an "exports" or "main" field to package.json' })),

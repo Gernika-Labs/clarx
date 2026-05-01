@@ -17,6 +17,7 @@ export async function evaluateD2(
         id: 'D2',
         passed: true,
         severity: 'warning',
+        confidence: 'medium',
         scoreImpact: 25,
         message: 'All workspaces have a purpose statement in the manifest',
       };
@@ -25,6 +26,7 @@ export async function evaluateD2(
       id: 'D2',
       passed: false,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: `${empty.length} workspace${empty.length > 1 ? 's' : ''} missing a purpose statement`,
       locations: empty.map(([dir]) => ({ path: dir, detail: 'Add a description to manifest.workspaces' })),
@@ -43,6 +45,7 @@ export async function evaluateD2(
       id: 'D2',
       passed: hasReadme,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: hasReadme ? 'Root README found' : 'No README found at root',
     };
@@ -64,6 +67,7 @@ export async function evaluateD2(
       id: 'D2',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'All packages have a README',
     };
@@ -73,6 +77,7 @@ export async function evaluateD2(
     id: 'D2',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${missing.length} package${missing.length > 1 ? 's' : ''} missing a README`,
     locations: missing.map(d => ({ path: d, detail: 'Add a README.md with at least one sentence describing the package' })),
@@ -134,6 +139,7 @@ export function evaluateD3(files: FileEntry[], manifest?: Manifest | null): Rule
       id: 'D3',
       passed: true,
       severity: 'warning',
+      confidence: 'low',
       scoreImpact: 25,
       message: 'Source and config files are properly segregated',
     };
@@ -143,6 +149,7 @@ export function evaluateD3(files: FileEntry[], manifest?: Manifest | null): Rule
     id: 'D3',
     passed: false,
     severity: 'warning',
+    confidence: 'low',
     scoreImpact: 25,
     message: `${violations.length} director${violations.length > 1 ? 'ies' : 'y'} mix source and config files`,
     locations: violations.map(d => ({ path: d, detail: 'Move config files to the package root or a dedicated config/ directory' })),
@@ -180,6 +187,7 @@ export function evaluateD5(files: FileEntry[], manifest: Manifest | null): RuleR
       id: 'D5',
       passed: true,
       severity: 'recommendation',
+      confidence: 'low',
       scoreImpact: 0,
       message: `No files exceed ${D5_LIMIT} directory levels`,
     };
@@ -189,6 +197,7 @@ export function evaluateD5(files: FileEntry[], manifest: Manifest | null): RuleR
     id: 'D5',
     passed: false,
     severity: 'recommendation',
+    confidence: 'low',
     scoreImpact: 0,
     message: `${deep.length} file${deep.length > 1 ? 's' : ''} exceed ${D5_LIMIT} directory levels deep`,
     locations: deep.slice(0, 10).map(p => ({ path: p })),

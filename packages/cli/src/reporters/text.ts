@@ -30,6 +30,12 @@ function confidenceColor(conf: string): string {
   return c.bRed(conf);
 }
 
+function confidenceBadge(conf: string | undefined): string {
+  if (conf === 'high') return c.dim(c.bGreen('[high]')) + '  ';
+  if (conf === 'low')  return c.dim(c.bYellow('[low?]')) + '  ';
+  return '';  // medium: no annotation
+}
+
 const PILLAR_LABELS: Record<PillarName, string> = {
   discoverability:      'Discoverability',
   boundary_clarity:     'Boundary Clarity',
@@ -57,7 +63,7 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
     lines.push(`  ${c.bRed('✗')} ${c.bold(c.red(`Hard Failures (${hardFailures.length})`))}`);
     for (const rule of hardFailures) {
       lines.push('');
-      lines.push(`  ${c.bold(c.bRed(rule!.id))}  ${c.red(rule!.message)}`);
+      lines.push(`  ${c.bold(c.bRed(rule!.id))}  ${confidenceBadge(rule!.confidence)}${c.red(rule!.message)}`);
       if (rule!.locations) {
         for (const loc of rule!.locations) {
           const detail = loc.detail ? c.dim(` — ${loc.detail}`) : '';
@@ -73,7 +79,7 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
     lines.push(`  ${c.bYellow('⚠')} ${c.bold(c.yellow(`Warnings (${warnings.length})`))}`);
     for (const rule of warnings) {
       lines.push('');
-      lines.push(`  ${c.bold(c.bYellow(rule!.id))}  ${c.yellow(rule!.message)}`);
+      lines.push(`  ${c.bold(c.bYellow(rule!.id))}  ${confidenceBadge(rule!.confidence)}${c.yellow(rule!.message)}`);
       if (rule!.locations) {
         for (const loc of rule!.locations) {
           const detail = loc.detail ? c.dim(` — ${loc.detail}`) : '';
@@ -89,7 +95,7 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
     lines.push(`  ${c.bCyan('●')} ${c.bold(c.cyan(`Recommendations (${recommendations.length})`))}`);
     for (const rule of recommendations) {
       lines.push('');
-      lines.push(`  ${c.bold(c.bCyan(rule!.id))}  ${c.cyan(rule!.message)}`);
+      lines.push(`  ${c.bold(c.bCyan(rule!.id))}  ${confidenceBadge(rule!.confidence)}${c.cyan(rule!.message)}`);
       if (rule!.locations) {
         for (const loc of rule!.locations.slice(0, 5)) {
           lines.push(`      ${c.dim('→')} ${loc.path}`);

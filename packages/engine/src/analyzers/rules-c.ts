@@ -35,6 +35,7 @@ export function evaluateC1(
       id: 'C1',
       passed: true,
       severity: 'hard_failure',
+      confidence: 'medium',
       scoreImpact: 100,
       message: 'Generated artifacts are excluded from the source tree',
     };
@@ -52,6 +53,7 @@ export function evaluateC1(
       id: 'C1',
       passed: false,
       severity: 'hard_failure',
+      confidence: 'high',
       scoreImpact: 100,
       message: `Generated artifacts committed to source control: ${committedDirs.join(', ')}`,
       locations: committedDirs.map(d => ({ path: d, detail: 'Remove from git tracking and add to .gitignore' })),
@@ -63,6 +65,7 @@ export function evaluateC1(
     id: 'C1',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `Generated directories in working tree but not committed: ${leakedDirs.join(', ')}`,
     locations: leakedDirs.map(d => ({ path: d, detail: 'Add to .gitignore to reduce agent noise' })),
@@ -82,6 +85,7 @@ export function evaluateC2(files: FileEntry[]): RuleResult {
       id: 'C2',
       passed: true,
       severity: 'warning',
+      confidence: 'high',
       scoreImpact: 25,
       message: 'No source file exceeds 400 lines',
     };
@@ -91,6 +95,7 @@ export function evaluateC2(files: FileEntry[]): RuleResult {
     id: 'C2',
     passed: false,
     severity: 'warning',
+    confidence: 'high',
     scoreImpact: 25,
     message: `${violations.length} source file${violations.length > 1 ? 's' : ''} exceed${violations.length === 1 ? 's' : ''} 400 lines`,
     locations: violations.slice(0, 10).map(f => ({

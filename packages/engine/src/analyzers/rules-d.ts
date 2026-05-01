@@ -64,7 +64,7 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
   try {
     entries = await readdir(root);
   } catch {
-    return { id: 'D1', passed: true, severity: 'warning', scoreImpact: 25, message: 'Could not read root directory' };
+    return { id: 'D1', passed: true, severity: 'warning', confidence: 'low', scoreImpact: 25, message: 'Could not read root directory' };
   }
 
   const isMonorepo = entries.some(e => MONOREPO_SIGNALS.has(e));
@@ -76,6 +76,7 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
       id: 'D1',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: `Root directory has ${meaningful.length} meaningful entries (≤${limit})`,
     };
@@ -85,6 +86,7 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
     id: 'D1',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `Root directory has ${meaningful.length} meaningful entries (limit: ${limit}${isMonorepo ? ', monorepo' : ''})`,
     locations: meaningful.map(e => ({ path: e })),
@@ -110,6 +112,7 @@ export function evaluateD4(files: FileEntry[]): RuleResult {
       id: 'D4',
       passed: true,
       severity: 'warning',
+      confidence: 'medium',
       scoreImpact: 25,
       message: 'No utility dumping ground files found',
     };
@@ -119,6 +122,7 @@ export function evaluateD4(files: FileEntry[]): RuleResult {
     id: 'D4',
     passed: false,
     severity: 'warning',
+    confidence: 'medium',
     scoreImpact: 25,
     message: `${violations.length} utility dumping ground file${violations.length > 1 ? 's' : ''} found`,
     locations: violations.map(f => ({ path: f.relativePath, detail: 'Rename to a domain-specific file' })),
