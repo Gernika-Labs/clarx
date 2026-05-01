@@ -62,6 +62,17 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
     }
   }
 
+  if (opts.verbose) {
+    const passing = Object.values(result.rules).filter(r => r.passed && r.scoreImpact > 0);
+    if (passing.length > 0) {
+      lines.push('');
+      lines.push(`Passing (${passing.length}):`);
+      for (const rule of passing) {
+        lines.push(`  ${rule.id}  ${rule.message}`);
+      }
+    }
+  }
+
   if (warnings.length > 0 || recommendations.length > 0) {
     lines.push('');
     lines.push("Run `clarx explain <rule>` for guidance on any rule.");

@@ -7,15 +7,24 @@
     "clarx": "./dist/cli.js"
   },
   "main": "./dist/cli.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsc --watch",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@clarxai/engine": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "typescript": "^5.4.0",
     "tsx": "^4.7.0"
   }

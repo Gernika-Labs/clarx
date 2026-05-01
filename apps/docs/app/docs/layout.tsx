@@ -13,6 +13,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       }}
       sidebar={{
         banner: null,
+        collapsible: false,
       }}
     >
       {children}

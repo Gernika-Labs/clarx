@@ -2,6 +2,7 @@ import { analyze } from '@clarxai/engine';
 import { resolve } from 'node:path';
 import { exit } from 'node:process';
 import { formatText } from '../reporters/text.js';
+import { formatMarkdown } from '../reporters/markdown.js';
 
 export async function scoreCommand(args: string[]) {
   const pathArg = args.find(a => !a.startsWith('--')) ?? '.';
@@ -19,6 +20,10 @@ export async function scoreCommand(args: string[]) {
   switch (format) {
     case 'json':
       console.log(JSON.stringify(result, null, 2));
+      break;
+    case 'markdown':
+    case 'md':
+      console.log(formatMarkdown(result, { verbose }));
       break;
     case 'text':
     default:

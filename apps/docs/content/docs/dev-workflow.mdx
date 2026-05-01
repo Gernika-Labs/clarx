@@ -1,0 +1,97 @@
+---
+title: Dev Workflow
+description: How to run the monorepo locally, including the Turbo TUI.
+---
+
+## Starting the dev server
+
+From the repo root:
+
+```bash
+pnpm dev
+```
+
+Turbo builds any compiled packages first (e.g. `@clarxai/engine`), then starts all persistent dev processes in parallel.
+
+---
+
+## The Turbo TUI
+
+When you run `pnpm dev`, Turbo opens an interactive terminal dashboard instead of streaming raw logs.
+
+```
+┌─────────────────────┬──────────────────────────────────────────┐
+│  Tasks              │  Log output (selected task)              │
+│                     │                                          │
+│  » docs#dev         │  ▲ Next.js 15.5.15 (Turbopack)          │
+│  ✓ engine#build     │    Local:   http://localhost:3000        │
+│  ✓ cli#dev          │    Network: http://192.168.0.x:3000      │
+│                     │                                          │
+├─────────────────────┴──────────────────────────────────────────┤
+│  i - Interact  u/d - Scroll  U/D - Page  t/b - Top/Bottom      │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Left panel — task list
+
+Shows every task Turbo is running or has finished:
+
+| Icon | Meaning |
+|------|---------|
+| `»`  | Running (selected) |
+| `✓`  | Completed successfully |
+| `✗`  | Failed |
+| `○`  | Pending / compiling |
+
+Click or use arrow keys to select a task and see its logs on the right.
+
+### Right panel — log output
+
+Streams the stdout/stderr of the selected task. Turbopack, MDX, and TSC output all land here.
+
+### Keyboard shortcuts
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Select previous / next task |
+| `i` | Enter interact mode — send keystrokes to the task (e.g. to use the Next.js REPL) |
+| `u` / `d` | Scroll logs up / down one line |
+| `U` / `D` | Page logs up / down |
+| `t` / `b` | Jump to top / bottom of logs |
+| `m` | Show all keybindings |
+| `q` or `Ctrl+C` | Quit all tasks and exit |
+
+### Exiting interact mode
+
+Press `Ctrl+Z` to leave interact mode and return to normal TUI navigation.
+
+---
+
+## Running a single package
+
+To skip the TUI and run just one workspace:
+
+```bash
+pnpm --filter docs dev                  # docs site only
+pnpm --filter @clarxai/engine build    # build the engine
+pnpm --filter @clarxai/cli dev         # CLI only
+```
+
+These stream logs directly to the terminal with no TUI wrapper.
+
+---
+
+## Other common tasks
+
+| Command | What it does |
+|---------|-------------|
+| `pnpm build` | Full production build (all packages) |
+| `pnpm lint` | Type-check all packages |
+| `pnpm format` | Prettier across all `.ts`, `.tsx`, `.mdx` files |
+| `pnpm approve-builds` | Allow blocked native build scripts (e.g. `esbuild`) |
+
+---
+
+## Docs site
+
+The docs site runs at `http://localhost:3000` when `pnpm dev` is active. Content lives in `apps/docs/content/docs/` — editing any `.mdx` file triggers a live reload automatically via the MDX dev server (visible as `[MDX] updated map file` in the `docs#dev` log panel).

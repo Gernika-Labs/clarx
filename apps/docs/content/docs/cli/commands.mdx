@@ -23,13 +23,19 @@ clarx score [path] [options]
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--format` | Output format: `text`, `json`, `markdown`, `sarif` | `text` |
+| `--format` | Output format: `text`, `json`, `markdown` (alias `md`) | `text` |
 | `--min-score` | Exit code 1 if overall score is below this value | none |
 | `--min-pillar-score` | Exit code 1 if any pillar score is below this value | none |
 | `--ignore` | Comma-separated glob patterns to exclude | none |
-| `--manifest` | Path to a custom manifest file | `./clarx-manifest.json` |
-| `--no-manifest` | Skip manifest resolution entirely | false |
 | `--verbose` | Include passing rules in output | false |
+
+**Exit codes:**
+
+| Code | Meaning |
+|------|---------|
+| `0` | Analysis complete, all thresholds passed |
+| `1` | Score or pillar threshold not met |
+| `2` | Hard failure rules triggered |
 
 **Examples:**
 
@@ -46,8 +52,14 @@ clarx score --min-score 70
 # JSON output for programmatic use
 clarx score --format json > clarx-report.json
 
+# Markdown report to stdout
+clarx score --format markdown
+
 # Fail if any pillar drops below 60
 clarx score --min-pillar-score 60
+
+# Show passing rules too
+clarx score --verbose
 ```
 
 ---
@@ -97,55 +109,3 @@ clarx explain B1
 - Why it matters for AI navigability
 - How to fix it
 - How to declare an exemption in the manifest (where applicable)
-
----
-
-## `clarx diff`
-
-Compare scores between two git refs (branches, commits, or tags).
-
-```bash
-clarx diff [base] [head]
-```
-
-**Arguments:**
-
-| Argument | Description | Default |
-|----------|-------------|---------|
-| `base` | Base git ref | `main` |
-| `head` | Head git ref | `HEAD` |
-
-**Examples:**
-
-```bash
-# Compare current branch to main
-clarx diff
-
-# Compare two specific commits
-clarx diff abc1234 def5678
-
-# Output as JSON
-clarx diff --format json
-```
-
-This is useful in PR checks to confirm a branch does not regress the score.
-
----
-
-## `clarx report`
-
-Generate a full report and write it to a file.
-
-```bash
-clarx report [path] --out <file>
-```
-
-**Examples:**
-
-```bash
-# Write markdown report
-clarx report --format markdown --out clarx-report.md
-
-# Write JSON report
-clarx report --format json --out clarx-report.json
-```

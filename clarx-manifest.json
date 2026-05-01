@@ -5,7 +5,8 @@
     "apps/docs/.next",
     "**/dist",
     "**/node_modules",
-    "**/coverage"
+    "**/coverage",
+    ".turbo"
   ],
   "workspaces": {
     "packages/ui": "Semantic UI component library — reusable intention-driven components",
@@ -15,6 +16,7 @@
   },
   "highFanIn": [
     "packages/ui/src/tokens.ts",
+    "packages/ui/src/utils.ts",
     "apps/docs/lib/mdx-components.ts"
   ],
   "verificationCommands": {

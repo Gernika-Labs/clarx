@@ -32,7 +32,7 @@ jobs:
       - run: npx clarx score --min-score 70
 ```
 
-### PR comment with score diff
+### PR comment with markdown report
 
 ```yaml
 name: Clarx Score
@@ -47,18 +47,13 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # needed for clarx diff
 
-      - name: Score current branch
-        run: npx clarx score --format markdown --out clarx-report.md
-
-      - name: Post score as PR comment
+      - name: Score and post as PR comment
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const report = fs.readFileSync('clarx-report.md', 'utf8');
+            const { execSync } = require('child_process');
+            const report = execSync('npx clarx score --format markdown').toString();
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -68,19 +63,6 @@ jobs:
 
       - name: Enforce minimum score
         run: npx clarx score --min-score 65
-```
-
-### SARIF upload (for inline PR annotations)
-
-```yaml
-      - name: Run Clarx (SARIF)
-        run: npx clarx score --format sarif --out clarx.sarif
-        continue-on-error: true
-
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: clarx.sarif
 ```
 
 ---
@@ -93,8 +75,8 @@ clarx:
   script:
     - npx clarx score --min-score 70 --format json | tee clarx-report.json
   artifacts:
-    reports:
-      codequality: clarx-report.json
+    paths:
+      - clarx-report.json
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 ```
@@ -112,21 +94,6 @@ Start conservative. A low threshold that passes lets teams adopt Clarx without b
 | Target state | `--min-score 80` |
 
 Do not set a threshold higher than the current score on `main`. The first run should always pass on the existing codebase.
-
----
-
-## Caching
-
-Clarx analysis is fast on most repos. If you want to cache the manifest resolution:
-
-```yaml
-      - uses: actions/cache@v4
-        with:
-          path: .clarx-cache
-          key: clarx-${{ hashFiles('clarx-manifest.json') }}
-
-      - run: npx clarx score --cache-dir .clarx-cache
-```
 
 ---
 

@@ -132,13 +132,3 @@ const failingWarnings = Object.values(result.rules).filter(
 );
 ```
 
----
-
-## SARIF output
-
-When `--format sarif` is used, the CLI wraps the engine output in SARIF 2.1.0 format for use with GitHub Code Scanning and editor integrations. Each failing rule becomes a SARIF result with:
-
-- `ruleId`: the rule ID (e.g. `C2`)
-- `message`: the human-readable finding
-- `locations`: file paths involved
-- `level`: `error` for hard failures, `warning` for warnings, `note` for recommendations

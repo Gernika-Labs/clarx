@@ -1,4 +1,4 @@
-import { readdir, stat } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { minimatch } from 'minimatch';
 import type { Manifest } from '../types.js';
@@ -7,6 +7,12 @@ const ALWAYS_EXCLUDED = [
   '**/node_modules/**',
   '**/.git/**',
 ];
+
+const LINE_COUNT_EXTENSIONS = new Set([
+  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
+  '.py', '.go', '.rs', '.rb', '.java', '.cs', '.cpp', '.c', '.h',
+  '.vue', '.svelte',
+]);
 
 export type FileEntry = {
   path: string;
@@ -18,6 +24,16 @@ export type FileEntry = {
 export type ScanStats = {
   filesScanned: number;
 };
+
+async function countLines(filePath: string): Promise<number> {
+  const content = await readFile(filePath, 'utf-8');
+  return content.split('\n').length;
+}
+
+function shouldCountLines(filePath: string): boolean {
+  const ext = filePath.slice(filePath.lastIndexOf('.'));
+  return LINE_COUNT_EXTENSIONS.has(ext);
+}
 
 export async function scanFilesystem(
   root: string,
@@ -37,16 +53,15 @@ export async function scanFilesystem(
       const fullPath = join(dir, entry.name);
       const rel = relative(root, fullPath);
 
-      const isExcluded = generatedPatterns.some(p => minimatch(rel, p, { dot: true }));
+      const isGenerated = generatedPatterns.some(p => minimatch(rel, p, { dot: true }));
 
       if (entry.isDirectory()) {
-        if (!isExcluded) await walk(fullPath);
+        if (!isGenerated) await walk(fullPath);
       } else if (entry.isFile()) {
-        files.push({
-          path: fullPath,
-          relativePath: rel,
-          isGenerated: isExcluded,
-        });
+        const lines = (!isGenerated && shouldCountLines(fullPath))
+          ? await countLines(fullPath)
+          : undefined;
+        files.push({ path: fullPath, relativePath: rel, lines, isGenerated });
       }
     }
   }
