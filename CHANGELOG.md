@@ -9,7 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
-## [0.1.0] - 2026-04-30
+## [0.1.0] - 2026-05-01
 
 ### Added
 
