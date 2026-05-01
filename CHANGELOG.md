@@ -9,6 +9,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.2] - 2026-05-01
+
+### Added
+
+**CLI clipboard support**
+- `clarx score --copy-all` — copies all failing rules (grouped by severity) with full fix text to clipboard after scoring
+- Watch mode: `copy all` at the prompt copies every failing rule to clipboard
+- Watch mode: `copy <rule>` copies a single rule's fix text to clipboard
+- `clarx explain <rule> --copy` — prints explanation and copies it to clipboard
+- Clipboard support: `pbcopy` (macOS), `clip` (Windows), `xclip`/`xsel` (Linux)
+
+---
+
 ## [0.1.1] - 2026-05-01
 
 ### Changed
