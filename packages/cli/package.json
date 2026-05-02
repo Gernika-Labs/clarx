@@ -21,7 +21,8 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@clarxai/engine": "workspace:*"
+    "@clarxai/engine": "workspace:*",
+    "chalk": "^5.4.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

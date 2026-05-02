@@ -123,11 +123,11 @@ function showFooter(result: AnalysisResult, watching: boolean) {
 
   if (parts.length > 0) {
     console.log(`  ${parts.join('    ')}`);
-    console.log(`  ${dim('Type a rule ID for details')}  ${dim('·')}  ${dim('copy <rule> or copy all')}  ${dim('·')}  ${magenta('e.g. C1')}  ${magenta('copy E2')}  ${magenta('copy all')}`);
+    console.log(`  ${dim('Type a rule ID for details')}  ${dim('·')}  ${dim('copy <rule> or copy all')}  ${dim('·')}  ${magenta("e.g. 'C1'")}  ${magenta("'C'")}  ${magenta("'copy E2'")}  ${magenta("'copy all'")}  ${magenta("'show all'")}`);
   }
 
   if (watching) {
-    console.log(`  ${dim('↺  Watching for changes')}  ${dim('·')}  ${magenta('r')} ${dim('to refresh')}  ${dim('·')}  ${magenta('Ctrl+C')} ${dim('to stop')}`);
+    console.log(`  ${dim('↺  Watching for changes')}  ${dim('·')}  ${magenta('h')} ${dim('home')}  ${dim('·')}  ${magenta('r')} ${dim('refresh')}  ${dim('·')}  ${magenta('Ctrl+C')} ${dim('to stop')}`);
   }
 
   console.log('');
@@ -159,13 +159,46 @@ async function runWatch(opts: ScoreOpts) {
     prompt();
 
     rl.on('line', (input) => {
-      const id = input.trim().toUpperCase();
+      // Normalize '01'–'05' → 'O1'–'O5': zero and letter-O are visually identical in most mono fonts
+      const id = input.trim().toUpperCase().replace(/^0([1-5])$/, 'O$1');
       if (!id) { prompt(); return; }
 
-      if (id === 'R') {
+      if (id === 'R' || id === 'H') {
         rl!.close();
         rl = null;
         render();
+        return;
+      }
+
+      if (id === 'SHOW ALL') {
+        const allRules = Object.values(result.rules).filter(Boolean) as NonNullable<(typeof result.rules)[keyof typeof result.rules]>[];
+        const failing = allRules.filter(r => !r.passed);
+        if (failing.length === 0) {
+          console.log(`  ${dim('No issues found.')}\n`);
+        } else {
+          for (const r of failing) {
+            const explanation = formatExplanation(r.id);
+            if (explanation) console.log(explanation);
+          }
+          track({ action: 'show_all', score: result.score });
+        }
+        prompt();
+        return;
+      }
+
+      if (/^[DBCOE]$/.test(id)) {
+        const allRules = Object.values(result.rules).filter(Boolean) as NonNullable<(typeof result.rules)[keyof typeof result.rules]>[];
+        const failing = allRules.filter(r => !r.passed && r.id.startsWith(id));
+        if (failing.length === 0) {
+          console.log(`  ${dim(`No issues in pillar ${id}`)}\n`);
+        } else {
+          for (const r of failing) {
+            const explanation = formatExplanation(r.id);
+            if (explanation) console.log(explanation);
+          }
+          track({ action: 'show_section', rule: id, score: result.score });
+        }
+        prompt();
         return;
       }
 
@@ -205,7 +238,7 @@ async function runWatch(opts: ScoreOpts) {
         console.log(explanation);
         track({ action: 'explain', rule: id, score: result.score });
       } else {
-        console.log(`  ${dim(`Unknown rule "${input.trim()}". Valid: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5`)}`);
+        console.log(`  ${dim(`Unknown: "${input.trim()}". Try a rule ID (e.g. 'C1'), a section letter ('C'), 'show all', or 'copy all'`)}`);
         console.log('');
       }
       prompt();
