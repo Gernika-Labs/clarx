@@ -2,15 +2,29 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { FileEntry } from '../analyzers/filesystem.js';
 import type { ImportGraph } from '../analyzers/import-graph.js';
-import { evaluateC1, evaluateC2 } from '../analyzers/rules-c.js';
-import { evaluateD1, evaluateD4 } from '../analyzers/rules-d.js';
-import { evaluateD2, evaluateD3, evaluateD5 } from '../analyzers/rules-d2-d3-d5.js';
-import { evaluateB3 } from '../analyzers/rules-b.js';
-import { evaluateB1, evaluateB2 } from '../analyzers/rules-b1-b2.js';
-import { evaluateC3, evaluateC4, evaluateC5 } from '../analyzers/rules-c3-c4-c5.js';
-import { evaluateE1, evaluateE3, evaluateE5 } from '../analyzers/rules-e.js';
-import { evaluateB4, evaluateB5, evaluateE2, evaluateE4 } from '../analyzers/rules-remaining.js';
-import { evaluateO5 } from '../analyzers/rules-o5.js';
+import {
+  evaluateB1,
+  evaluateB2,
+  evaluateB3,
+  evaluateB4,
+  evaluateB5,
+  evaluateC1,
+  evaluateC2,
+  evaluateC3,
+  evaluateC4,
+  evaluateC5,
+  evaluateD1,
+  evaluateD2,
+  evaluateD3,
+  evaluateD4,
+  evaluateD5,
+  evaluateE1,
+  evaluateE2,
+  evaluateE3,
+  evaluateE4,
+  evaluateE5,
+  evaluateO5,
+} from '../analyzers/index.js';
 import type { Manifest, RuleId, RuleResult } from '../types.js';
 
 export type EvaluationResult = {
