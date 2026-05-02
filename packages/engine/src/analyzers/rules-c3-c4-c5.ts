@@ -9,7 +9,7 @@ const C3_LIMIT = 15;
 export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleResult {
   const declared = new Set(manifest?.highFanIn ?? []);
   const violations = [...graph.importCount.entries()]
-    .filter(([path, count]) => count > C3_LIMIT && !declared.has(path))
+    .filter(([path, count]) => count > C3_LIMIT && ![...declared].some(d => path === d || path.endsWith('/' + d)))
     .sort((a, b) => b[1] - a[1]);
 
   if (violations.length === 0) {
