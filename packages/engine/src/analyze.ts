@@ -26,6 +26,10 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
   const { rules, importGraphResolved } = await evaluateRules(root, files, manifest, importGraph, gitTrackedPaths);
   const { score, confidence, hardFailures, pillars } = computeScore(rules, { importGraphResolved, manifestFound: manifest !== null });
 
+  const tip = (rules['O1'] && !rules['O1'].passed && confidence !== 'high')
+    ? 'Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5).'
+    : undefined;
+
   return {
     version: '0.1',
     confidence,
@@ -33,6 +37,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
     hardFailures,
     pillars,
     rules,
+    tip,
     meta: {
       analyzedAt: new Date().toISOString(),
       root,

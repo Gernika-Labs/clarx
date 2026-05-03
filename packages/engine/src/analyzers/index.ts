@@ -2,7 +2,7 @@ export { evaluateB3 } from './rules-b.js';
 export { evaluateB1, evaluateB2 } from './rules-b1-b2.js';
 export { evaluateC1, evaluateC2 } from './rules-c.js';
 export { evaluateC3, evaluateC4, evaluateC5 } from './rules-c3-c4-c5.js';
-export { evaluateD1, evaluateD4 } from './rules-d.js';
+export { evaluateD1, evaluateD4, evaluateD4WithRoot } from './rules-d.js';
 export { evaluateD2, evaluateD3, evaluateD5 } from './rules-d2-d3-d5.js';
 export { evaluateE1, evaluateE3, evaluateE5 } from './rules-e.js';
 export { evaluateO5 } from './rules-o5.js';

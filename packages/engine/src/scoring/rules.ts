@@ -16,7 +16,7 @@ import {
   evaluateD1,
   evaluateD2,
   evaluateD3,
-  evaluateD4,
+  evaluateD4WithRoot,
   evaluateD5,
   evaluateE1,
   evaluateE2,
@@ -45,6 +45,17 @@ async function readGuidanceContent(root: string, files: FileEntry[]): Promise<st
 const COMMAND_RE = /`?(yarn|npm run|pnpm(?: run)?|npx|make|go test|cargo test|pytest|jest|vitest|tsc)\s/i;
 const DIR_RE = /`[a-z][a-z0-9_-]*\/[a-z]/;
 
+async function readRootPkgScripts(root: string, files: FileEntry[]): Promise<Set<string>> {
+  if (!files.some(f => f.relativePath === 'package.json')) return new Set();
+  try {
+    const raw = await readFile(join(root, 'package.json'), 'utf-8');
+    const pkg = JSON.parse(raw) as { scripts?: Record<string, string> };
+    return new Set(Object.keys(pkg.scripts ?? {}));
+  } catch {
+    return new Set();
+  }
+}
+
 export async function evaluateRules(
   root: string,
   files: FileEntry[],
@@ -59,7 +70,7 @@ export async function evaluateRules(
   rules['D1'] = await evaluateD1(root);
   rules['D2'] = await evaluateD2(root, manifest, files);
   rules['D3'] = evaluateD3(files, manifest);
-  rules['D4'] = evaluateD4(files);
+  rules['D4'] = await evaluateD4WithRoot(root, files);
   rules['D5'] = evaluateD5(files, manifest);
 
   // ── Boundary Clarity ──────────────────────────────────────────────────────
@@ -93,6 +104,9 @@ export async function evaluateRules(
     message: hasGuidance || manifest !== null
       ? 'Machine-readable guidance file found'
       : 'No CLAUDE.md, AGENTS.md, or clarx-manifest.json found',
+    ...(!(hasGuidance || manifest !== null) && {
+      remediation: 'Add a clarx-manifest.json at the repo root. At minimum include verificationCommands so the engine can confirm test and typecheck commands exist.',
+    }),
   };
 
   const hasGeneratedDeclaration = manifest !== null && (manifest.generated?.length ?? 0) > 0;
@@ -105,13 +119,19 @@ export async function evaluateRules(
     message: hasGeneratedDeclaration
       ? 'Generated directories declared in manifest'
       : 'No generated directories declared in guidance file or manifest',
+    ...(!hasGeneratedDeclaration && {
+      remediation: 'Add a "generated" array to clarx-manifest.json listing directories like ".next", "dist", ".source".',
+    }),
   };
 
   const guidanceContent = await readGuidanceContent(root, files);
 
+  const pkgScripts = await readRootPkgScripts(root, files);
+  const pkgHasVerification = pkgScripts.has('test') || pkgScripts.has('typecheck') || pkgScripts.has('lint');
   const hasVerificationCommands = (manifest?.verificationCommands != null &&
     Object.keys(manifest.verificationCommands).length > 0) ||
-    COMMAND_RE.test(guidanceContent);
+    COMMAND_RE.test(guidanceContent) ||
+    pkgHasVerification;
   rules['O3'] = {
     id: 'O3',
     passed: hasVerificationCommands,
@@ -119,8 +139,13 @@ export async function evaluateRules(
     confidence: 'medium',
     scoreImpact: 25,
     message: hasVerificationCommands
-      ? 'Verification commands declared in guidance'
+      ? pkgHasVerification && !(manifest?.verificationCommands != null && Object.keys(manifest.verificationCommands).length > 0) && !COMMAND_RE.test(guidanceContent)
+        ? 'Verification commands found in package.json scripts'
+        : 'Verification commands declared in guidance'
       : 'No verification commands found in manifest or guidance files',
+    ...(!hasVerificationCommands && {
+      remediation: 'Add verificationCommands to clarx-manifest.json with at minimum "typecheck" and "test" scripts.',
+    }),
   };
 
   const hasCommonTasks = (manifest?.commonTasks != null &&
@@ -135,6 +160,9 @@ export async function evaluateRules(
     message: hasCommonTasks
       ? 'Common task locations declared in guidance'
       : 'No common task locations found in manifest or guidance files',
+    ...(!hasCommonTasks && {
+      remediation: 'Add a commonTasks section to clarx-manifest.json mapping task names to their directory paths.',
+    }),
   };
 
   rules['O5'] = evaluateO5(files, manifest);

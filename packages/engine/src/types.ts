@@ -22,6 +22,7 @@ export type RuleResult = {
   confidence: Confidence;
   scoreImpact: number;
   message: string;
+  remediation?: string;
   locations?: Location[];
 };
 
@@ -45,6 +46,7 @@ export type AnalysisResult = {
   hardFailures: RuleId[];
   pillars: Record<PillarName, PillarScore>;
   rules: Partial<Record<RuleId, RuleResult>>;
+  tip?: string;
   meta: {
     analyzedAt: string;
     root: string;

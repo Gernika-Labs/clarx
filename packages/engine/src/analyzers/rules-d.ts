@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { FileEntry } from './filesystem.js';
 import type { Manifest, RuleResult } from '../types.js';
@@ -98,6 +98,21 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
 // Small focused helpers (e.g. a single cn() utility) are not a problem.
 const D4_MIN_LINES = 30;
 
+async function isTypeOnlyFile(filePath: string): Promise<boolean> {
+  try {
+    const content = await readFile(filePath, 'utf-8');
+    // Function declarations (function foo() or async function foo())
+    if (/^\s*(export\s+)?(default\s+)?(async\s+)?function\s+\w/m.test(content)) return false;
+    // Class implementations (not just `type X = class...` which doesn't exist anyway)
+    if (/^\s*(export\s+)?(default\s+)?class\s+\w/m.test(content)) return false;
+    // Arrow functions or function expressions assigned to variables
+    if (/^\s*(export\s+)?(const|let|var)\s+\w[\w\s,:<>[\]]*=\s*(async\s*)?\(/m.test(content)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function evaluateD4(files: FileEntry[]): RuleResult {
   const violations = files.filter(f => {
     if (f.isGenerated) return false;
@@ -106,6 +121,43 @@ export function evaluateD4(files: FileEntry[]): RuleResult {
     const name = basename.includes('.') ? basename.slice(0, basename.lastIndexOf('.')) : basename;
     return UTILITY_DUMP_NAMES.has(name.toLowerCase());
   });
+
+  if (violations.length === 0) {
+    return {
+      id: 'D4',
+      passed: true,
+      severity: 'warning',
+      confidence: 'medium',
+      scoreImpact: 25,
+      message: 'No utility dumping ground files found',
+    };
+  }
+
+  return {
+    id: 'D4',
+    passed: false,
+    severity: 'warning',
+    confidence: 'medium',
+    scoreImpact: 25,
+    message: `${violations.length} utility dumping ground file${violations.length > 1 ? 's' : ''} found`,
+    locations: violations.map(f => ({ path: f.relativePath, detail: 'Rename to a domain-specific file' })),
+  };
+}
+
+export async function evaluateD4WithRoot(root: string, files: FileEntry[]): Promise<RuleResult> {
+  const candidates = files.filter(f => {
+    if (f.isGenerated) return false;
+    if (f.lines === undefined || f.lines < D4_MIN_LINES) return false;
+    const basename = f.relativePath.split('/').pop() ?? '';
+    const name = basename.includes('.') ? basename.slice(0, basename.lastIndexOf('.')) : basename;
+    return UTILITY_DUMP_NAMES.has(name.toLowerCase());
+  });
+
+  const violations: FileEntry[] = [];
+  for (const f of candidates) {
+    const typeOnly = await isTypeOnlyFile(join(root, f.relativePath));
+    if (!typeOnly) violations.push(f);
+  }
 
   if (violations.length === 0) {
     return {
