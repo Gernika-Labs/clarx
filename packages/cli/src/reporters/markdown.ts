@@ -23,6 +23,16 @@ export function formatMarkdown(result: AnalysisResult, opts: { verbose?: boolean
   lines.push(`**Confidence:** ${result.confidence} &nbsp;|&nbsp; **Standard:** v${result.version} &nbsp;|&nbsp; **Scanned:** ${result.meta.filesScanned} files`);
   lines.push('');
 
+  if (result.confidenceCaveat) {
+    lines.push(`> ⚠️ **Low confidence:** ${result.confidenceCaveat}`);
+    lines.push('');
+  }
+
+  if (result.tip) {
+    lines.push(`> 💡 ${result.tip}`);
+    lines.push('');
+  }
+
   // Pillar table
   lines.push('### Pillar Scores');
   lines.push('');
@@ -93,6 +103,10 @@ export function formatMarkdown(result: AnalysisResult, opts: { verbose?: boolean
 function formatRuleBlock(rule: RuleResult): string {
   const lines: string[] = [];
   lines.push(`**\`${rule.id}\`** — ${rule.message}`);
+  if (rule.remediation) {
+    lines.push('');
+    lines.push(`*Fix:* ${rule.remediation}`);
+  }
   if (rule.locations && rule.locations.length > 0) {
     lines.push('');
     for (const loc of rule.locations.slice(0, 10)) {

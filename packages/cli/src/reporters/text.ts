@@ -74,9 +74,15 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
   lines.push('');
 
   // ── Overall ───────────────────────────────────────────────────────────────────
-  lines.push(
-    `${'Overall score'.padEnd(NAME_W)}  ${chalk.bold(`${result.score} / 100`)}  ${chalk.green(`(confidence: ${result.confidence})`)}`,
-  );
+  const confLabel = result.confidenceCaveat
+    ? chalk.yellow(`⚠ confidence: ${result.confidence}`)
+    : chalk.green(`(confidence: ${result.confidence})`);
+  lines.push(`${'Overall score'.padEnd(NAME_W)}  ${chalk.bold(`${result.score} / 100`)}  ${confLabel}`);
+
+  if (result.confidenceCaveat) {
+    lines.push(chalk.yellow(`  Scan confidence is low — hard failures are real findings but may shift`));
+    lines.push(chalk.yellow(`  once a clarx-manifest.json is added. Treat as soft-critical for now.`));
+  }
   lines.push('');
 
   // ── Summary ───────────────────────────────────────────────────────────────────
@@ -95,6 +101,10 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
   const topRule = hardFails[0] ?? warnings[0];
   if (topRule) {
     lines.push(`${chalk.dim('Run')} ${chalk.cyan(`clarx explain ${topRule.id}`)} ${chalk.dim('for details')}`);
+  }
+
+  if (result.tip) {
+    lines.push(`${chalk.dim('→')} ${chalk.cyan(result.tip)}`);
   }
 
   lines.push('');
