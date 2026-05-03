@@ -30,6 +30,10 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
     ? 'Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5).'
     : undefined;
 
+  const confidenceCaveat = (hardFailures.length > 0 && confidence === 'low')
+    ? 'Hard failures detected, but scan confidence is low — the import graph did not resolve fully and no manifest was found. These findings are real but may shift once a clarx-manifest.json is added. Treat them as soft-critical rather than confirmed blockers.'
+    : undefined;
+
   return {
     version: '0.1',
     confidence,
@@ -38,6 +42,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
     pillars,
     rules,
     tip,
+    confidenceCaveat,
     meta: {
       analyzedAt: new Date().toISOString(),
       root,
