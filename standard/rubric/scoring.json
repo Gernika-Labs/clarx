@@ -28,7 +28,8 @@
         "C2": { "description": "No source file exceeds 400 lines", "severity": "warning", "scoreImpact": 25 },
         "C3": { "description": "No file imports from more than 15 distinct modules", "severity": "warning", "scoreImpact": 20 },
         "C4": { "description": "High fan-in files (10+ dependents) are documented", "severity": "recommendation", "scoreImpact": 20 },
-        "C5": { "description": "Import graph depth does not exceed 8 hops from entry to leaf", "severity": "recommendation", "scoreImpact": 15 }
+        "C5": { "description": "Import graph depth does not exceed 8 hops from entry to leaf", "severity": "recommendation", "scoreImpact": 15 },
+        "C6": { "description": "Entry files expose a local boundary surface before infrastructure", "severity": "recommendation", "scoreImpact": 15 }
       }
     },
     "operational_guidance": {

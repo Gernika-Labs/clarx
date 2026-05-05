@@ -1,7 +1,7 @@
 export type RuleId =
   | 'D1' | 'D2' | 'D3' | 'D4' | 'D5'
   | 'B1' | 'B2' | 'B3' | 'B4' | 'B5'
-  | 'C1' | 'C2' | 'C3' | 'C4' | 'C5'
+  | 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6'
   | 'O1' | 'O2' | 'O3' | 'O4' | 'O5'
   | 'E1' | 'E2' | 'E3' | 'E4' | 'E5';
 
@@ -69,12 +69,37 @@ export type AnalysisResult = {
    * rather than treating them as confirmed blockers.
    */
   confidenceCaveat?: string;
+  opportunities: {
+    viewModelMigrations: ViewModelMigrationOpportunity[];
+  };
   meta: {
     analyzedAt: string;
     root: string;
     filesScanned: number;
     manifestFound: boolean;
     importGraphResolved: boolean;
+  };
+};
+
+export type ViewModelMigrationOpportunity = {
+  path: string;
+  score: number;
+  rating: 'high' | 'medium' | 'low';
+  summary: string;
+  reasons: string[];
+  limits: string[];
+  scores: {
+    tracingRoi: number;
+    simplificationRoi: number;
+  };
+  signals: {
+    lines: number;
+    queryHookImports: number;
+    handlerTypeImports: number;
+    tokenReferences: number;
+    mutationSignals: number;
+    hasBoundarySurface: boolean;
+    inlineDerivedSignals: number;
   };
 };
 

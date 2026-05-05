@@ -13,6 +13,7 @@ import {
   evaluateC3,
   evaluateC4,
   evaluateC5,
+  evaluateC6,
   evaluateD1,
   evaluateD2,
   evaluateD3,
@@ -88,6 +89,7 @@ export async function evaluateRules(
   rules['C3'] = evaluateC3(importGraph, manifest);
   rules['C4'] = evaluateC4(importGraph, manifest);
   rules['C5'] = evaluateC5(importGraph, files);
+  rules['C6'] = await evaluateC6(root, files);
 
   // ── Operational Guidance ──────────────────────────────────────────────────
 

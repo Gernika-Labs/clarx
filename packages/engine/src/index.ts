@@ -9,6 +9,7 @@ export type {
   Severity,
   Confidence,
   Location,
+  ViewModelMigrationOpportunity,
 } from './types.js';
 
 export { analyze } from './analyze.js';

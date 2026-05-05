@@ -33,6 +33,17 @@ export function formatMarkdown(result: AnalysisResult, opts: { verbose?: boolean
     lines.push('');
   }
 
+  if (result.opportunities.viewModelMigrations.length > 0) {
+    lines.push('### View-Model Migration Opportunities');
+    lines.push('');
+    lines.push('| Rating | Path | Score | ROI Split | Why |');
+    lines.push('|--------|------|-------|-----------|-----|');
+    for (const item of result.opportunities.viewModelMigrations.slice(0, 5)) {
+      lines.push(`| ${item.rating} | \`${item.path}\` | ${item.score} | tracing ${item.scores.tracingRoi} / simplify ${item.scores.simplificationRoi} | ${item.summary} |`);
+    }
+    lines.push('');
+  }
+
   // Pillar table
   lines.push('### Pillar Scores');
   lines.push('');

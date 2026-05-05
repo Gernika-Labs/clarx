@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import type { AnalysisResult, AnalyzeOptions, Manifest } from './types.js';
 import { scanFilesystem } from './analyzers/filesystem.js';
 import { buildImportGraph } from './analyzers/import-graph.js';
+import { findViewModelMigrationOpportunities } from './analyzers/index.js';
 import { evaluateRules } from './scoring/rules.js';
 import { computeScore } from './scoring/overall.js';
 import { loadManifest } from './manifest.js';
@@ -24,6 +25,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
   const gitTrackedPaths = getGitTrackedPaths(root);
   const importGraph = await buildImportGraph(root, files, manifest?.workspaces ?? null);
   const { rules, importGraphResolved } = await evaluateRules(root, files, manifest, importGraph, gitTrackedPaths);
+  const viewModelMigrations = await findViewModelMigrationOpportunities(root, files);
   const { score, confidence, hardFailures, pillars } = computeScore(rules, { importGraphResolved, manifestFound: manifest !== null });
 
   const tip = (rules['O1'] && !rules['O1'].passed && confidence !== 'high')
@@ -43,6 +45,9 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
     rules,
     tip,
     confidenceCaveat,
+    opportunities: {
+      viewModelMigrations,
+    },
     meta: {
       analyzedAt: new Date().toISOString(),
       root,

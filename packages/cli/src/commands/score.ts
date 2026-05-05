@@ -123,7 +123,7 @@ function showFooter(result: AnalysisResult, watching: boolean) {
 
   if (parts.length > 0) {
     console.log(`  ${parts.join('    ')}`);
-    console.log(`  ${dim('Type a rule ID for details')}  ${dim('·')}  ${dim('copy <rule> or copy all')}  ${dim('·')}  ${magenta("e.g. 'C1'")}  ${magenta("'C'")}  ${magenta("'copy E2'")}  ${magenta("'copy all'")}  ${magenta("'show all'")}`);
+    console.log(`  ${dim('Type a rule ID for details')}  ${dim('·')}  ${dim('copy <rule>, copy all, or copy warnings/failures/recs')}  ${dim('·')}  ${magenta("e.g. 'C1'")}  ${magenta("'C'")}  ${magenta("'copy E2'")}  ${magenta("'copy w'")}  ${magenta("'copy all'")}  ${magenta("'show all'")}`);
   }
 
   if (watching) {
@@ -216,7 +216,21 @@ async function runWatch(opts: ScoreOpts) {
       }
 
       if (id.startsWith('COPY ')) {
-        const ruleId = id.slice(5).trim();
+        const target = id.slice(5).trim();
+        const sectionText = buildCopySectionText(result, target);
+        if (sectionText) {
+          const ok = copyToClipboard(sectionText);
+          console.log(ok
+            ? `  \x1b[92m✓\x1b[0m \x1b[2mCopied ${target.toLowerCase()} section to clipboard\x1b[0m`
+            : `  \x1b[2mClipboard not available on this system\x1b[0m`
+          );
+          track({ action: 'copy_section', rule: target, score: result.score });
+          console.log('');
+          prompt();
+          return;
+        }
+
+        const ruleId = target;
         const text = getRuleCopyText(ruleId);
         if (text) {
           const ok = copyToClipboard(text);
@@ -226,7 +240,7 @@ async function runWatch(opts: ScoreOpts) {
           );
           track({ action: 'copy', rule: ruleId, score: result.score });
         } else {
-          console.log(`  ${dim(`Unknown rule "${ruleId}". Valid: D1–D5, B1–B5, C1–C5, O1–O5, E1–E5`)}`);
+          console.log(`  ${dim(`Unknown rule or section "${ruleId}". Valid rules: D1–D5, B1–B5, C1–C6, O1–O5, E1–E5. Sections: failures/f, warnings/w, recs/recommendations`)}`);
         }
         console.log('');
         prompt();
@@ -291,6 +305,44 @@ function buildCopyAllText(result: AnalysisResult): string {
       if (copy) sections.push(copy);
       sections.push('');
     }
+  }
+
+  return sections.join('\n');
+}
+
+function buildCopySectionText(result: AnalysisResult, target: string): string | null {
+  const rules = Object.values(result.rules).filter(Boolean) as NonNullable<(typeof result.rules)[keyof typeof result.rules]>[];
+  const normalized = target.trim().toUpperCase();
+  const severity = normalized === 'FAILURES' || normalized === 'FAILURE' || normalized === 'F'
+    ? 'hard_failure'
+    : normalized === 'WARNINGS' || normalized === 'WARNING' || normalized === 'W'
+    ? 'warning'
+    : normalized === 'RECS' || normalized === 'REC' || normalized === 'RECOMMENDATIONS' || normalized === 'RECOMMENDATION'
+    ? 'recommendation'
+    : null;
+
+  if (!severity) return null;
+
+  const group = rules.filter(r => !r.passed && r.severity === severity);
+  if (group.length === 0) {
+    const label = severity === 'hard_failure' ? 'failures' : severity === 'warning' ? 'warnings' : 'recommendations';
+    return `Clarx AI-First Score: ${result.score}/100 — No ${label}.`;
+  }
+
+  const sep = '─'.repeat(56);
+  const label = severity === 'hard_failure' ? 'HARD FAILURES' : severity === 'warning' ? 'WARNINGS' : 'RECOMMENDATIONS';
+  const sections: string[] = [
+    `Clarx AI-First Score: ${result.score}/100`,
+    `Confidence: ${result.confidence}`,
+    '',
+    label,
+    sep,
+  ];
+
+  for (const rule of group) {
+    const copy = getRuleCopyText(rule.id);
+    if (copy) sections.push(copy);
+    sections.push('');
   }
 
   return sections.join('\n');

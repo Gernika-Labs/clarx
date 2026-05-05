@@ -13,7 +13,7 @@ function failing(id: RuleId, severity: RuleResult['severity'] = 'warning', score
 const ALL_PASSING: Partial<Record<RuleId, RuleResult>> = {
   D1: passing('D1'), D2: passing('D2'), D3: passing('D3'), D4: passing('D4'), D5: passing('D5', 0),
   B1: passing('B1', 100), B2: passing('B2'), B3: passing('B3'), B4: passing('B4', 0), B5: passing('B5', 0),
-  C1: passing('C1', 100), C2: passing('C2'), C3: passing('C3'), C4: passing('C4', 0), C5: passing('C5', 0),
+  C1: passing('C1', 100), C2: passing('C2'), C3: passing('C3'), C4: passing('C4', 0), C5: passing('C5', 0), C6: passing('C6', 0),
   O1: passing('O1', 100), O2: passing('O2'), O3: passing('O3'), O4: passing('O4'), O5: passing('O5', 0),
   E1: passing('E1'), E2: passing('E2', 0), E3: passing('E3'), E4: passing('E4', 0), E5: passing('E5'),
 };

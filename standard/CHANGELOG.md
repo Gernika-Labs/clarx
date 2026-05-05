@@ -5,7 +5,7 @@
 Initial release.
 
 - Five pillars with equal 20% weighting
-- 25 rules across all pillars (D1–D5, B1–B5, C1–C5, O1–O5, E1–E5)
+- 26 rules across all pillars (D1–D5, B1–B5, C1–C6, O1–O5, E1–E5)
 - Three hard failures: B1 (circular imports), C1 (generated in source), O1 (no guidance file)
 - Severity model: hard_failure, warning, recommendation
 - Confidence levels: high, medium, low

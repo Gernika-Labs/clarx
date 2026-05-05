@@ -85,7 +85,7 @@ export async function showDisclosureIfNeeded(): Promise<void> {
 }
 
 export interface TelemetryEvent {
-  action:        'score' | 'explain' | 'copy' | 'copy_all' | 'show_all' | 'show_section';
+  action:        'score' | 'explain' | 'copy' | 'copy_all' | 'copy_section' | 'show_all' | 'show_section';
   rule?:         string;
   score?:        number;
   hardFailures?: number;

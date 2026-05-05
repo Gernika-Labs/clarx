@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import type { FileEntry } from './filesystem.js';
 import type { ImportGraph } from './import-graph.js';
 import type { Manifest, RuleResult } from '../types.js';
@@ -153,5 +155,86 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
     scoreImpact: 0,
     message: `Import graph depth reaches ${maxDepth} hops (limit: ${C5_LIMIT})`,
     locations: [{ path: deepestPath[deepestPath.length - 1] ?? '', detail: `${maxDepth}-hop chain` }],
+  };
+}
+
+const ENTRY_FILE_RE = /(?:^|\/)(?:page|screen|view|container|layout|route)\.[jt]sx?$/;
+const BOUNDARY_IMPORT_RE = /(?:^|\/)(?:view-models?\/|presenters?\/|facades?\/)|(?:^|\/)(?:use[A-Z][A-Za-z0-9]*ViewModel|[A-Za-z0-9-]+(?:view-model|viewmodel|presenter|facade|adapter))\.[jt]sx?$/;
+const INFRA_IMPORT_RE = /(?:^|\/)(?:api|client|fetch|query|queries|service|services|store|state|pagination|types?|hooks?|use-[a-z0-9-]+)\b/i;
+const IMPORT_PATH_RE = /(?:import|export)\b[^'"]*['"]([^'"]+)['"]/g;
+const C6_IMPORT_THRESHOLD = 8;
+const C6_INFRA_THRESHOLD = 2;
+
+function extractImports(source: string): string[] {
+  const imports: string[] = [];
+  IMPORT_PATH_RE.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = IMPORT_PATH_RE.exec(source)) !== null) {
+    if (match[1]) imports.push(match[1]);
+  }
+  return imports;
+}
+
+export async function evaluateC6(root: string, files: FileEntry[]): Promise<RuleResult> {
+  const sourceFiles = files.filter(
+    f => !f.isGenerated && ENTRY_FILE_RE.test(f.relativePath)
+  );
+
+  if (sourceFiles.length === 0) {
+    return {
+      id: 'C6',
+      passed: true,
+      severity: 'recommendation',
+      confidence: 'low',
+      scoreImpact: 0,
+      message: 'No entry files detected that need local boundary-surface checks',
+    };
+  }
+
+  const violations: Array<{ path: string; detail: string }> = [];
+
+  for (const file of sourceFiles) {
+    let source: string;
+    try {
+      source = await readFile(join(root, file.relativePath), 'utf-8');
+    } catch {
+      continue;
+    }
+
+    const imports = extractImports(source);
+    const relativeImports = imports.filter(imp => imp.startsWith('.'));
+    const infraImports = relativeImports.filter(imp => INFRA_IMPORT_RE.test(imp));
+    const hasBoundarySurface = relativeImports.some(imp => BOUNDARY_IMPORT_RE.test(imp));
+    const needsBoundarySurface =
+      imports.length >= C6_IMPORT_THRESHOLD || infraImports.length >= C6_INFRA_THRESHOLD;
+
+    if (needsBoundarySurface && !hasBoundarySurface) {
+      violations.push({
+        path: file.relativePath,
+        detail: `${imports.length} imports, ${infraImports.length} infrastructure-style relative imports, no local boundary surface`,
+      });
+    }
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: 'C6',
+      passed: true,
+      severity: 'recommendation',
+      confidence: 'medium',
+      scoreImpact: 0,
+      message: 'Entry files that coordinate multiple dependencies expose a local boundary surface',
+    };
+  }
+
+  return {
+    id: 'C6',
+    passed: false,
+    severity: 'recommendation',
+    confidence: 'medium',
+    scoreImpact: 0,
+    message: `${violations.length} entry file${violations.length > 1 ? 's' : ''} appear to coordinate data/state directly without a local boundary surface`,
+    remediation: 'Introduce a page-local boundary such as a view-model, presenter, facade, or adapter so entry files can stop at one explicit surface instead of tracing hooks, queries, and types.',
+    locations: violations.slice(0, 10),
   };
 }

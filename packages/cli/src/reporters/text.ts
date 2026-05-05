@@ -109,6 +109,23 @@ export function formatText(result: AnalysisResult, opts: { verbose?: boolean } =
 
   lines.push('');
 
+  if (result.opportunities.viewModelMigrations.length > 0) {
+    lines.push(chalk.bold('View-model migration opportunities'));
+    for (const item of result.opportunities.viewModelMigrations.slice(0, 5)) {
+      const tone = item.rating === 'high' ? chalk.yellow : item.rating === 'medium' ? chalk.cyan : chalk.dim;
+      lines.push(`  ${tone(item.rating.toUpperCase().padEnd(6))} ${item.path} ${chalk.dim(`(${item.score})`)}`);
+      lines.push(`         ${item.summary}`);
+      lines.push(`         ${chalk.dim(`Tracing ROI ${item.scores.tracingRoi} · Simplification ROI ${item.scores.simplificationRoi}`)}`);
+      for (const reason of item.reasons.slice(0, 3)) {
+        lines.push(`         ${chalk.dim('•')} ${reason}`);
+      }
+      for (const limit of item.limits.slice(0, 2)) {
+        lines.push(`         ${chalk.dim('◦')} ${limit}`);
+      }
+    }
+    lines.push('');
+  }
+
   // ── Verbose findings ──────────────────────────────────────────────────────────
   if (opts.verbose) {
     for (const [label, group, color] of [

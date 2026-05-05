@@ -1,5 +1,9 @@
 import { describe, it, expect } from '@jest/globals';
+import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { evaluateC1, evaluateC2 } from '../analyzers/rules-c.js';
+import { evaluateC6 } from '../analyzers/rules-c3-c4-c5.js';
 import { makeFile, makeGenerated, makeManifest } from './helpers.js';
 
 describe('C1 — generated artifacts excluded from source tree', () => {
@@ -88,5 +92,63 @@ describe('C2 — no source file exceeds 400 lines', () => {
     const files = [makeFile('assets/logo.png')]; // no lines
     const result = evaluateC2(files);
     expect(result.passed).toBe(true);
+  });
+});
+
+describe('C6 — entry files expose a local boundary surface before infrastructure', () => {
+  it('passes when an entry file imports a local view-model boundary', async () => {
+    const root = join(tmpdir(), `clarx-c6-pass-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src/training'), { recursive: true });
+      await writeFile(join(root, 'src/training/page.tsx'), `
+import { useTrainingPageViewModel } from './useTrainingPageViewModel';
+import { Button } from './button';
+
+export function Page() {
+  return <Button />;
+}
+`, 'utf-8');
+      await writeFile(join(root, 'src/training/useTrainingPageViewModel.ts'), 'export function useTrainingPageViewModel() { return {}; }\n', 'utf-8');
+
+      const result = await evaluateC6(root, [
+        makeFile('src/training/page.tsx'),
+        makeFile('src/training/useTrainingPageViewModel.ts'),
+      ]);
+
+      expect(result.passed).toBe(true);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('flags entry files that coordinate infrastructure imports directly', async () => {
+    const root = join(tmpdir(), `clarx-c6-fail-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src/training'), { recursive: true });
+      await writeFile(join(root, 'src/training/page.tsx'), `
+import { useTrainingFeedback } from './hooks/useTrainingFeedback';
+import { useBackendPagination } from './hooks/useBackendPagination';
+import { fetchTraining } from './services/training-service';
+import { TrainingResponse } from './types';
+import { Badge } from './Badge';
+import { Button } from './Button';
+import { EmptyState } from './EmptyState';
+import { Filters } from './Filters';
+
+export function Page() {
+  return <Button />;
+}
+`, 'utf-8');
+
+      const result = await evaluateC6(root, [
+        makeFile('src/training/page.tsx'),
+      ]);
+
+      expect(result.passed).toBe(false);
+      expect(result.locations?.[0]?.path).toBe('src/training/page.tsx');
+      expect(result.locations?.[0]?.detail).toContain('no local boundary surface');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

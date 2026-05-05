@@ -45,6 +45,17 @@ beforeAll(async () => {
   await write('packages/ui/README.md', '# UI\n');
   await write('packages/ui/src/index.ts', 'export { Button } from "./button.js";\n');
   await write('packages/ui/src/button.tsx', 'export function Button() { return null; }\n');
+  await write('apps/web/src/pages/conversations/page.tsx', `
+import { useUser } from '../../../auth/useUser';
+import { useConversationListQuery } from '../../../hooks/queries/useConversationListQuery';
+import { useConversationStatsQuery } from '../../../hooks/queries/useConversationStatsQuery';
+import { ConversationSummary } from '../../../services/handlers/conversations';
+
+export function Page() {
+  const { accessToken, idToken } = useUser();
+  return <div>{accessToken}{idToken}</div>;
+}
+`);
 });
 
 afterAll(async () => {
@@ -101,18 +112,24 @@ describe('analyze() — happy path', () => {
     expect(result.score).toBeGreaterThanOrEqual(70);
   });
 
-  it('emits a result for all 25 rules', async () => {
+  it('emits a result for all 26 rules', async () => {
     const result = await analyze({ root: ROOT });
     const ruleIds = [
       'D1', 'D2', 'D3', 'D4', 'D5',
       'B1', 'B2', 'B3', 'B4', 'B5',
-      'C1', 'C2', 'C3', 'C4', 'C5',
+      'C1', 'C2', 'C3', 'C4', 'C5', 'C6',
       'O1', 'O2', 'O3', 'O4', 'O5',
       'E1', 'E2', 'E3', 'E4', 'E5',
     ];
     for (const id of ruleIds) {
       expect(result.rules[id as keyof typeof result.rules]).toBeDefined();
     }
+  });
+
+  it('includes ranked view-model migration opportunities', async () => {
+    const result = await analyze({ root: ROOT });
+    expect(result.opportunities.viewModelMigrations.length).toBeGreaterThan(0);
+    expect(result.opportunities.viewModelMigrations[0]?.path).toBe('apps/web/src/pages/conversations/page.tsx');
   });
 });
 

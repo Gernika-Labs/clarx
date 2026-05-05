@@ -5,7 +5,7 @@ description: Rules and rationale for all five pillars of the Clarx standard.
 
 # The Five Pillars
 
-Each pillar has five rules. Rules have three severity levels:
+Each pillar has a small set of rules. Rules have three severity levels:
 
 - **hard_failure** — sets the score floor to 50 for the entire repo
 - **warning** — reduces the pillar score proportionally
@@ -111,6 +111,11 @@ Files imported by 10 or more other files are architectural load-bearing points. 
 Severity: `recommendation`
 
 Deep import chains mean a small change can trigger a wide re-evaluation. An agent navigating a chain of 12 imports loses coherence before reaching the relevant code.
+
+### C6 — Entry files expose a local boundary surface before infrastructure
+Severity: `recommendation`
+
+The real cost of a task is often dependency tracing rather than raw file count. Entry files that directly coordinate hooks, queries, services, and types force an agent to reconstruct implicit contracts across multiple layers. A local boundary surface such as a view-model, presenter, facade, or adapter gives the agent one explicit place to stop.
 
 ---
 
