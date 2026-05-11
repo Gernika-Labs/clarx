@@ -1,4 +1,5 @@
 export { evaluateB3 } from './rules-b.js';
+export { evaluateD6 } from './rules-d6.js';
 export { evaluateB1, evaluateB2 } from './rules-b1-b2.js';
 export { evaluateC1, evaluateC2 } from './rules-c.js';
 export { evaluateC3, evaluateC4, evaluateC5, evaluateC6 } from './rules-c3-c4-c5.js';

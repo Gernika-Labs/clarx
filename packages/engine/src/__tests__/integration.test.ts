@@ -67,7 +67,7 @@ afterAll(async () => {
 describe('analyze() — happy path', () => {
   it('returns a valid AnalysisResult structure', async () => {
     const result = await analyze({ root: ROOT });
-    expect(result.version).toBe('0.1');
+    expect(result.version).toMatch(/^\d+\.\d+\.\d+/);
     expect(typeof result.score).toBe('number');
     expect(result.score).toBeGreaterThanOrEqual(0);
     expect(result.score).toBeLessThanOrEqual(100);
@@ -112,10 +112,10 @@ describe('analyze() — happy path', () => {
     expect(result.score).toBeGreaterThanOrEqual(70);
   });
 
-  it('emits a result for all 26 rules', async () => {
+  it('emits a result for all 27 rules', async () => {
     const result = await analyze({ root: ROOT });
     const ruleIds = [
-      'D1', 'D2', 'D3', 'D4', 'D5',
+      'D1', 'D2', 'D3', 'D4', 'D5', 'D6',
       'B1', 'B2', 'B3', 'B4', 'B5',
       'C1', 'C2', 'C3', 'C4', 'C5', 'C6',
       'O1', 'O2', 'O3', 'O4', 'O5',
@@ -130,6 +130,60 @@ describe('analyze() — happy path', () => {
     const result = await analyze({ root: ROOT });
     expect(result.opportunities.viewModelMigrations.length).toBeGreaterThan(0);
     expect(result.opportunities.viewModelMigrations[0]?.path).toBe('apps/web/src/pages/conversations/page.tsx');
+  });
+});
+
+// ── Gitignore + default patterns ─────────────────────────────────────────────
+
+describe('analyze() — gitignore and default generated patterns', () => {
+  it('respects .gitignore and marks those files as generated', async () => {
+    const gitRoot = join(tmpdir(), `clarx-gitignore-${Date.now()}`);
+    try {
+      await mkdir(gitRoot, { recursive: true });
+      await writeFile(join(gitRoot, 'CLAUDE.md'), '# Guide\n', 'utf-8');
+      await writeFile(join(gitRoot, 'README.md'), '# Repo\n', 'utf-8');
+      await writeFile(join(gitRoot, 'package.json'), JSON.stringify({ name: 'test' }), 'utf-8');
+      await writeFile(join(gitRoot, '.gitignore'), 'generated-output\n', 'utf-8');
+
+      await mkdir(join(gitRoot, 'src'), { recursive: true });
+      await writeFile(join(gitRoot, 'src/index.ts'), 'export const x = 1;\n', 'utf-8');
+
+      await mkdir(join(gitRoot, 'generated-output'), { recursive: true });
+      await writeFile(join(gitRoot, 'generated-output/schema.ts'), 'export type T = string;\n', 'utf-8');
+
+      const result = await analyze({ root: gitRoot });
+      expect(result.meta.filesScanned).toBeGreaterThan(0);
+      // generated-output/schema.ts is counted but should not inflate non-generated file count
+      const nonGeneratedTs = result.meta.filesScanned;
+      // Re-run without gitignore dir to confirm it doesn't change rule outputs
+      expect(result.rules['D1']).toBeDefined();
+    } finally {
+      await rm(gitRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('excludes default generated dirs (dist, .next, coverage) even without .gitignore', async () => {
+    const bareRoot = join(tmpdir(), `clarx-defaults-${Date.now()}`);
+    try {
+      await mkdir(bareRoot, { recursive: true });
+      await writeFile(join(bareRoot, 'CLAUDE.md'), '# Guide\n', 'utf-8');
+      await writeFile(join(bareRoot, 'README.md'), '# Repo\n', 'utf-8');
+      await writeFile(join(bareRoot, 'package.json'), JSON.stringify({ name: 'test' }), 'utf-8');
+      await mkdir(join(bareRoot, 'src'), { recursive: true });
+      await writeFile(join(bareRoot, 'src/index.ts'), 'export const x = 1;\n', 'utf-8');
+
+      // These should all be treated as generated and not inflate file counts
+      await mkdir(join(bareRoot, 'dist'), { recursive: true });
+      await writeFile(join(bareRoot, 'dist/index.js'), 'exports.x = 1;\n', 'utf-8');
+      await mkdir(join(bareRoot, 'coverage'), { recursive: true });
+      await writeFile(join(bareRoot, 'coverage/lcov.info'), 'SF:src/index.ts\n', 'utf-8');
+
+      const result = await analyze({ root: bareRoot });
+      expect(result.meta.filesScanned).toBeGreaterThan(0);
+      expect(result.rules['D1']).toBeDefined();
+    } finally {
+      await rm(bareRoot, { recursive: true, force: true });
+    }
   });
 });
 

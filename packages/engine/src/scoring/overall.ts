@@ -1,7 +1,7 @@
 import type { AnalysisResult, Confidence, PillarName, PillarScore, RuleId, RuleResult } from '../types.js';
 
 const PILLAR_RULES: Record<PillarName, RuleId[]> = {
-  discoverability: ['D1', 'D2', 'D3', 'D4', 'D5'],
+  discoverability: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'],
   boundary_clarity: ['B1', 'B2', 'B3', 'B4', 'B5'],
   context_efficiency: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'],
   operational_guidance: ['O1', 'O2', 'O3', 'O4', 'O5'],

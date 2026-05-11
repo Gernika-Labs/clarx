@@ -1,11 +1,40 @@
 import { spawnSync } from 'node:child_process';
-import type { AnalysisResult, AnalyzeOptions, Manifest } from './types.js';
+import { createRequire } from 'node:module';
+import type { AnalysisResult, AnalyzeOptions, Manifest, RuleResult } from './types.js';
+import type { FileEntry } from './analyzers/filesystem.js';
+
+const _require = createRequire(import.meta.url);
+const ENGINE_VERSION: string = (_require('../package.json') as { version: string }).version;
 import { scanFilesystem } from './analyzers/filesystem.js';
 import { buildImportGraph } from './analyzers/import-graph.js';
 import { findViewModelMigrationOpportunities } from './analyzers/index.js';
 import { evaluateRules } from './scoring/rules.js';
 import { computeScore } from './scoring/overall.js';
 import { loadManifest } from './manifest.js';
+
+// Build a set of every valid path reachable in the scanned tree:
+// all file relativePaths plus every directory segment derived from them.
+function buildValidPathSet(files: FileEntry[]): Set<string> {
+  const valid = new Set<string>();
+  for (const f of files) {
+    valid.add(f.relativePath);
+    const parts = f.relativePath.split('/');
+    for (let i = 1; i < parts.length; i++) {
+      valid.add(parts.slice(0, i).join('/'));
+    }
+  }
+  return valid;
+}
+
+// Drop any location whose path doesn't correspond to a real file or directory
+// in the scanned tree. Prevents phantom paths from leaking into results.
+function filterLocationPaths(rules: Partial<Record<string, RuleResult>>, validPaths: Set<string>): void {
+  for (const rule of Object.values(rules)) {
+    if (!rule?.locations) continue;
+    rule.locations = rule.locations.filter(loc => loc.path.length > 0 && validPaths.has(loc.path));
+    if (rule.locations.length === 0) delete rule.locations;
+  }
+}
 
 function getGitTrackedPaths(root: string): Set<string> {
   try {
@@ -25,6 +54,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
   const gitTrackedPaths = getGitTrackedPaths(root);
   const importGraph = await buildImportGraph(root, files, manifest?.workspaces ?? null);
   const { rules, importGraphResolved } = await evaluateRules(root, files, manifest, importGraph, gitTrackedPaths);
+  filterLocationPaths(rules, buildValidPathSet(files));
   const viewModelMigrations = await findViewModelMigrationOpportunities(root, files);
   const { score, confidence, hardFailures, pillars } = computeScore(rules, { importGraphResolved, manifestFound: manifest !== null });
 
@@ -37,7 +67,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
     : undefined;
 
   return {
-    version: '0.1',
+    version: ENGINE_VERSION,
     confidence,
     score,
     hardFailures,

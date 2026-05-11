@@ -5,13 +5,61 @@ import type { ImportGraph } from './import-graph.js';
 import type { Manifest, RuleResult } from '../types.js';
 
 // C3 — no file imports from more than 15 distinct modules
-// Files declared in manifest.highFanIn are intentional hubs and are exempt.
+// Files declared in manifest.highFanOut are intentional aggregation points and are exempt.
+// Common mutation/command layer filenames (actions.ts, mutations.ts, etc.) are also auto-exempted
+// because they reach into many domains by design — the coupling is intentional, not accidental.
 const C3_LIMIT = 15;
 
+const AGGREGATION_FILENAME_RE = /(?:^|\/)(?:actions|mutations|resolvers|commands|handlers|routes)\.[jt]sx?$/;
+
+// Extracts a human-readable domain label from a resolved internal file path.
+// Tries to strip common boilerplate prefixes (src/, packages/foo/src/) so
+// the first meaningful segment is the domain name.
+function domainFromPath(resolvedPath: string): string | null {
+  const parts = resolvedPath.split('/');
+  const srcIdx = parts.indexOf('src');
+  const start = srcIdx >= 0 ? srcIdx + 1 : 0;
+  const remaining = parts.slice(start);
+  // Next.js app-router: app/[domain]/... → use the second segment
+  if (remaining[0] === 'app' && remaining.length > 1) {
+    const seg = remaining[1]!;
+    return seg.startsWith('(') ? (remaining[2] ?? remaining[0] ?? null) : seg;
+  }
+  return remaining[0] ?? null;
+}
+
+function clusterDetail(path: string, totalCount: number, graph: ImportGraph): string {
+  const internalEdges = [...(graph.edges.get(path) ?? new Set<string>())]
+    .filter(p => !p.endsWith('/__entry__'));
+  const externalCount = totalCount - internalEdges.length;
+
+  const domains = new Map<string, number>();
+  for (const imp of internalEdges) {
+    const domain = domainFromPath(imp);
+    if (domain) domains.set(domain, (domains.get(domain) ?? 0) + 1);
+  }
+
+  const top = [...domains.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([d, n]) => `${d} (${n})`)
+    .join(', ');
+
+  if (!top) return `${totalCount} imports`;
+  return externalCount > 0
+    ? `${totalCount} imports — ${top} +${externalCount} pkg`
+    : `${totalCount} imports — ${top}`;
+}
+
 export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleResult {
-  const declared = new Set(manifest?.highFanIn ?? []);
+  const declared = new Set(manifest?.highFanOut ?? []);
   const violations = [...graph.importCount.entries()]
-    .filter(([path, count]) => count > C3_LIMIT && ![...declared].some(d => path === d || path.endsWith('/' + d)))
+    .filter(([path, count]) => {
+      if (count <= C3_LIMIT) return false;
+      if ([...declared].some(d => path === d || path.endsWith('/' + d))) return false;
+      if (AGGREGATION_FILENAME_RE.test(path)) return false;
+      return true;
+    })
     .sort((a, b) => b[1] - a[1]);
 
   if (violations.length === 0) {
@@ -21,7 +69,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
       severity: 'warning',
       confidence: 'high',
       scoreImpact: 25,
-      message: `No file imports from more than ${C3_LIMIT} distinct modules`,
+      message: `No file has a large import surface (more than ${C3_LIMIT} distinct modules)`,
     };
   }
 
@@ -31,10 +79,11 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
     severity: 'warning',
     confidence: 'high',
     scoreImpact: 25,
-    message: `${violations.length} file${violations.length > 1 ? 's' : ''} import from more than ${C3_LIMIT} modules`,
+    message: `${violations.length} file${violations.length > 1 ? 's' : ''} ${violations.length > 1 ? 'have' : 'has'} a large import surface (more than ${C3_LIMIT} modules) — harder to navigate and expensive for LLM context windows`,
+    remediation: 'If a file is an intentional aggregation point (e.g. a Server Actions file, API layer, or command handler), declare it in manifest.highFanOut to suppress this finding. Otherwise consider extracting cohesive domain slices into separate files.',
     locations: violations.slice(0, 10).map(([path, count]) => ({
       path,
-      detail: `${count} imports`,
+      detail: clusterDetail(path, count, graph),
     })),
   };
 }
@@ -46,6 +95,17 @@ export function evaluateC4(
   graph: ImportGraph,
   manifest: Manifest | null
 ): RuleResult {
+  if (manifest === null) {
+    return {
+      id: 'C4',
+      passed: true,
+      severity: 'recommendation',
+      confidence: 'low',
+      scoreImpact: 0,
+      message: 'Add a clarx-manifest.json to document high fan-in files once adopted',
+    };
+  }
+
   const highFanIn = [...graph.fanIn.entries()]
     .filter(([path, count]) => count >= C4_THRESHOLD && !path.endsWith('/__entry__'))
     .sort((a, b) => b[1] - a[1]);
@@ -129,7 +189,7 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
       }
 
       for (const neighbor of graph.edges.get(node) ?? []) {
-        if (!visited.has(neighbor)) {
+        if (!visited.has(neighbor) && !neighbor.endsWith('/__entry__')) {
           queue.push({ node: neighbor, path: [...path, neighbor] });
         }
       }

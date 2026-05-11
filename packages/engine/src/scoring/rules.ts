@@ -19,6 +19,7 @@ import {
   evaluateD3,
   evaluateD4WithRoot,
   evaluateD5,
+  evaluateD6,
   evaluateE1,
   evaluateE2,
   evaluateE3,
@@ -73,6 +74,7 @@ export async function evaluateRules(
   rules['D3'] = evaluateD3(files, manifest);
   rules['D4'] = await evaluateD4WithRoot(root, files);
   rules['D5'] = evaluateD5(files, manifest);
+  rules['D6'] = evaluateD6(files);
 
   // ── Boundary Clarity ──────────────────────────────────────────────────────
 
@@ -85,7 +87,7 @@ export async function evaluateRules(
   // ── Context Efficiency ────────────────────────────────────────────────────
 
   rules['C1'] = evaluateC1(files, manifest, gitTrackedPaths);
-  rules['C2'] = evaluateC2(files);
+  rules['C2'] = await evaluateC2(root, files);
   rules['C3'] = evaluateC3(importGraph, manifest);
   rules['C4'] = evaluateC4(importGraph, manifest);
   rules['C5'] = evaluateC5(importGraph, files);

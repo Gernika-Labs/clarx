@@ -44,8 +44,8 @@ export function evaluateB1(
     scoreImpact: 100,
     message: `${cycles.length} circular import cycle${cycles.length > 1 ? 's' : ''} detected between packages`,
     locations: cycles.map(cycle => ({
-      path: cycle.join(' → '),
-      detail: 'Break the cycle by extracting shared code into a third package',
+      path: cycle[0]!,
+      detail: cycle.join(' → '),
     })),
   };
 }
@@ -70,15 +70,15 @@ export function evaluateB2(
     };
   }
 
-  // Build: filename (without leading package path) → list of packages that have it
-  const filesByName = new Map<string, string[]>();
+  // Build: logical filename (without package prefix) → actual file paths
+  const filesByLogical = new Map<string, string[]>();
 
   for (const f of files) {
     if (f.isGenerated) continue;
     const pkg = workspaceDirs.find(d => f.relativePath.startsWith(d + '/'));
     if (!pkg) continue;
 
-    // Strip package prefix and src/ prefix to get the "logical" path
+    // Strip package prefix and src/ prefix to get the "logical" path for dedup key
     let logical = f.relativePath.slice(pkg.length + 1);
     if (logical.startsWith('src/')) logical = logical.slice(4);
 
@@ -87,14 +87,12 @@ export function evaluateB2(
     if (['index.ts', 'index.tsx', 'index.js', 'types.ts', 'types.d.ts'].includes(basename)) continue;
     if (!logical.match(/\.[jt]sx?$/)) continue;
 
-    const list = filesByName.get(logical) ?? [];
-    list.push(pkg);
-    filesByName.set(logical, list);
+    const list = filesByLogical.get(logical) ?? [];
+    list.push(f.relativePath);
+    filesByLogical.set(logical, list);
   }
 
-  const duplicates = [...filesByName.entries()]
-    .filter(([, pkgs]) => pkgs.length > 1)
-    .map(([path, pkgs]) => ({ path, pkgs }));
+  const duplicates = [...filesByLogical.values()].filter(paths => paths.length > 1);
 
   if (duplicates.length === 0) {
     return {
@@ -114,9 +112,8 @@ export function evaluateB2(
     confidence: 'medium',
     scoreImpact: 25,
     message: `${duplicates.length} file${duplicates.length > 1 ? 's' : ''} duplicated across packages`,
-    locations: duplicates.slice(0, 10).map(d => ({
-      path: d.path,
-      detail: `Found in: ${d.pkgs.join(', ')}`,
-    })),
+    locations: duplicates.slice(0, 10).flatMap(paths =>
+      paths.map(p => ({ path: p, detail: `Duplicated across ${paths.length} packages` }))
+    ),
   };
 }

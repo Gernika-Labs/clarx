@@ -28,19 +28,32 @@ describe('C3 — no file imports from more than 15 distinct modules', () => {
     expect(result.locations?.[0]?.detail).toBe('20 imports');
   });
 
-  it('exempts files declared in manifest.highFanIn', () => {
+  it('exempts files declared in manifest.highFanOut', () => {
     const graph = makeImportGraph({ 'src/registry.ts': 20 });
-    const manifest = makeManifest({ highFanIn: ['src/registry.ts'] });
+    const manifest = makeManifest({ highFanOut: ['src/registry.ts'] });
     expect(evaluateC3(graph, manifest).passed).toBe(true);
   });
 
-  it('does not exempt files not in highFanIn', () => {
+  it('does not exempt files not in highFanOut', () => {
     const graph = makeImportGraph({ 'src/registry.ts': 20, 'src/other.ts': 18 });
-    const manifest = makeManifest({ highFanIn: ['src/registry.ts'] });
+    const manifest = makeManifest({ highFanOut: ['src/registry.ts'] });
     const result = evaluateC3(graph, manifest);
     expect(result.passed).toBe(false);
     expect(result.locations).toHaveLength(1);
     expect(result.locations?.[0]?.path).toBe('src/other.ts');
+  });
+
+  it('auto-exempts aggregation layer filenames (actions.ts, mutations.ts, etc.)', () => {
+    const graph = makeImportGraph({
+      'src/app/actions.ts': 25,
+      'src/mutations.ts': 20,
+      'src/resolvers.ts': 18,
+      'src/god.ts': 17,
+    });
+    const result = evaluateC3(graph, null);
+    expect(result.passed).toBe(false);
+    expect(result.locations).toHaveLength(1);
+    expect(result.locations?.[0]?.path).toBe('src/god.ts');
   });
 });
 

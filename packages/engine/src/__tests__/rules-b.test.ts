@@ -82,8 +82,11 @@ describe('B2 — shared code lives in a declared package', () => {
     ];
     const result = evaluateB2(files, makeManifest());
     expect(result.passed).toBe(false);
-    expect(result.locations?.[0]?.detail).toContain('packages/a');
-    expect(result.locations?.[0]?.detail).toContain('packages/b');
+    // Locations now point to the actual file paths (one per duplicate occurrence)
+    const paths = result.locations?.map(l => l.path) ?? [];
+    expect(paths).toContain('packages/a/src/formatting.ts');
+    expect(paths).toContain('packages/b/src/formatting.ts');
+    expect(result.locations?.[0]?.detail).toContain('Duplicated across');
   });
 
   it('ignores index.ts and types.ts duplicates (expected pattern)', () => {

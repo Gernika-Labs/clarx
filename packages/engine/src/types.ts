@@ -1,5 +1,5 @@
 export type RuleId =
-  | 'D1' | 'D2' | 'D3' | 'D4' | 'D5'
+  | 'D1' | 'D2' | 'D3' | 'D4' | 'D5' | 'D6'
   | 'B1' | 'B2' | 'B3' | 'B4' | 'B5'
   | 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6'
   | 'O1' | 'O2' | 'O3' | 'O4' | 'O5'
@@ -18,13 +18,16 @@ export type Confidence = 'high' | 'medium' | 'low';
  * or additional examples of the same violation. Consumers that want a single
  * representative path should always use `locations[0].path`.
  *
- * `path` is relative to the repo root. `line` is 1-based and optional.
- * `detail` is a short human-readable annotation for the location (e.g. the
- * export name that triggered the rule, or the import that created a cycle).
+ * `path` is relative to the repo root. `line` and `endLine` are 1-based and
+ * optional; when both are present they form an inclusive line range. Rules that
+ * point to a single line may omit `endLine`. `detail` is a short human-readable
+ * annotation for the location (e.g. the export name that triggered the rule, or
+ * the import that created a cycle).
  */
 export type Location = {
   path: string;
   line?: number;
+  endLine?: number;
   detail?: string;
 };
 
@@ -114,6 +117,7 @@ export type Manifest = {
   generated?: string[];
   workspaces?: Record<string, string>;
   highFanIn?: string[];
+  highFanOut?: string[];
   verificationCommands?: {
     typecheck?: string;
     test?: string;

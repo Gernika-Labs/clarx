@@ -88,6 +88,9 @@ importers:
 
   packages/engine:
     dependencies:
+      ignore:
+        specifier: ^7.0.5
+        version: 7.0.5
       minimatch:
         specifier: ^9.0.0
         version: 9.0.9
@@ -2060,6 +2063,10 @@ packages:
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
+
+  ignore@7.0.5:
+    resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
+    engines: {node: '>= 4'}
 
   image-size@2.0.2:
     resolution: {integrity: sha512-IRqXKlaXwgSMAMtpNzZa1ZAe8m+Sa1770Dhk8VkSsP9LS+iHD62Zd8FQKs8fbPiagBE7BzoFX23cxFnwshpV6w==}
@@ -5168,6 +5175,8 @@ snapshots:
   html-void-elements@3.0.0: {}
 
   human-signals@2.1.0: {}
+
+  ignore@7.0.5: {}
 
   image-size@2.0.2: {}
 

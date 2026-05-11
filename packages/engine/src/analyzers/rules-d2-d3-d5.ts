@@ -159,6 +159,22 @@ export function evaluateD3(files: FileEntry[], manifest?: Manifest | null): Rule
 // D5 — directory depth does not exceed 5 levels before a module boundary
 const D5_LIMIT = 5;
 
+// Matches file-system routing segments used by Next.js, Remix, SvelteKit, etc.
+// These are structurally required by the framework and cannot be flattened.
+const ROUTING_SEGMENT_RE = /^[\[(@]/;
+
+// Reserved filenames in file-system routers (Next.js app router, Remix, etc.).
+// Files with these names exist because the router requires them at that path.
+const ROUTER_ENTRY_FILENAMES = new Set([
+  'route.ts', 'route.tsx', 'route.js', 'route.jsx',
+  'page.ts', 'page.tsx', 'page.js', 'page.jsx',
+  'layout.ts', 'layout.tsx',
+  'loading.ts', 'loading.tsx',
+  'error.ts', 'error.tsx',
+  'not-found.ts', 'not-found.tsx',
+  'template.ts', 'template.tsx',
+]);
+
 export function evaluateD5(files: FileEntry[], manifest: Manifest | null): RuleResult {
   const workspacePrefixes = manifest?.workspaces
     ? Object.keys(manifest.workspaces).map(d => d + '/')
@@ -178,7 +194,14 @@ export function evaluateD5(files: FileEntry[], manifest: Manifest | null): RuleR
       }
     }
 
-    const depth = rel.split('/').length - 1; // number of directory levels
+    const segments = rel.split('/');
+    const filename = segments[segments.length - 1] ?? '';
+    // Skip framework router files — their path depth is dictated by the router,
+    // not by the developer's choice of nesting.
+    if (ROUTER_ENTRY_FILENAMES.has(filename)) continue;
+    if (segments.some(seg => ROUTING_SEGMENT_RE.test(seg))) continue;
+
+    const depth = segments.length - 1; // number of directory levels
     if (depth > D5_LIMIT) deep.push(f.relativePath);
   }
 

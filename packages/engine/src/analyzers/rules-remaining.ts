@@ -83,8 +83,8 @@ export function evaluateB5(files: FileEntry[]): RuleResult {
     // Co-located: test is in same dir as its source
     const isColocated = sourceFiles.some(f => f.relativePath.split('/').slice(0, -1).join('/') === dir);
 
-    // Mirrored: test is in a __tests__/ subdirectory
-    const isMirrored = dir.includes('__tests__') || dir.includes('test/') || dir.includes('tests/');
+    // Mirrored: test is inside any directory named test, tests, or __tests__ at any depth
+    const isMirrored = /(?:^|\/)(?:__tests__|tests?)(?:\/|$)/.test(dir);
 
     if (!isColocated && !isMirrored) {
       misplaced.push(testPath);

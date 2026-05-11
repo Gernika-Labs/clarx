@@ -1,11 +1,17 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import { minimatch } from 'minimatch';
+import ignore, { type Ignore } from 'ignore';
 import type { Manifest } from '../types.js';
 
-const ALWAYS_EXCLUDED = [
-  '**/node_modules/**',
-  '**/.git/**',
+const ALWAYS_EXCLUDED = ['node_modules', '.git'];
+
+const DEFAULT_GENERATED_PATTERNS = [
+  'dist', 'build', 'out',
+  '.next', '.nuxt', '.output',
+  'coverage', '.nyc_output',
+  '.turbo', '.cache',
+  'storybook-static',
+  '__pycache__', '*.pyc', '*.pyo',
 ];
 
 const LINE_COUNT_EXTENSIONS = new Set([
@@ -35,15 +41,27 @@ function shouldCountLines(filePath: string): boolean {
   return LINE_COUNT_EXTENSIONS.has(ext);
 }
 
+async function buildIgnoreFilter(root: string, extraPatterns: string[]): Promise<Ignore> {
+  const ig = ignore().add([...ALWAYS_EXCLUDED, ...DEFAULT_GENERATED_PATTERNS, ...extraPatterns]);
+  try {
+    const content = await readFile(join(root, '.gitignore'), 'utf-8');
+    ig.add(content);
+  } catch {
+    // no .gitignore — fine
+  }
+  return ig;
+}
+
 export async function scanFilesystem(
   root: string,
   options: { ignore: string[]; manifest: Manifest | null }
 ): Promise<{ files: FileEntry[]; stats: ScanStats }> {
-  const generatedPatterns = [
-    ...ALWAYS_EXCLUDED,
+  const extraPatterns = [
     ...(options.manifest?.generated ?? []),
     ...options.ignore,
   ];
+
+  const ignoreFilter = await buildIgnoreFilter(root, extraPatterns);
 
   const files: FileEntry[] = [];
 
@@ -53,7 +71,7 @@ export async function scanFilesystem(
       const fullPath = join(dir, entry.name);
       const rel = relative(root, fullPath);
 
-      const isGenerated = generatedPatterns.some(p => minimatch(rel, p, { dot: true }));
+      const isGenerated = rel.length > 0 && ignoreFilter.ignores(rel);
 
       if (entry.isDirectory()) {
         if (!isGenerated) await walk(fullPath);

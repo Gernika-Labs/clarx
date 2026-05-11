@@ -1,6 +1,6 @@
 {
   "name": "@clarxai/engine",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Clarx codebase analysis engine",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,6 +26,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "ignore": "^7.0.5",
     "minimatch": "^9.0.0"
   },
   "devDependencies": {

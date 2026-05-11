@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { minimatch } from 'minimatch';
 import type { FileEntry } from './filesystem.js';
@@ -75,10 +75,35 @@ export function evaluateC1(
 // C2 — no source file exceeds 400 lines
 const C2_LIMIT = 400;
 
-export function evaluateC2(files: FileEntry[]): RuleResult {
-  const violations = files
-    .filter(f => !f.isGenerated && f.lines !== undefined && f.lines > C2_LIMIT)
-    .sort((a, b) => (b.lines ?? 0) - (a.lines ?? 0));
+// Files whose names signal static data — exempt from the line-count limit
+// regardless of whether they contain a small incidental helper.
+const DATA_FILENAME_RE = /[-.](?:content|data|seed|fixture|mock|stub|constants?)(?:\.[^.]+)*\.[jt]sx?$/i;
+
+// Detects files with meaningful executable logic (functions, classes, arrow
+// functions). Pure data/type files that happen to have one small helper are
+// caught by DATA_FILENAME_RE above; this check handles everything else.
+const FN_RE = /^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s+\w/m;
+const CLASS_RE = /^\s*(?:export\s+)?(?:default\s+)?class\s+\w/m;
+const ARROW_RE = /^\s*(?:export\s+)?(?:const|let|var)\s+\w[\w\s,:<>[\]]*=\s*(?:async\s*)?\(/m;
+
+function hasExecutableLogic(content: string): boolean {
+  return FN_RE.test(content) || CLASS_RE.test(content) || ARROW_RE.test(content);
+}
+
+export async function evaluateC2(root: string, files: FileEntry[]): Promise<RuleResult> {
+  const candidates = files.filter(f => !f.isGenerated && f.lines !== undefined && f.lines > C2_LIMIT);
+
+  const violations: FileEntry[] = [];
+  for (const f of candidates) {
+    if (DATA_FILENAME_RE.test(f.relativePath)) continue; // static data file — exempt by name
+    try {
+      const content = await readFile(join(root, f.relativePath), 'utf-8');
+      if (hasExecutableLogic(content)) violations.push(f);
+    } catch {
+      violations.push(f); // if unreadable, include it to be safe
+    }
+  }
+  violations.sort((a, b) => (b.lines ?? 0) - (a.lines ?? 0));
 
   if (violations.length === 0) {
     return {

@@ -54,43 +54,43 @@ describe('C1 — generated artifacts excluded from source tree', () => {
 });
 
 describe('C2 — no source file exceeds 400 lines', () => {
-  it('passes when all files are under 400 lines', () => {
+  it('passes when all files are under 400 lines', async () => {
     const files = [makeFile('src/a.ts', 100), makeFile('src/b.ts', 399)];
-    const result = evaluateC2(files);
+    const result = await evaluateC2('/', files);
     expect(result.passed).toBe(true);
   });
 
-  it('fails when a file exceeds 400 lines', () => {
+  it('fails when a file exceeds 400 lines', async () => {
     const files = [makeFile('src/a.ts', 100), makeFile('src/b.ts', 401)];
-    const result = evaluateC2(files);
+    const result = await evaluateC2('/', files);
     expect(result.passed).toBe(false);
     expect(result.locations).toHaveLength(1);
     expect(result.locations?.[0]?.path).toBe('src/b.ts');
     expect(result.locations?.[0]?.detail).toBe('401 lines');
   });
 
-  it('reports multiple violations sorted by line count descending', () => {
+  it('reports multiple violations sorted by line count descending', async () => {
     const files = [
       makeFile('src/a.ts', 500),
       makeFile('src/b.ts', 800),
       makeFile('src/c.ts', 200),
     ];
-    const result = evaluateC2(files);
+    const result = await evaluateC2('/', files);
     expect(result.passed).toBe(false);
     expect(result.locations).toHaveLength(2);
     expect(result.locations?.[0]?.path).toBe('src/b.ts'); // worst first
   });
 
-  it('ignores generated files', () => {
+  it('ignores generated files', async () => {
     const files = [makeGenerated('dist/bundle.js')];
     Object.assign(files[0]!, { lines: 9999 });
-    const result = evaluateC2(files);
+    const result = await evaluateC2('/', files);
     expect(result.passed).toBe(true);
   });
 
-  it('ignores files without a line count', () => {
+  it('ignores files without a line count', async () => {
     const files = [makeFile('assets/logo.png')]; // no lines
-    const result = evaluateC2(files);
+    const result = await evaluateC2('/', files);
     expect(result.passed).toBe(true);
   });
 });
