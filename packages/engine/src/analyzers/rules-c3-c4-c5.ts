@@ -80,7 +80,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
     confidence: 'high',
     scoreImpact: 25,
     message: `${violations.length} file${violations.length > 1 ? 's' : ''} ${violations.length > 1 ? 'have' : 'has'} a large import surface (more than ${C3_LIMIT} modules) — harder to navigate and expensive for LLM context windows`,
-    remediation: 'If a file is an intentional aggregation point (e.g. a Server Actions file, API layer, or command handler), declare it in manifest.highFanOut to suppress this finding. Otherwise consider extracting cohesive domain slices into separate files.',
+    remediation: 'The domain breakdown in each finding shows which concerns are already clustered — extract the largest clusters into their own files first. If a file is an intentional aggregation point (e.g. a Server Actions file or API layer), declare it in manifest.highFanOut to suppress this finding.',
     locations: violations.slice(0, 10).map(([path, count]) => ({
       path,
       detail: clusterDetail(path, count, graph),
@@ -144,9 +144,10 @@ export function evaluateC4(
     confidence: 'medium',
     scoreImpact: 0,
     message: `${undocumented.length} high fan-in file${undocumented.length > 1 ? 's' : ''} not documented in manifest.highFanIn`,
+    remediation: 'Add these paths to manifest.highFanIn. Documenting them signals to every editor that changes here have a wide blast radius — callers will break silently if the exported API changes.',
     locations: undocumented.slice(0, 10).map(([path, count]) => ({
       path,
-      detail: `imported by ${count} files`,
+      detail: `blast radius: ${count} direct callers`,
     })),
   };
 }

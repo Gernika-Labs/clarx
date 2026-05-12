@@ -13,7 +13,14 @@ export type ImportGraph = {
   packageIndex: Map<string, string>;
 };
 
-const IMPORT_RE = /(?:^|[\r\n])\s*(?:import|export)\b[^'"]*['"]([^'"]+)['"]/g;
+// Matches `import ... from 'mod'` and `export ... from 'mod'` anchored to line starts.
+// Using [^'"\n]* (no newlines, no quotes) prevents false matches on SQL 'FROM "table"'
+// patterns inside template literals or string bodies. Multi-line imports where 'from'
+// is on a separate line from the keyword are rare and the miss is less harmful than
+// inflated counts from unanchored matching.
+const FROM_RE = /(?:^|[\r\n])\s*(?:import|export)\b[^'"\n]*\bfrom\s*['"]([^'"]+)['"]/g;
+// Matches side-effect imports: `import 'mod'` (no `from` clause).
+const SIDE_EFFECT_RE = /(?:^|[\r\n])\s*import\s+['"]([^'"]+)['"]/g;
 const REQUIRE_RE = /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 const DYNAMIC_RE = /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
@@ -22,7 +29,7 @@ const INDEX_NAMES = RESOLVABLE_EXTS.map(e => `index${e}`);
 
 function extractRawImports(source: string): string[] {
   const results = new Set<string>();
-  for (const re of [IMPORT_RE, REQUIRE_RE, DYNAMIC_RE]) {
+  for (const re of [FROM_RE, SIDE_EFFECT_RE, REQUIRE_RE, DYNAMIC_RE]) {
     re.lastIndex = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(source)) !== null) {
@@ -108,6 +115,11 @@ export async function buildImportGraph(
       if (imp.startsWith('.')) {
         // Relative import — resolve within the same package
         const target = resolveRelative(file.relativePath, imp, fileSet);
+        if (target) resolved.add(target);
+      } else if (imp.startsWith('@/')) {
+        // Next.js-style path alias: @/ → src/ (resolves to internal files for domain clustering)
+        // Use a virtual anchor in src/ so resolveRelative computes: src/ + ./rest = src/rest
+        const target = resolveRelative('src/__alias__', '.' + imp.slice(1), fileSet);
         if (target) resolved.add(target);
       } else {
         // Bare specifier — check if it maps to a known workspace package

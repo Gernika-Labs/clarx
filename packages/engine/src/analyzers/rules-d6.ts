@@ -65,17 +65,31 @@ export function evaluateD6(files: FileEntry[]): RuleResult {
     };
   }
 
-  const totalRoutes = shadowGroups.reduce((n, [, paths]) => n + paths.length, 0);
+  const groupDescriptions = shadowGroups.map(([leaf, paths]) =>
+    `'${leaf}': ${paths.join(' vs ')}`
+  );
+  const message = shadowGroups.length === 1
+    ? `Route ${groupDescriptions[0]} appears at multiple URL depths with no documented distinction`
+    : `${shadowGroups.length} route names appear at multiple URL depths with no documented distinction: ${groupDescriptions.join('; ')}`;
+
   return {
     id: 'D6',
     passed: false,
     severity: 'warning',
     confidence: 'medium',
     scoreImpact: 25,
-    message: `${shadowGroups.length} route name${shadowGroups.length > 1 ? 's' : ''} appear at multiple URL depths — likely shadow or duplicate handlers`,
-    remediation: 'Pick one canonical URL for each resource and delete or redirect the other. If both are intentional (mobile vs desktop API), document the distinction in clarx-manifest.json.',
-    locations: shadowGroups.flatMap(([leaf, paths]) =>
-      paths.map(p => ({ path: p, detail: `"${leaf}" also exists at a different URL depth` }))
+    message,
+    remediation: 'If both handlers are intentional (e.g. separate mobile and web APIs), document the distinction in clarx-manifest.json. Otherwise, pick one canonical URL and delete or redirect the other.',
+    locations: shadowGroups.flatMap(([, paths]) =>
+      paths.map(p => {
+        const siblings = paths.filter(other => other !== p);
+        return {
+          path: p,
+          detail: siblings.length === 1
+            ? `same leaf segment as ${siblings[0]}`
+            : `same leaf segment as ${siblings.join(', ')}`,
+        };
+      })
     ),
   };
 }
