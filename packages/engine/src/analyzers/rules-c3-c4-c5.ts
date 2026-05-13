@@ -12,6 +12,22 @@ const C3_LIMIT = 15;
 
 const AGGREGATION_FILENAME_RE = /(?:^|\/)(?:actions|mutations|resolvers|commands|handlers|routes)\.[jt]sx?$/;
 
+function dirOf(p: string): string {
+  const idx = p.lastIndexOf('/');
+  return idx >= 0 ? p.slice(0, idx) : '';
+}
+
+// A single-domain barrel imports exclusively from its own directory.
+// These are not navigation problems — they're the right pattern for index files
+// that aggregate many small sibling files (e.g. components/svgs/index.ts).
+function isSingleDomainBarrel(path: string, graph: ImportGraph): boolean {
+  const edges = [...(graph.edges.get(path) ?? new Set<string>())]
+    .filter(p => !p.endsWith('/__entry__'));
+  if (edges.length === 0) return false;
+  const fileDir = dirOf(path);
+  return edges.every(e => dirOf(e) === fileDir);
+}
+
 // Extracts a human-readable domain label from a resolved internal file path.
 // Tries to strip common boilerplate prefixes (src/, packages/foo/src/) so
 // the first meaningful segment is the domain name.
@@ -58,6 +74,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
       if (count <= C3_LIMIT) return false;
       if ([...declared].some(d => path === d || path.endsWith('/' + d))) return false;
       if (AGGREGATION_FILENAME_RE.test(path)) return false;
+      if (isSingleDomainBarrel(path, graph)) return false;
       return true;
     })
     .sort((a, b) => b[1] - a[1]);
@@ -91,6 +108,11 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
 // C4 — high fan-in files are documented
 const C4_THRESHOLD = 10;
 
+// Files in a conventionally-named UI component library directory are designed
+// to have many callers — that's their purpose. Exempting them avoids requiring
+// a manifest.highFanIn entry for every button, text, icon, etc.
+const UI_LIB_DIR_RE = /(?:^|\/)ui(?:\/|$)/i;
+
 export function evaluateC4(
   graph: ImportGraph,
   manifest: Manifest | null
@@ -107,7 +129,7 @@ export function evaluateC4(
   }
 
   const highFanIn = [...graph.fanIn.entries()]
-    .filter(([path, count]) => count >= C4_THRESHOLD && !path.endsWith('/__entry__'))
+    .filter(([path, count]) => count >= C4_THRESHOLD && !path.endsWith('/__entry__') && !UI_LIB_DIR_RE.test(path))
     .sort((a, b) => b[1] - a[1]);
 
   if (highFanIn.length === 0) {
@@ -137,13 +159,17 @@ export function evaluateC4(
     };
   }
 
+  // List all file paths in the message so reviewers and agents don't need to
+  // grep for the "N more" files. Use full paths (not basenames) so they can
+  // be copied directly into manifest.highFanIn without ambiguity.
+  const pathList = undocumented.map(([path, count]) => `${path} (${count})`).join(', ');
   return {
     id: 'C4',
     passed: false,
     severity: 'recommendation',
     confidence: 'medium',
     scoreImpact: 0,
-    message: `${undocumented.length} high fan-in file${undocumented.length > 1 ? 's' : ''} not documented in manifest.highFanIn`,
+    message: `${undocumented.length} files not in manifest.highFanIn: ${pathList}`,
     remediation: 'Add these paths to manifest.highFanIn. Documenting them signals to every editor that changes here have a wide blast radius — callers will break silently if the exported API changes.',
     locations: undocumented.slice(0, 10).map(([path, count]) => ({
       path,

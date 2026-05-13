@@ -66,6 +66,31 @@ function resolveRelative(
   return null;
 }
 
+type AliasEntry = { prefix: string; dir: string };
+
+async function readPathAliases(root: string): Promise<AliasEntry[]> {
+  try {
+    const raw = await readFile(join(root, 'tsconfig.json'), 'utf-8');
+    const tsconfig = JSON.parse(raw) as {
+      compilerOptions?: { baseUrl?: string; paths?: Record<string, string[]> };
+    };
+    const baseUrl = tsconfig.compilerOptions?.baseUrl ?? '.';
+    const paths = tsconfig.compilerOptions?.paths ?? {};
+    const aliases: AliasEntry[] = [];
+    for (const [alias, targets] of Object.entries(paths)) {
+      if (!Array.isArray(targets) || targets.length === 0) continue;
+      const target = targets[0]!;
+      if (!alias.endsWith('/*') || !target.endsWith('/*')) continue;
+      const prefix = alias.slice(0, -1); // '@/' or '~/'
+      const dir = normalize(join(baseUrl, target.slice(0, -1))).replace(/\\/g, '/').replace(/\/$/, '');
+      aliases.push({ prefix, dir });
+    }
+    return aliases;
+  } catch {
+    return [];
+  }
+}
+
 export async function buildImportGraph(
   root: string,
   files: FileEntry[],
@@ -90,6 +115,8 @@ export async function buildImportGraph(
       // skip
     }
   }
+
+  const pathAliases = await readPathAliases(root);
 
   const edges = new Map<string, Set<string>>();
   const fanIn = new Map<string, number>();
@@ -116,12 +143,19 @@ export async function buildImportGraph(
         // Relative import — resolve within the same package
         const target = resolveRelative(file.relativePath, imp, fileSet);
         if (target) resolved.add(target);
-      } else if (imp.startsWith('@/')) {
-        // Next.js-style path alias: @/ → src/ (resolves to internal files for domain clustering)
-        // Use a virtual anchor in src/ so resolveRelative computes: src/ + ./rest = src/rest
-        const target = resolveRelative('src/__alias__', '.' + imp.slice(1), fileSet);
-        if (target) resolved.add(target);
       } else {
+        // Check tsconfig path aliases before falling through to package specifiers
+        let aliasMatched = false;
+        for (const { prefix, dir } of pathAliases) {
+          if (imp.startsWith(prefix)) {
+            const rest = imp.slice(prefix.length);
+            const target = resolveRelative(`${dir}/__alias__`, `./${rest}`, fileSet);
+            if (target) resolved.add(target);
+            aliasMatched = true;
+            break;
+          }
+        }
+        if (aliasMatched) continue;
         // Bare specifier — check if it maps to a known workspace package
         const pkgName = imp.startsWith('@')
           ? imp.split('/').slice(0, 2).join('/')

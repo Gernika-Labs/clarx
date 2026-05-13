@@ -69,7 +69,7 @@ export async function evaluateRules(
 
   // ── Discoverability ───────────────────────────────────────────────────────
 
-  rules['D1'] = await evaluateD1(root);
+  rules['D1'] = await evaluateD1(root, manifest);
   rules['D2'] = await evaluateD2(root, manifest, files);
   rules['D3'] = evaluateD3(files, manifest);
   rules['D4'] = await evaluateD4WithRoot(root, files);

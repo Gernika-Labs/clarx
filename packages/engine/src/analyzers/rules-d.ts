@@ -11,6 +11,7 @@ const UTILITY_DUMP_NAMES = new Set([
 
 // D1 — root directory has ≤N meaningful entries
 const D1_LIMIT_DEFAULT = 10;
+const D1_LIMIT_NEXTJS = 17;
 const D1_LIMIT_MONOREPO = 20;
 
 // Exact-match names that don't count as meaningful
@@ -24,6 +25,10 @@ const D1_IGNORED_EXACT = new Set([
   'pnpm-workspace.yaml', 'lerna.json', 'nx.json', 'turbo.json', 'rush.json',
   'components.json', // shadcn/ui config
   'storybook-static',
+  // Universal project files — every repo has these; they carry no structural signal
+  'package.json', 'README.md', 'README',
+  // AI agent guidance files — infrastructure, not part of source layout
+  'AGENTS.md', 'CLAUDE.md', 'Makefile',
 ]);
 
 // Pattern-match for tooling config files with variable names
@@ -53,13 +58,28 @@ const MONOREPO_SIGNALS = new Set([
   'pnpm-workspace.yaml', 'lerna.json', 'nx.json', 'turbo.json', 'rush.json',
 ]);
 
+// next.config.* at the root is the definitive Next.js signal
+const NEXTJS_CONFIG_RE = /^next\.config\./;
+
 function isIgnored(entry: string): boolean {
   if (entry.startsWith('.')) return true;
   if (D1_IGNORED_EXACT.has(entry)) return true;
   return D1_IGNORED_PATTERNS.some(p => p.test(entry));
 }
 
-export async function evaluateD1(root: string): Promise<RuleResult> {
+// Check whether a root-level entry is covered by a manifest generated pattern.
+// Handles exact names ("dist"), glob prefixes ("**/dist", "**/dist/**"), and
+// dotfiles that manifest authors sometimes declare explicitly (".source").
+function isGeneratedEntry(entry: string, generated: string[]): boolean {
+  return generated.some(pattern => {
+    if (pattern === entry) return true;
+    // Strip leading **/ and trailing /** or /**/* to get the bare name
+    const bare = pattern.replace(/^\*\*\//, '').replace(/\/\*\*.*$/, '');
+    return bare === entry;
+  });
+}
+
+export async function evaluateD1(root: string, manifest: Manifest | null): Promise<RuleResult> {
   let entries: string[];
   try {
     entries = await readdir(root);
@@ -67,9 +87,11 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
     return { id: 'D1', passed: true, severity: 'warning', confidence: 'low', scoreImpact: 25, message: 'Could not read root directory' };
   }
 
+  const generated = manifest?.generated ?? [];
   const isMonorepo = entries.some(e => MONOREPO_SIGNALS.has(e));
-  const limit = isMonorepo ? D1_LIMIT_MONOREPO : D1_LIMIT_DEFAULT;
-  const meaningful = entries.filter(e => !isIgnored(e));
+  const isNextJs = !isMonorepo && entries.some(e => NEXTJS_CONFIG_RE.test(e));
+  const limit = isMonorepo ? D1_LIMIT_MONOREPO : isNextJs ? D1_LIMIT_NEXTJS : D1_LIMIT_DEFAULT;
+  const meaningful = entries.filter(e => !isIgnored(e) && !isGeneratedEntry(e, generated));
 
   if (meaningful.length <= limit) {
     return {
@@ -78,7 +100,7 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
       severity: 'warning',
       confidence: 'medium',
       scoreImpact: 25,
-      message: `Root directory has ${meaningful.length} meaningful entries (≤${limit})`,
+      message: `Root directory has ${meaningful.length} meaningful entries (≤${limit}${isMonorepo ? ', monorepo' : isNextJs ? ', next.js' : ''})`,
     };
   }
 
@@ -88,7 +110,7 @@ export async function evaluateD1(root: string): Promise<RuleResult> {
     severity: 'warning',
     confidence: 'medium',
     scoreImpact: 25,
-    message: `Root directory has ${meaningful.length} meaningful entries (limit: ${limit}${isMonorepo ? ', monorepo' : ''})`,
+    message: `Root directory has ${meaningful.length} meaningful entries (limit: ${limit}${isMonorepo ? ', monorepo' : isNextJs ? ', next.js' : ''})`,
     locations: meaningful.map(e => ({ path: e })),
   };
 }
