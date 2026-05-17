@@ -122,9 +122,9 @@ export async function evaluateRules(
     scoreImpact: 25,
     message: hasGeneratedDeclaration
       ? 'Generated directories declared in manifest'
-      : 'No generated directories declared in guidance file or manifest',
+      : 'Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip',
     ...(!hasGeneratedDeclaration && {
-      remediation: 'Add a "generated" array to clarx-manifest.json listing directories like ".next", "dist", ".source".',
+      remediation: 'Add a "generated" array to clarx-manifest.json (e.g. ["dist", ".next"]). This is separate from .gitignore — it tells AI agents which directories to exclude from analysis.',
     }),
   };
 

@@ -74,6 +74,8 @@ export function evaluateC1(
 
 // C2 — no source file exceeds 400 lines
 const C2_LIMIT = 400;
+// Hard failure threshold: files above this are unambiguously too large regardless of structure.
+const C2_HARD_LIMIT = 600;
 
 // Files whose names signal static data — exempt from the line-count limit
 // regardless of whether they contain a small incidental helper.
@@ -92,6 +94,24 @@ function isSvgGraphicsFile(relativePath: string, content: string): boolean {
   return svgLineCount / lines.length > 0.15;
 }
 
+// Shadcn/ui components are vendor-installed files, not app code — exempt from C2.
+// Detect by directory convention (components/ui/) OR by the triple fingerprint:
+// "use client" + @radix-ui import + cva usage. Any two of the three content signals
+// in the canonical components/ui/ path is enough; outside that path all three are required.
+const SHADCN_DIR_RE = /(?:^|\/)components\/ui\//;
+const RADIX_IMPORT_RE = /from ['"]@radix-ui\//;
+const CVA_USAGE_RE = /\bcva\s*[(`]/;
+const USE_CLIENT_DIRECTIVE_RE = /^\s*['"]use client['"]/m;
+
+function isShadcnComponent(relativePath: string, content: string): boolean {
+  if (SHADCN_DIR_RE.test(relativePath)) return true;
+  return (
+    USE_CLIENT_DIRECTIVE_RE.test(content) &&
+    RADIX_IMPORT_RE.test(content) &&
+    CVA_USAGE_RE.test(content)
+  );
+}
+
 // Detects files with meaningful executable logic (functions, classes, arrow
 // functions). Pure data/type files that happen to have one small helper are
 // caught by DATA_FILENAME_RE above; this check handles everything else.
@@ -103,12 +123,40 @@ function hasExecutableLogic(content: string): boolean {
   return FN_RE.test(content) || CLASS_RE.test(content) || ARROW_RE.test(content);
 }
 
-// Counts top-level export declarations (excludes `export *` barrel re-exports).
-// Used to distinguish co-located unrelated concerns from a single complex operation.
-const EXPORT_STMT_RE = /^export\s+(?!\*)/gm;
-// Counts type-only exports: `export type`, `export interface`, `export enum`.
-// When these dominate, the safe action is extracting types — not restructuring logic.
-const TYPE_EXPORT_RE = /^export\s+(?:type\b|interface\s+\w|enum\s+\w)/gm;
+// Counts exported symbols, not export statements.
+// The critical distinction: `export { A, B, C }` is one statement but three symbols.
+// Files that collect all exports in a single grouped block (common in shadcn/ui and
+// barrel-style components) would otherwise show "1 export" regardless of how many
+// symbols they actually export.
+function countTopLevelExports(content: string): { total: number; types: number } {
+  let total = 0;
+  let types = 0;
+
+  // Direct named exports: export const/function/class/type/interface/enum/default
+  // Excludes export { } blocks and export * re-exports, handled separately below.
+  for (const m of content.matchAll(/^export\s+(?!\*|(?:type\s+)?\{)/gm)) {
+    total++;
+    if (/^export\s+(?:type\b|interface\s+\w|enum\s+\w)/.test(m[0])) types++;
+  }
+
+  // Grouped exports: `export { A, B, C }` or `export type { A, B }` — possibly multi-line.
+  // [^}]* matches newlines (negated char class), so this handles multi-line blocks.
+  for (const m of content.matchAll(/^export\s+(type\s+)?\{([^}]*)\}/gm)) {
+    const isTypeBlock = !!m[1];
+    const symbols = (m[2] ?? '')
+      .split(',')
+      .map(s => s.replace(/\/\/.*$/, '').trim()) // strip inline comments
+      .filter(s => s.length > 0);
+    total += symbols.length;
+    if (isTypeBlock) {
+      types += symbols.length;
+    } else {
+      types += symbols.filter(s => /^type\s+/.test(s)).length;
+    }
+  }
+
+  return { total, types };
+}
 
 // Export density threshold: >= 1 export per 100 lines signals co-located concerns.
 // A low-density file (e.g. 10 exports / 1462 lines ≈ 0.68) is more likely a single
@@ -116,23 +164,18 @@ const TYPE_EXPORT_RE = /^export\s+(?:type\b|interface\s+\w|enum\s+\w)/gm;
 const EXPORT_DENSITY_THRESHOLD = 1.0; // exports per 100 lines
 const TYPE_MAJORITY_MIN = 5; // minimum type exports before "extract types" fires
 
-function countTopLevelExports(content: string): { total: number; types: number } {
-  return {
-    total: (content.match(EXPORT_STMT_RE) ?? []).length,
-    types: (content.match(TYPE_EXPORT_RE) ?? []).length,
-  };
-}
-
 function exportDetail(lines: number, total: number, types: number): string {
   const density = lines > 0 ? (total * 100) / lines : 0;
+  const overage = lines > C2_LIMIT ? Math.round(((lines - C2_LIMIT) / C2_LIMIT) * 100) : 0;
+  const overageTag = overage > 0 ? ` (${overage}% over)` : '';
   if (density >= EXPORT_DENSITY_THRESHOLD) {
     const values = total - types;
     if (types >= TYPE_MAJORITY_MIN && types > values) {
-      return `${lines} lines, ${total} exports (${types} types, ${values} values) — extract type definitions to a separate types file; do not restructure logic functions`;
+      return `${lines} lines${overageTag}, ${total} exports (${types} types, ${values} values) — extract type definitions to a separate types file; do not restructure logic functions`;
     }
-    return `${lines} lines, ${total} exports — co-located concerns, consider splitting by domain`;
+    return `${lines} lines${overageTag}, ${total} exports — co-located concerns, consider splitting by domain`;
   }
-  return `${lines} lines, ${total} export${total === 1 ? '' : 's'} — single complex component, consider reducing internal complexity rather than splitting`;
+  return `${lines} lines${overageTag}, ${total} export${total === 1 ? '' : 's'} — single complex component, consider reducing internal complexity rather than splitting`;
 }
 
 export async function evaluateC2(root: string, files: FileEntry[]): Promise<RuleResult> {
@@ -144,6 +187,7 @@ export async function evaluateC2(root: string, files: FileEntry[]): Promise<Rule
     try {
       const content = await readFile(join(root, f.relativePath), 'utf-8');
       if (isSvgGraphicsFile(f.relativePath, content)) continue;
+      if (isShadcnComponent(f.relativePath, content)) continue;
       if (hasExecutableLogic(content)) {
         const counts = countTopLevelExports(content);
         violations.push({ file: f, total: counts.total, types: counts.types });
@@ -165,10 +209,12 @@ export async function evaluateC2(root: string, files: FileEntry[]): Promise<Rule
     };
   }
 
+  const hasHardViolation = violations.some(v => (v.file.lines ?? 0) > C2_HARD_LIMIT);
+
   return {
     id: 'C2',
     passed: false,
-    severity: 'warning',
+    severity: hasHardViolation ? 'hard_failure' : 'warning',
     confidence: 'high',
     scoreImpact: 25,
     message: `${violations.length} source file${violations.length > 1 ? 's' : ''} exceed${violations.length === 1 ? 's' : ''} 400 lines`,

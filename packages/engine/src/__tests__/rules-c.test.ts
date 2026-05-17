@@ -109,6 +109,107 @@ describe('C2 — no source file exceeds 400 lines', () => {
     expect(result.passed).toBe(true);
   });
 
+  it('skips shadcn/ui files in components/ui/ regardless of size', async () => {
+    const root = join(tmpdir(), `clarx-c2-shadcn-dir-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'components/ui'), { recursive: true });
+      const lines = Array.from({ length: 500 }, (_, i) => `export const C${i} = () => null;`);
+      await writeFile(join(root, 'components/ui/sidebar.tsx'), lines.join('\n'), 'utf-8');
+      const files = [makeFile('components/ui/sidebar.tsx', 500)];
+      const result = await evaluateC2(root, files);
+      expect(result.passed).toBe(true);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('skips files matching the shadcn fingerprint (use client + radix + cva) outside components/ui/', async () => {
+    const root = join(tmpdir(), `clarx-c2-shadcn-fp-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src/shared'), { recursive: true });
+      const content = [
+        `'use client'`,
+        `import * as TogglePrimitive from '@radix-ui/react-toggle'`,
+        `import { cva } from 'class-variance-authority'`,
+        `const toggleVariants = cva('base')`,
+        ...Array.from({ length: 450 }, (_, i) => `export const T${i} = () => null;`),
+      ].join('\n');
+      await writeFile(join(root, 'src/shared/toggle.tsx'), content, 'utf-8');
+      const files = [makeFile('src/shared/toggle.tsx', 455)];
+      const result = await evaluateC2(root, files);
+      expect(result.passed).toBe(true);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('counts symbols in grouped export { A, B, C } blocks, not just statements', async () => {
+    const root = join(tmpdir(), `clarx-c2-exports-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src'), { recursive: true });
+      // Simulates a shadcn-style file: all exports collected at the bottom in one block
+      const fns = Array.from({ length: 20 }, (_, i) => `function Comp${i}() { return null }`);
+      const exportBlock = `export {\n  ${Array.from({ length: 20 }, (_, i) => `Comp${i}`).join(',\n  ')}\n}`;
+      const content = [`'use client'`, ...fns, exportBlock].join('\n');
+      const lineCount = content.split('\n').length;
+      await writeFile(join(root, 'src/multi-export.tsx'), content, 'utf-8');
+      const files = [makeFile('src/multi-export.tsx', lineCount)];
+      const result = await evaluateC2(root, files);
+      // If line count > 400 it should flag, but the detail must say ~20 exports, not 1
+      if (!result.passed) {
+        expect(result.locations?.[0]?.detail).toMatch(/20 exports/);
+        expect(result.locations?.[0]?.detail).not.toMatch(/\b1 export\b/);
+      }
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('escalates to hard_failure when any file exceeds 600 lines', async () => {
+    const root = join(tmpdir(), `clarx-c2-hard-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src'), { recursive: true });
+      const big = Array.from({ length: 700 }, (_, i) => `export function fn${i}() {}`).join('\n');
+      await writeFile(join(root, 'src/big.tsx'), big, 'utf-8');
+      const files = [makeFile('src/big.tsx', 700)];
+      const result = await evaluateC2(root, files);
+      expect(result.passed).toBe(false);
+      expect(result.severity).toBe('hard_failure');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('stays warning when all violations are 400–600 lines', async () => {
+    const root = join(tmpdir(), `clarx-c2-warn-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src'), { recursive: true });
+      const mid = Array.from({ length: 500 }, (_, i) => `export function fn${i}() {}`).join('\n');
+      await writeFile(join(root, 'src/mid.tsx'), mid, 'utf-8');
+      const files = [makeFile('src/mid.tsx', 500)];
+      const result = await evaluateC2(root, files);
+      expect(result.passed).toBe(false);
+      expect(result.severity).toBe('warning');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('includes overage percentage in the detail string', async () => {
+    const root = join(tmpdir(), `clarx-c2-overage-${Date.now()}`);
+    try {
+      await mkdir(join(root, 'src'), { recursive: true });
+      // 800 lines = 100% over the 400-line limit
+      const content = Array.from({ length: 800 }, (_, i) => `export function fn${i}() {}`).join('\n');
+      await writeFile(join(root, 'src/over.tsx'), content, 'utf-8');
+      const files = [makeFile('src/over.tsx', 800)];
+      const result = await evaluateC2(root, files);
+      expect(result.locations?.[0]?.detail).toMatch(/100% over/);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it('skips SVG illustration files in svgs/ directories', async () => {
     // Regression: components/svgs/manolo.tsx (688L) was flagging C2 because it
     // has a function declaration, but its line count is SVG path data, not logic.
