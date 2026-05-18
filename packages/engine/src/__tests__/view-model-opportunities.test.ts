@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { makeFile } from './helpers.js';
+import { makeFile } from './file-fixtures.js';
 import { findViewModelMigrationOpportunities } from '../analyzers/view-model-opportunities.js';
 
 describe('findViewModelMigrationOpportunities', () => {

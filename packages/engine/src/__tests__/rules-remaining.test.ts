@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { evaluateB4, evaluateE2 } from '../analyzers/rules-remaining.js';
 import { evaluateO5 } from '../analyzers/rules-o5.js';
-import { makeFile, makeGenerated, makeManifest } from './helpers.js';
+import { makeFile, makeGenerated, makeManifest } from './file-fixtures.js';
 
 // ── B4 ────────────────────────────────────────────────────────────────────────
 

@@ -3,7 +3,8 @@ import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { evaluateC3, evaluateC4, evaluateC6 } from '../analyzers/rules-c3-c4-c5.js';
-import { makeFanInGraph, makeFile, makeImportGraph, makeManifest } from './helpers.js';
+import { makeFile, makeManifest } from './file-fixtures.js';
+import { makeFanInGraph, makeImportGraph } from './graph-fixtures.js';
 
 describe('C4 — high fan-in files are documented', () => {
   it('passes when no file exceeds the threshold', () => {
@@ -83,11 +84,7 @@ export function Page() {
 import { useTrainingFeedback } from './hooks/useTrainingFeedback';
 import { useBackendPagination } from './hooks/useBackendPagination';
 import { fetchTraining } from './services/training-service';
-import { TrainingResponse } from './types';
-import { Badge } from './Badge';
 import { Button } from './Button';
-import { EmptyState } from './EmptyState';
-import { Filters } from './Filters';
 
 export function Page() {
   return <Button />;

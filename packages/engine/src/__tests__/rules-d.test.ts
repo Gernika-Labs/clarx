@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { evaluateD1, evaluateD4 } from '../analyzers/rules-d.js';
 import { evaluateD2, evaluateD3, evaluateD5 } from '../analyzers/rules-d2-d3-d5.js';
 import { evaluateD6 } from '../analyzers/rules-d6.js';
-import { makeFile, makeGenerated, makeManifest } from './helpers.js';
+import { makeFile, makeGenerated, makeManifest } from './file-fixtures.js';
 
 // ── D1 ────────────────────────────────────────────────────────────────────────
 // Regression: generated entries in manifest were not excluded from the root

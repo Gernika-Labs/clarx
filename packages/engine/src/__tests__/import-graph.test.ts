@@ -3,7 +3,7 @@ import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { buildImportGraph } from '../analyzers/import-graph.js';
-import { makeFile } from './helpers.js';
+import { makeFile } from './file-fixtures.js';
 
 async function setupDir(): Promise<string> {
   const root = join(tmpdir(), `clarx-ig-${Date.now()}-${Math.random().toString(36).slice(2)}`);

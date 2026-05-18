@@ -3,7 +3,7 @@ import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { evaluateC1, evaluateC2 } from '../analyzers/rules-c.js';
-import { makeFile, makeGenerated, makeManifest } from './helpers.js';
+import { makeFile, makeGenerated, makeManifest } from './file-fixtures.js';
 
 describe('C1 — generated artifacts excluded from source tree', () => {
   it('passes when no generated-looking dirs are present', () => {

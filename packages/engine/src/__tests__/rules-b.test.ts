@@ -3,7 +3,7 @@ import { evaluateB2 } from '../analyzers/rules-b1-b2.js';
 import { evaluateB5 } from '../analyzers/rules-remaining.js';
 import { detectCycles } from '../analyzers/import-graph.js';
 import type { ImportGraph } from '../analyzers/import-graph.js';
-import { makeFile, makeGenerated, makeManifest } from './helpers.js';
+import { makeFile, makeGenerated, makeManifest } from './file-fixtures.js';
 
 // ── B1 cycle detection ────────────────────────────────────────────────────────
 

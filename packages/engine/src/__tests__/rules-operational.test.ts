@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import { evaluateC3 } from '../analyzers/rules-c3-c4-c5.js';
 import { evaluateE1, evaluateE3 } from '../analyzers/rules-e.js';
 import type { ImportGraph } from '../analyzers/import-graph.js';
-import { makeFile, makeManifest } from './helpers.js';
+import { makeFile, makeManifest } from './file-fixtures.js';
 
 // ── C3 ────────────────────────────────────────────────────────────────────────
 
