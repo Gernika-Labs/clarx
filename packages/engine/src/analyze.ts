@@ -49,7 +49,7 @@ function getGitTrackedPaths(root: string): Set<string> {
 export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> {
   const { root, manifest: manifestPath, ignore = [] } = options;
 
-  const manifest = await loadManifest(root, manifestPath);
+  const { manifest, unknownKeys: unknownManifestKeys } = await loadManifest(root, manifestPath);
   const { files, stats } = await scanFilesystem(root, { ignore, manifest });
   const gitTrackedPaths = getGitTrackedPaths(root);
   const importGraph = await buildImportGraph(root, files, manifest?.workspaces ?? null);
@@ -58,9 +58,14 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
   const viewModelMigrations = await findViewModelMigrationOpportunities(root, files);
   const { score, confidence, hardFailures, pillars } = computeScore(rules, { importGraphResolved, manifestFound: manifest !== null });
 
-  const tip = (rules['O1'] && !rules['O1'].passed && confidence !== 'high')
-    ? 'Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5).'
+  const manifestKeyTip = unknownManifestKeys.length > 0
+    ? `Unknown key${unknownManifestKeys.length > 1 ? 's' : ''} in clarx-manifest.json: ${unknownManifestKeys.map(k => `"${k}"`).join(', ')} — ${unknownManifestKeys.length > 1 ? 'these have' : 'this has'} no effect. Valid keys: generated, highFanIn, highFanOut, verificationCommands, commonTasks, workspaces.`
     : undefined;
+
+  const tip = manifestKeyTip
+    ?? ((rules['O1'] && !rules['O1'].passed && confidence !== 'high')
+      ? 'Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5).'
+      : undefined);
 
   const confidenceCaveat = (hardFailures.length > 0 && confidence === 'low')
     ? 'Hard failures detected, but scan confidence is low — the import graph did not resolve fully and no manifest was found. These findings are real but may shift once a clarx-manifest.json is added. Treat them as soft-critical rather than confirmed blockers.'

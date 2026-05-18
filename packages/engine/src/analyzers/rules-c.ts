@@ -95,21 +95,16 @@ function isSvgGraphicsFile(relativePath: string, content: string): boolean {
 }
 
 // Shadcn/ui components are vendor-installed files, not app code — exempt from C2.
-// Detect by directory convention (components/ui/) OR by the triple fingerprint:
-// "use client" + @radix-ui import + cva usage. Any two of the three content signals
-// in the canonical components/ui/ path is enough; outside that path all three are required.
+// Detect by directory convention (components/ui/) OR by two content fingerprints:
+// "use client" + @radix-ui import. Both signals together are specific enough to
+// identify vendor UI components — cva isn't used in all shadcn components (e.g. sidebar).
 const SHADCN_DIR_RE = /(?:^|\/)components\/ui\//;
 const RADIX_IMPORT_RE = /from ['"]@radix-ui\//;
-const CVA_USAGE_RE = /\bcva\s*[(`]/;
 const USE_CLIENT_DIRECTIVE_RE = /^\s*['"]use client['"]/m;
 
 function isShadcnComponent(relativePath: string, content: string): boolean {
   if (SHADCN_DIR_RE.test(relativePath)) return true;
-  return (
-    USE_CLIENT_DIRECTIVE_RE.test(content) &&
-    RADIX_IMPORT_RE.test(content) &&
-    CVA_USAGE_RE.test(content)
-  );
+  return USE_CLIENT_DIRECTIVE_RE.test(content) && RADIX_IMPORT_RE.test(content);
 }
 
 // Detects files with meaningful executable logic (functions, classes, arrow
@@ -128,7 +123,10 @@ function hasExecutableLogic(content: string): boolean {
 // Files that collect all exports in a single grouped block (common in shadcn/ui and
 // barrel-style components) would otherwise show "1 export" regardless of how many
 // symbols they actually export.
-function countTopLevelExports(content: string): { total: number; types: number } {
+//
+// `export * from './X'` re-exports cannot be counted without resolving the module,
+// so they are tracked separately as `starExports` and shown in the detail string.
+function countTopLevelExports(content: string): { total: number; types: number; starExports: number } {
   let total = 0;
   let types = 0;
 
@@ -155,7 +153,10 @@ function countTopLevelExports(content: string): { total: number; types: number }
     }
   }
 
-  return { total, types };
+  // Star re-exports: `export * from './X'` — counted by module, not by symbol.
+  const starExports = (content.match(/^export\s+\*\s+(?:as\s+\w+\s+)?from\b/gm) ?? []).length;
+
+  return { total, types, starExports };
 }
 
 // Export density threshold: >= 1 export per 100 lines signals co-located concerns.
@@ -164,24 +165,26 @@ function countTopLevelExports(content: string): { total: number; types: number }
 const EXPORT_DENSITY_THRESHOLD = 1.0; // exports per 100 lines
 const TYPE_MAJORITY_MIN = 5; // minimum type exports before "extract types" fires
 
-function exportDetail(lines: number, total: number, types: number): string {
-  const density = lines > 0 ? (total * 100) / lines : 0;
+function exportDetail(lines: number, total: number, types: number, starExports: number): string {
+  const effectiveTotal = total + starExports;
+  const density = lines > 0 ? (effectiveTotal * 100) / lines : 0;
   const overage = lines > C2_LIMIT ? Math.round(((lines - C2_LIMIT) / C2_LIMIT) * 100) : 0;
   const overageTag = overage > 0 ? ` (${overage}% over)` : '';
+  const starTag = starExports > 0 ? ` +${starExports} re-export module${starExports > 1 ? 's' : ''}` : '';
   if (density >= EXPORT_DENSITY_THRESHOLD) {
     const values = total - types;
     if (types >= TYPE_MAJORITY_MIN && types > values) {
-      return `${lines} lines${overageTag}, ${total} exports (${types} types, ${values} values) — extract type definitions to a separate types file; do not restructure logic functions`;
+      return `${lines} lines${overageTag}, ${total} exports (${types} types, ${values} values)${starTag} — extract type definitions to a separate types file; do not restructure logic functions`;
     }
-    return `${lines} lines${overageTag}, ${total} exports — co-located concerns, consider splitting by domain`;
+    return `${lines} lines${overageTag}, ${total} exports${starTag} — co-located concerns, consider splitting by domain`;
   }
-  return `${lines} lines${overageTag}, ${total} export${total === 1 ? '' : 's'} — single complex component, consider reducing internal complexity rather than splitting`;
+  return `${lines} lines${overageTag}, ${total} export${total === 1 ? '' : 's'}${starTag} — single complex component, consider reducing internal complexity rather than splitting`;
 }
 
 export async function evaluateC2(root: string, files: FileEntry[]): Promise<RuleResult> {
   const candidates = files.filter(f => !f.isGenerated && f.lines !== undefined && f.lines > C2_LIMIT);
 
-  const violations: Array<{ file: FileEntry; total: number; types: number }> = [];
+  const violations: Array<{ file: FileEntry; total: number; types: number; starExports: number }> = [];
   for (const f of candidates) {
     if (DATA_FILENAME_RE.test(f.relativePath)) continue;
     try {
@@ -190,10 +193,10 @@ export async function evaluateC2(root: string, files: FileEntry[]): Promise<Rule
       if (isShadcnComponent(f.relativePath, content)) continue;
       if (hasExecutableLogic(content)) {
         const counts = countTopLevelExports(content);
-        violations.push({ file: f, total: counts.total, types: counts.types });
+        violations.push({ file: f, total: counts.total, types: counts.types, starExports: counts.starExports });
       }
     } catch {
-      violations.push({ file: f, total: 0, types: 0 });
+      violations.push({ file: f, total: 0, types: 0, starExports: 0 });
     }
   }
   violations.sort((a, b) => (b.file.lines ?? 0) - (a.file.lines ?? 0));
@@ -218,9 +221,9 @@ export async function evaluateC2(root: string, files: FileEntry[]): Promise<Rule
     confidence: 'high',
     scoreImpact: 25,
     message: `${violations.length} source file${violations.length > 1 ? 's' : ''} exceed${violations.length === 1 ? 's' : ''} 400 lines`,
-    locations: violations.slice(0, 10).map(({ file: f, total, types }) => ({
+    locations: violations.slice(0, 10).map(({ file: f, total, types, starExports }) => ({
       path: f.relativePath,
-      detail: exportDetail(f.lines ?? 0, total, types),
+      detail: exportDetail(f.lines ?? 0, total, types, starExports),
     })),
   };
 }
