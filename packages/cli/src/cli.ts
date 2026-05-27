@@ -45,6 +45,7 @@ Usage:
 
 Options for score:
   --format text|json|markdown     Output format (default: text)
+  --ui text|ink                   UI mode for interactive terminal output (default: ink in TTY, text otherwise)
   --watch, -w                     Re-run on file changes
   --min-score <n>                 Exit 1 if score is below n
   --min-pillar-score <n>          Exit 1 if any pillar score is below n

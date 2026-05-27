@@ -1,0 +1,26 @@
+{
+  "version": "0.1",
+  "generated": [
+    "dist",
+    "**/dist",
+    "node_modules",
+    "**/node_modules",
+    ".turbo"
+  ],
+  "highFanIn": [
+    "src/commands/score.ts",
+    "src/app/score/command-core.ts",
+    "src/presentation/ink/app.ts"
+  ],
+  "verificationCommands": {
+    "typecheck": "pnpm --filter @clarxai/cli typecheck",
+    "test": "pnpm --filter @clarxai/cli test",
+    "build": "pnpm --filter @clarxai/cli build"
+  },
+  "commonTasks": {
+    "add a cli command": "src/commands/ and wire in src/cli.ts",
+    "change score behavior": "src/app/score/ first, then adapt presentation/",
+    "change text or markdown output": "src/presentation/reporters/",
+    "change the interactive tty ui": "src/presentation/ink/"
+  }
+}

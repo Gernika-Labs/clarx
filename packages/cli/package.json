@@ -7,6 +7,13 @@
     "clarx": "./dist/cli.js"
   },
   "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/cli.js",
+      "types": "./dist/cli.d.ts"
+    }
+  },
   "files": [
     "dist",
     "README.md"
@@ -17,15 +24,19 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts",
     "dev": "tsc --watch",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@clarxai/engine": "workspace:*",
-    "chalk": "^5.4.1"
+    "chalk": "^5.4.1",
+    "ink": "^5.2.1",
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/react": "^18.3.12",
     "typescript": "^5.4.0",
     "tsx": "^4.7.0"
   }
