@@ -26,7 +26,7 @@ export function CliSection() {
               <span className="prompt">$ </span>
               <span className="cmdtxt">clarx score .</span>
             </div>
-            <div className="ver">clarx v0.1.4 · scoring 218 files…</div>
+            <div className="ver">clarx v0.1.10 · scoring 218 files…</div>
             <div className="row">
               <span className="name">Discoverability</span>
               <span className="bar-track">

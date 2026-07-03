@@ -7,7 +7,7 @@ description: Rules and rationale for all five pillars of the Clarx standard.
 
 Each pillar has a small set of rules. Rules have three severity levels:
 
-- **hard_failure** — sets the score floor to 50 for the entire repo
+- **hard_failure** — caps the overall score using a graduated floor (one failure → max 65, two → 50, three → 35, four or more → 25)
 - **warning** — reduces the pillar score proportionally
 - **recommendation** — no score impact, but worth addressing
 
@@ -19,10 +19,10 @@ Each pillar has a small set of rules. Rules have three severity levels:
 
 Discoverability measures how quickly an AI agent can orient itself in a repo. A discoverable repo has a clean root, meaningful names, and clear separation between types of files.
 
-### D1 — Root directory has ≤10 meaningful entries
+### D1 — Root directory has ≤N meaningful entries
 Severity: `warning`
 
-The repo root should contain only top-level directories and essential config files. Count excludes dotfiles and lockfiles. Noise at the root forces an agent to scan everything before understanding anything.
+The repo root should contain only top-level directories and essential config files. Dotfiles, lockfiles, and common config filenames are excluded from the count. Limits: **10** (default), **17** (Next.js repos), **20** (monorepos). Noise at the root forces an agent to scan everything before understanding anything.
 
 ### D2 — Every workspace or package has a one-line purpose statement
 Severity: `warning`
@@ -43,6 +43,11 @@ Files named `utils.ts`, `helpers.ts`, `misc.ts`, `common.ts`, `shared.ts`, or si
 Severity: `recommendation`
 
 Deep nesting without semantic meaning forces an agent to traverse multiple directories to understand structure. A module boundary (package, workspace, clear domain directory) should appear within 5 levels.
+
+### D6 — No shadow routes at multiple URL depths
+Severity: `warning`
+
+In file-system routers (Next.js App Router, Remix, SvelteKit), the same route leaf segment must not appear at multiple URL depths without a documented distinction — e.g. `/api/mnemonic` and `/api/mobile/mnemonic` both handling `mnemonic`. Shadow routes make it unclear which handler is canonical. Document intentional pairs in the manifest or consolidate to one URL.
 
 ---
 
@@ -86,26 +91,28 @@ Tests must either live next to the source file they test or in a directory that 
 Context efficiency measures how much of the codebase an agent needs to load to complete a representative task. Every unnecessary file loaded is tokens burned and coherence lost.
 
 ### C1 — Generated artifacts are excluded from the source tree
-Severity: `hard_failure`
+Severity: `hard_failure` (when committed) · `warning` (gitignored but present)
 
-Generated directories (build output, compiled files, framework artifacts) must not live inside authored source directories. An agent that encounters generated files in a source tree cannot tell what is hand-written versus computed. Must be declared in `.gitignore` and in a manifest file.
+Generated directories (build output, compiled files, framework artifacts) must not live inside authored source directories. An agent that encounters generated files in a source tree cannot tell what is hand-written versus computed. **Hard failure** applies only when generated output is **committed to git**. Gitignored build artifacts in the working tree downgrade to a warning.
 
 ### C2 — No source file exceeds 400 lines
-Severity: `warning`
+Severity: `warning` · escalates to `hard_failure` above 600 lines
 
-Files over 400 lines are almost always doing more than one thing. An agent asked to make a targeted change to a 900-line file must load the entire file to locate the relevant section.
+Files over 400 lines are almost always doing more than one thing. An agent asked to make a targeted change to a 900-line file must load the entire file to locate the relevant section. Files above **600 lines** escalate to hard failure.
 
-**Exception:** files that are explicitly declarative registries (e.g. a route config, a token map) may exceed this limit if declared in the manifest.
+**Auto-exemptions:** static data files (`*.content.ts`, fixtures), SVG/icon directories, and shadcn/ui vendor components (`components/ui/` or Radix + `"use client"` fingerprint). There is no manifest-based line-count exemption.
 
 ### C3 — No file imports from more than 15 distinct modules
 Severity: `warning`
 
-A file with 20+ imports is likely a coordination layer mixing concerns that belong in separate files. Every import is a potential context chain an agent must follow.
+A file importing more than **15** distinct modules is likely a coordination layer mixing concerns that belong in separate files. Every import is a potential context chain an agent must follow.
+
+**Exemptions:** paths declared in `manifest.highFanOut`, common aggregation filenames (`actions.ts`, `mutations.ts`, `handlers.ts`, etc.), and single-domain barrel files.
 
 ### C4 — High fan-in files are documented
 Severity: `recommendation`
 
-Files imported by 10 or more other files are architectural load-bearing points. Changes to them have wide blast radius. They must be identified in the manifest or in an architecture document.
+Files imported by **10 or more** other files are architectural load-bearing points. Changes to them have wide blast radius. Copy paths from the finding into `manifest.highFanIn`. Files under `ui/` directories are auto-exempt.
 
 ### C5 — Import graph depth does not exceed 8 hops from entry to leaf
 Severity: `recommendation`

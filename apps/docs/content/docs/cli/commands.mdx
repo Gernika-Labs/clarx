@@ -28,9 +28,15 @@ clarx score [path] [options]
 | `--min-pillar-score` | Exit code 1 if any pillar score is below this value | none |
 | `--ignore` | Comma-separated glob patterns to exclude | none |
 | `--verbose` | Include passing rules in output | false |
-| `--ui` | Interactive UI mode: `tui` (default in TTY) or `text` | `tui` |
+| `--ui` | Interactive UI: `tui` or `text`. `ink` is accepted as an alias for `tui` | `tui` in TTY, `text` otherwise |
 | `--watch`, `-w` | Re-run analysis on file changes (pairs with `--ui tui`) | false |
 | `--copy-all` | Copy all failing rules and fixes to clipboard | false |
+
+**UI notes:**
+
+- In a TTY, `--ui tui` opens the [interactive dashboard](/docs/cli/tui) (default).
+- `--format json`, `markdown`, or `sarif` always uses plain output — the TUI is skipped.
+- `--ui text` uses a readline-style prompt instead of the dashboard.
 
 **Exit codes:**
 
@@ -39,15 +45,16 @@ clarx score [path] [options]
 | `0` | Analysis complete, all thresholds passed |
 | `1` | Score or pillar threshold not met |
 | `2` | Hard failure rules triggered |
+| `3` | Analysis error or unknown command |
 
 **Examples:**
 
 ```bash
-# Score current directory
+# Score current directory (TUI in terminal)
 clarx score
 
-# Score a specific path
-clarx score ./my-repo
+# Plain text mode
+clarx score --ui text
 
 # CI gate: fail if score < 70
 clarx score --min-score 70
@@ -55,8 +62,11 @@ clarx score --min-score 70
 # JSON output for programmatic use
 clarx score --format json > clarx-report.json
 
-# Markdown report to stdout
-clarx score --format markdown
+# SARIF for GitHub Code Scanning
+clarx score --format sarif > clarx.sarif
+
+# Watch mode with TUI
+clarx score --watch
 
 # Fail if any pillar drops below 60
 clarx score --min-pillar-score 60
@@ -64,6 +74,8 @@ clarx score --min-pillar-score 60
 # Show passing rules too
 clarx score --verbose
 ```
+
+See [Interactive TUI](/docs/cli/tui) for keyboard shortcuts and detail view behavior.
 
 ---
 
@@ -76,11 +88,13 @@ clarx init [path]
 ```
 
 The command:
-1. Detects monorepo structure (Turborepo, Nx, Lerna, etc.)
-2. Identifies common generated directories (`.next`, `dist`, `.source`, etc.)
-3. Discovers workspaces and reads their READMEs for purpose statements
-4. Pre-fills `verificationCommands` from `package.json` scripts
-5. Writes `clarx-manifest.json` and prints a diff for review
+
+1. Scans `packages/`, `apps/`, `libs/`, and `services/` for workspace directories
+2. Pre-fills common generated globs (`.next`, `dist`, `.source`, `coverage`, `node_modules`, etc.)
+3. Adds detected `.next` or `dist` paths when present
+4. Writes `clarx-manifest.json` with placeholder workspace purpose strings and default `verificationCommands`
+
+After writing, it prints next steps for filling in workspace descriptions, verification commands, and `commonTasks`.
 
 **Options:**
 
@@ -96,14 +110,20 @@ The command:
 Print the full description, rationale, and remediation guidance for a rule.
 
 ```bash
-clarx explain <rule-id>
+clarx explain <rule-id> [--copy]
 ```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--copy` | Copy the fix guidance to the clipboard after printing |
 
 **Examples:**
 
 ```bash
 clarx explain C2
-clarx explain O1
+clarx explain O1 --copy
 clarx explain B1
 ```
 
@@ -111,4 +131,24 @@ clarx explain B1
 - Rule description
 - Why it matters for AI navigability
 - How to fix it
-- How to declare an exemption in the manifest (where applicable)
+- Manifest declarations where applicable
+
+In the TUI, `Enter` on an issue or typing a rule ID opens the same content in the [detail view](/docs/cli/tui).
+
+---
+
+## `clarx telemetry`
+
+Manage anonymous usage telemetry.
+
+```bash
+clarx telemetry [on|off|status]
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `status` (default) | Show whether telemetry is enabled |
+| `on` | Enable telemetry |
+| `off` | Disable telemetry |
+
+Telemetry sends rule interaction events and aggregate score signals — never code, file paths, or repo names. Set `NO_CLARX_TELEMETRY=1` or `DO_NOT_TRACK=1` to disable via environment.

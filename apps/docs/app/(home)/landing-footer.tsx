@@ -120,13 +120,13 @@ export function Footer() {
     <footer className="foot">
       <div className="wrap">
         <div className="foot-inner">
-          <span className="copy">© 2026 · Clarx · v0.1.4 · MIT licensed</span>
+          <span className="copy">© 2026 · Clarx · v0.1.10 · MIT licensed</span>
           <nav>
             <a href="#standard">Standard</a>
             <a href="#cli">CLI</a>
             <a href="#manifest">Manifest</a>
             <Link href="https://github.com/clarxai/clarx">GitHub</Link>
-            <Link href="/docs/changelog">Changelog</Link>
+            <Link href="https://github.com/clarxai/clarx/blob/main/CHANGELOG.md">Changelog</Link>
           </nav>
         </div>
       </div>

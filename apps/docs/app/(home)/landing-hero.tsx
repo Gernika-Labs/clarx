@@ -8,7 +8,7 @@ export function Nav() {
         <Link className="brand" href="/">
           <span className="brand-mark" />
           Clarx
-          <span className="ver mono">v0.1.4</span>
+          <span className="ver mono">v0.1.10</span>
         </Link>
         <div className="nav-links">
           <a href="#standard">Standard</a>

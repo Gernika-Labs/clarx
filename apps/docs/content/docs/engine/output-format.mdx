@@ -13,18 +13,17 @@ The engine returns a structured `AnalysisResult` object. The CLI `--format json`
 
 ```typescript
 type AnalysisResult = {
-  version: string;           // standard version used: "0.1"
+  version: string;           // engine package version (e.g. "0.1.8")
   confidence: 'high' | 'medium' | 'low';
   score: number;             // 0–100
   hardFailures: RuleId[];    // e.g. ["C1", "O1"]
-  pillars: {
-    discoverability: PillarScore;
-    boundary_clarity: PillarScore;
-    context_efficiency: PillarScore;
-    operational_guidance: PillarScore;
-    edit_safety: PillarScore;
+  pillars: Record<PillarName, PillarScore>;
+  rules: Partial<Record<RuleId, RuleResult>>;
+  tip?: string;              // actionable hint when manifest is missing
+  confidenceCaveat?: string; // soft-critical warning at low confidence
+  opportunities: {
+    viewModelMigrations: ViewModelMigrationOpportunity[];
   };
-  rules: Record<RuleId, RuleResult>;
   meta: {
     analyzedAt: string;      // ISO timestamp
     root: string;            // absolute path analyzed
@@ -37,21 +36,24 @@ type AnalysisResult = {
 type PillarScore = {
   score: number;             // 0–100
   weight: number;            // 0.20
-  rules: Record<RuleId, RuleResult>;
+  rules: Partial<Record<RuleId, RuleResult>>;
 };
 
 type RuleResult = {
   id: RuleId;                // "C2"
   passed: boolean;
   severity: 'hard_failure' | 'warning' | 'recommendation';
+  confidence: 'high' | 'medium' | 'low';
   scoreImpact: number;
   message: string;           // human-readable finding
+  remediation?: string;      // fix guidance when rule fails
   locations?: Location[];    // files involved, if applicable
 };
 
 type Location = {
   path: string;              // relative to root
-  line?: number;
+  line?: number;             // 1-based, optional
+  endLine?: number;          // inclusive range end, optional
   detail?: string;
 };
 ```
@@ -75,7 +77,8 @@ type Location = {
         "D2": { "id": "D2", "passed": true, "severity": "warning", "scoreImpact": 0, "message": "All 3 workspaces have purpose statements" },
         "D3": { "id": "D3", "passed": true, "severity": "warning", "scoreImpact": 0, "message": "Source, test, and config directories are segregated" },
         "D4": { "id": "D4", "passed": false, "severity": "warning", "scoreImpact": 15, "message": "Utility dumping ground files found", "locations": [{ "path": "packages/shared/src/utils.ts" }] },
-        "D5": { "id": "D5", "passed": true, "severity": "recommendation", "scoreImpact": 0, "message": "Max depth 4 before module boundary" }
+        "D5": { "id": "D5", "passed": true, "severity": "recommendation", "scoreImpact": 0, "message": "Max depth 4 before module boundary" },
+        "D6": { "id": "D6", "passed": true, "severity": "warning", "scoreImpact": 0, "message": "No shadow or duplicate route handlers detected" }
       }
     },
     "context_efficiency": {
@@ -88,8 +91,8 @@ type Location = {
           { "path": "apps/web/src/pages/dashboard.tsx", "detail": "601 lines" }
         ]},
         "C3": { "id": "C3", "passed": true, "severity": "warning", "scoreImpact": 0, "message": "No file imports more than 15 distinct modules" },
-        "C4": { "id": "C4", "passed": false, "severity": "recommendation", "scoreImpact": 20, "message": "High fan-in files not declared in manifest", "locations": [
-          { "path": "packages/ui/src/tokens.ts", "detail": "23 dependents" }
+        "C4": { "id": "C4", "passed": false, "severity": "recommendation", "scoreImpact": 0, "message": "1 files not in manifest.highFanIn: packages/ui/src/tokens.ts (23)", "locations": [
+          { "path": "packages/ui/src/tokens.ts", "detail": "blast radius: 23 direct callers" }
         ]},
         "C5": { "id": "C5", "passed": true, "severity": "recommendation", "scoreImpact": 0, "message": "Max import depth 6" }
       }

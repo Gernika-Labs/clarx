@@ -28,23 +28,35 @@ Within each pillar, each failing rule reduces the pillar score proportionally by
 
 | Rule | Severity | Score impact |
 |------|----------|-------------|
-| `hard_failure` | Sets overall floor to 50 | — |
+| `hard_failure` | Caps overall score (graduated floor) | — |
 | `warning` | Deducts from pillar score | Varies by rule |
 | `recommendation` | No score impact | — |
+
+### Hard failure floor
+
+When one or more hard failures are active, the overall score is capped:
+
+| Hard failures | Maximum overall score |
+|---------------|----------------------|
+| 1 | 65 |
+| 2 | 50 |
+| 3 | 35 |
+| 4+ | 25 |
 
 ---
 
 ## Hard failures
 
-A hard failure caps the entire repo score at 50, regardless of pillar scores.
+Hard failures are structural — they undermine AI navigability in ways that no amount of clean naming or documentation can compensate for.
 
 | Rule | Description |
 |------|-------------|
 | **B1** | Circular imports between packages or workspaces |
-| **C1** | Generated artifacts inside the source tree |
+| **C1** | Generated artifacts **committed** to the source tree |
+| **C2** | Any source file exceeds **600** lines |
 | **O1** | No machine-readable guidance file |
 
-Hard failures are structural — they undermine AI navigability in ways that no amount of clean naming or documentation can compensate for.
+**C1 note:** Gitignored generated directories in the working tree trigger a **warning**, not a hard failure, unless they are tracked in git.
 
 ---
 
@@ -103,7 +115,7 @@ my-app/
 ```
 
 Failures:
-- `.next/` in source tree → **C1 hard failure** → score capped at 50
+- `.next/` committed to git → **C1 hard failure** → score capped (graduated floor)
 - No guidance file → **O1 hard failure**
 - `utils.ts`, `helpers.ts` → D4, E3
 - `routes.ts` at 600 lines → C2, E1

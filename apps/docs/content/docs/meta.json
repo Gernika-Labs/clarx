@@ -41,6 +41,7 @@
     "standard/manifest",
     "---CLI---",
     "cli/overview",
+    "cli/tui",
     "cli/commands",
     "cli/ci-integration",
     "---Engine---",

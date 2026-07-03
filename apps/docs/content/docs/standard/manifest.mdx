@@ -43,6 +43,9 @@ The manifest is the contract between the repo and the analysis engine.
     "packages/ui/src/tokens.ts",
     "apps/docs/lib/mdx-components.ts"
   ],
+  "highFanOut": [
+    "apps/docs/lib/mdx-components.ts"
+  ],
   "verificationCommands": {
     "typecheck": "pnpm typecheck",
     "test": "pnpm test",
@@ -71,7 +74,10 @@ Glob patterns or paths that are generated artifacts. The engine will exclude the
 A map of workspace paths to one-line purpose statements. Satisfies **D2** when provided here instead of (or in addition to) per-package READMEs.
 
 ### `highFanIn`
-Files imported by 10 or more other files. Declaring these satisfies **C4** and enables the engine to warn when these files are modified. These are the files where changes have the widest blast radius.
+Files imported by **10 or more** other files. Copy paths from the C4 finding (listed with caller counts) into this array. Satisfies **C4**. Files under `ui/` directories are auto-exempt — shared primitives are expected to have many callers.
+
+### `highFanOut`
+Files that intentionally import from many modules — aggregation points such as Server Actions files, MDX component registries, or API coordination layers. Declaring a path here exempts it from **C3** (15-module import limit). The engine also auto-exempts common aggregation filenames (`actions.ts`, `mutations.ts`, `handlers.ts`, etc.) and single-domain barrel files.
 
 ### `verificationCommands`
 Commands for `typecheck`, `test`, and `lint`. Satisfies **O3**. The CLI uses these when suggesting how to verify changes.

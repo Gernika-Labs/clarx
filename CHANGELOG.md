@@ -9,6 +9,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.10] - 2026-07-03
+
+### Added
+
+**CLI — interactive TUI overhaul**
+- Scrollable body with pinned footer: pillar summary, issue cards, and command transcript stay navigable on small terminals
+- Rule detail view (`Enter` on an issue) with full explanation, remediation, and copy support
+- Body scroll (`↑`/`↓`, `PgUp`/`PgDn`) with edge-aware pillar navigation
+- Context-aware footer hints that adapt to main vs. detail view and filter/command mode
+- New TUI docs page at `/docs/cli/tui`
+
+### Changed
+
+**CLI**
+- TUI layout refactored into pure ANSI components (`layout`, `body-scroll`, `views`, `rule-detail-view`)
+- `explain` command copy text aligned with TUI rule detail rendering
+- Removed unused `open-file` platform helper
+
+**Docs**
+- CLI, engine, and standard docs updated for TUI workflow, output formats, and scoring behavior
+- Landing page version bumped to v0.1.10
+
+---
+
 ## [0.1.5] - 2026-05-01
 
 ### Added

@@ -1,29 +1,48 @@
+import type { FooterContext } from '../views.js';
 import { Text } from './text.js';
 
-export function Footer({ filterActive }: { filterActive?: boolean }): string {
-  if (filterActive) {
-    return Text({ children: 'type to filter pillars/issues · Enter clear · Esc cancel', dim: true });
+function hint(key: string, label: string): string {
+  return `${Text({ children: key, intent: 'brand' })}${Text({ children: label, dim: true })}`;
+}
+
+const JOIN = `  ${Text({ children: '·', dim: true })}  `;
+
+export function Footer({
+  context,
+  multipleIssues = false,
+  bodyScrollable = false,
+}: {
+  context: FooterContext;
+  multipleIssues?: boolean;
+  bodyScrollable?: boolean;
+}): string {
+  switch (context) {
+    case 'filter':
+      return Text({ children: 'type to filter · Enter apply · Esc cancel', dim: true });
+    case 'command':
+      return [
+        hint('Enter', ' run'),
+        hint('↑↓', ' history'),
+        hint('Esc', ' cancel'),
+      ].join(JOIN);
+    case 'detail':
+      return [
+        hint('Esc', ' back'),
+        hint('↑↓', ' scroll'),
+        hint('c', ' copy fix'),
+        ...(multipleIssues ? [hint('Tab', ' next issue')] : []),
+      ].join(JOIN);
+    case 'main':
+    default:
+      return [
+        hint('↓↑', bodyScrollable ? ' scroll' : ' pillars'),
+        ...(bodyScrollable ? [hint('PgUp/Dn', ' page')] : []),
+        ...(multipleIssues ? [hint('Tab', ' issue')] : []),
+        hint('Enter', ' details'),
+        hint('/', ' filter'),
+        hint('c', ' copy'),
+        hint('r', ' rescan'),
+        hint('q', ' quit'),
+      ].join(JOIN);
   }
-  return [
-    Text({ children: '↓↑', intent: 'brand' }),
-    Text({ children: ' navigate', dim: true }),
-    '  ',
-    Text({ children: 'Tab', intent: 'brand' }),
-    Text({ children: ' issue', dim: true }),
-    '  ',
-    Text({ children: 'Enter', intent: 'brand' }),
-    Text({ children: ' open', dim: true }),
-    '  ',
-    Text({ children: '/', intent: 'brand' }),
-    Text({ children: ' filter', dim: true }),
-    '  ',
-    Text({ children: 'c', intent: 'brand' }),
-    Text({ children: ' copy', dim: true }),
-    '  ',
-    Text({ children: 'r', intent: 'brand' }),
-    Text({ children: ' rescan', dim: true }),
-    '  ',
-    Text({ children: 'q', intent: 'brand' }),
-    Text({ children: ' quit', dim: true }),
-  ].join('');
 }

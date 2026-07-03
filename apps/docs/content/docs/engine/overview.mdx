@@ -15,8 +15,8 @@ The engine takes a filesystem path (and optionally a manifest) and returns a str
 
 1. **Filesystem scan** — discovers all source files, excludes generated paths
 2. **Metric collection** — measures file sizes, directory structure, naming patterns, import counts
-3. **Import graph analysis** — resolves TypeScript/JavaScript imports to detect cycles, fan-in, and graph depth (when possible)
-4. **Rule evaluation** — applies all 26 rules from the standard against collected metrics
+3. **Import graph analysis** — resolves TypeScript/JavaScript imports to detect cycles, fan-in, fan-out, and graph depth (when possible)
+4. **Rule evaluation** — applies all **27** rules from the standard against collected metrics
 5. **Score calculation** — computes pillar scores, overall score, hard failures, and confidence level
 
 ---
@@ -36,7 +36,7 @@ import { analyze } from '@clarxai/engine';
 
 const result = await analyze({
   root: '/path/to/repo',
-  manifest: './clarx-manifest.json', // optional
+  manifest: './clarx-manifest.json', // optional path override; defaults to clarx-manifest.json at root
 });
 
 console.log(result.score);        // 74
@@ -53,12 +53,12 @@ The engine runs analysis in two passes:
 
 ### Pass 1: Deterministic structural analysis
 - Fast, cheap, always runs
-- Filesystem heuristics, file size checks, naming pattern checks
+- Filesystem heuristics, file size checks, naming pattern checks, guidance file checks
 - Does not require import resolution
 
 ### Pass 2: Import graph analysis
 - Runs when TypeScript project references or JS/TS imports are resolvable
-- Detects circular dependencies (B1), fan-in (C4), and graph depth (C5)
+- Detects circular dependencies (B1), import surface (C3), fan-in (C4), fan-out, and graph depth (C5)
 - Skipped if the engine cannot resolve imports — confidence drops to `low` or `medium`
 
 ---
@@ -67,20 +67,26 @@ The engine runs analysis in two passes:
 
 ```
 packages/engine/src/
-  index.ts          — public API
-  types.ts          — AnalysisResult, RuleResult, PillarScore
+  index.ts              — public API
+  types.ts              — AnalysisResult, RuleResult, PillarScore
   analyzers/
-    filesystem.ts   — file tree scan, exclusions
-    naming.ts       — D4, E3 naming checks
-    structure.ts    — D1, D3, D5, B4, E2
-    imports.ts      — B1, C3, C4, C5 import graph
-    filesize.ts     — C2, E1
-    guidance.ts     — O1–O5
-    boundaries.ts   — B2, B3, E4, E5
+    filesystem.ts       — file tree scan, exclusions
+    import-graph.ts     — TypeScript/JS import resolution
+    rules-d.ts          — D1, D4
+    rules-d2-d3-d5.ts   — D2, D3, D5
+    rules-d6.ts         — D6 shadow routes
+    rules-b.ts          — B3, B4
+    rules-b1-b2.ts      — B1, B2
+    rules-c.ts            — C1, C2
+    rules-c3-c4-c5.ts   — C3, C4, C5, C6
+    rules-e.ts          — E1–E5
+    rules-remaining.ts  — O1–O4
+    rules-o5.ts         — O5
+    view-model-opportunities.ts — migration hints
   scoring/
-    pillar.ts       — per-pillar score calculation
-    overall.ts      — weighted average + hard failure floor
-  manifest.ts       — manifest parsing and validation
+    rules.ts            — rule orchestration
+    overall.ts          — weighted average + hard failure floor
+  manifest.ts           — manifest parsing and validation
 ```
 
 ---

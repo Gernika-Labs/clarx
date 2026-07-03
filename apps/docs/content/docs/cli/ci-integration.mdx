@@ -32,6 +32,31 @@ jobs:
       - run: npx clarx score --min-score 70
 ```
 
+### SARIF for GitHub Code Scanning
+
+```yaml
+name: Clarx SARIF
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npx clarx score --format sarif > clarx.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: clarx.sarif
+```
+
 ### PR comment with markdown report
 
 ```yaml
@@ -89,9 +114,11 @@ Start conservative. A low threshold that passes lets teams adopt Clarx without b
 
 | Phase | Recommended threshold |
 |-------|----------------------|
-| Initial adoption | `--min-score 50` (blocks only hard failures) |
+| Initial adoption | `--min-score 50` (tolerates one hard failure under the graduated floor) |
 | Stabilized baseline | `--min-score 65` |
 | Target state | `--min-score 80` |
+
+Use `--ui text` or `--format json` in CI — the interactive TUI is skipped automatically in non-TTY environments.
 
 Do not set a threshold higher than the current score on `main`. The first run should always pass on the existing codebase.
 

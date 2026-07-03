@@ -81,6 +81,23 @@ These stream logs directly to the terminal with no TUI wrapper.
 
 ---
 
+## Scoring this repo
+
+Root `package.json` includes scripts that build the CLI and run analysis against the monorepo:
+
+| Command | What it does |
+|---------|-------------|
+| `pnpm clarx:score` | Interactive TUI score of the repo |
+| `pnpm clarx:watch` | TUI with file-watch rescan |
+| `pnpm clarx:text` | Plain text mode |
+| `pnpm clarx:json` | JSON output |
+| `pnpm clarx:sarif` | SARIF output |
+| `pnpm clarx:verbose` | TUI with passing rules shown |
+
+See [Interactive TUI](/docs/cli/tui) for keyboard shortcuts.
+
+---
+
 ## Other common tasks
 
 | Command | What it does |

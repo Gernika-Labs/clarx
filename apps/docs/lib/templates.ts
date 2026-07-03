@@ -107,7 +107,7 @@ AI-native primitives:
 - ChatInput: onSubmit, isStreaming, placeholder
 - ToolCall: name, status (pending | running | success | error), input, output, error
 - StreamingText: content, isStreaming
-- AgentStatus: state (idle | thinking | running | done | error | interrupted)
+- AgentStatus: state (idle | thinking | using-tool | responding | done | error)
 `
 
 export const AGENTS_TEMPLATE = `## UI Generation — Design System Rules

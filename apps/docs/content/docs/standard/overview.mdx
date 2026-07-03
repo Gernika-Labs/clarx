@@ -26,7 +26,7 @@ Without a standard, every analysis is vague and inconsistent. A standard makes s
 
 The Clarx standard defines:
 
-- **26 rules** across five pillars
+- **27 rules** across five pillars
 - **Three severity levels**: hard failure, warning, recommendation
 - **A scoring model** from 0 to 100 with hard failure floors
 - **A confidence model** based on available analysis signals
@@ -48,12 +48,13 @@ The Clarx standard defines:
 
 ## Hard failures
 
-Three rules produce a hard failure that caps any repo score at 50:
+Four rules can produce a hard failure. Each active hard failure caps the overall score using a graduated floor (one → max 65, two → 50, three → 35, four or more → 25). See [Scoring Model](/docs/standard/scoring#hard-failures) for details.
 
 | Rule | Description |
 |------|-------------|
 | **B1** | Circular imports between packages or workspaces |
-| **C1** | Generated artifacts inside the source tree |
+| **C1** | Generated artifacts **committed** to the source tree |
+| **C2** | Any source file exceeds **600** lines |
 | **O1** | No machine-readable guidance file (CLAUDE.md, AGENTS.md, or clarx-manifest.json) |
 
 A repo can still improve from a hard failure. Fixing any one of these is the highest-leverage change.

@@ -38,11 +38,13 @@ clarx init
 clarx explain C2
 ```
 
+In a terminal, `clarx score` opens the [interactive TUI](/docs/cli/tui) by default. Use `--ui text` for a plain readline prompt, or `--format json|markdown|sarif` for machine-readable output.
+
 ---
 
 ## Output
 
-The default report is human-readable:
+In TTY mode, the default is the interactive dashboard. With `--ui text` or in CI, the report is human-readable plain text:
 
 ```
 Clarx AI-First Score — v0.1
@@ -59,7 +61,7 @@ Confidence: medium
 Warnings (4):
   C2  3 files exceed 400 lines:
         apps/api/src/routes/auth.ts (847 lines)
-        packages/ui/src/tokens.ts (512 lines)  [declared in manifest — exempt]
+        packages/ui/src/tokens.ts (512 lines)
         apps/web/src/pages/dashboard.tsx (601 lines)
   O2  Guidance file does not declare generated directories
   O3  Guidance file does not declare verification commands
@@ -72,6 +74,8 @@ Recommendations (2):
 
 Run `clarx explain <rule>` for guidance on any rule.
 ```
+
+In the TUI, press `Enter` on an issue to open a formatted detail view with the same guidance.
 
 ---
 

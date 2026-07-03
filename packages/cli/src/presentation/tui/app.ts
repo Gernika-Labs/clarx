@@ -1,9 +1,9 @@
 import type { AnalysisResult } from '@clarxai/engine';
 import type { ScoreOptions } from '../../app/score/types.js';
 import { runScan } from '../../app/score/run-scan.js';
-import { openFile } from '../../platform/open-file.js';
 import { createRecursiveWatcher } from '../../platform/watcher.js';
-import { formatExplanation, getRuleCopyText } from '../../commands/explain.js';
+import { parseScoreCommand } from '../../app/score/command-parser.js';
+import { formatExplanation, getRuleCopyText, getRuleExplanation } from '../../commands/explain.js';
 import { copyToClipboard } from '../../utils/clipboard.js';
 import { track } from '../../utils/telemetry.js';
 import { buildScoreReportView } from '../score-report/model.js';
@@ -23,9 +23,12 @@ import {
   nextPillarIndex,
   visiblePillarIndices,
 } from './navigation.js';
-import { renderTuiFrame, type TuiFrameState } from './render-frame.js';
+import { findSelectedIssueLineRange, scrollToRevealRange } from './body-scroll.js';
+import { bodyViewportRows, footerLineCount, maxBodyScroll } from './layout.js';
+import { renderTuiFrameParts, type TuiFrameState } from './render-frame.js';
 import { TerminalScreen } from './screen.js';
 import { transcriptHeight } from './viewport.js';
+import type { TuiView } from './views.js';
 
 const MAX_TRANSCRIPT_ENTRIES = 50;
 
@@ -69,6 +72,9 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
   let history: CommandHistoryState = createCommandHistoryState();
   let transcript: TranscriptEntry[] = [];
   let transcriptScroll = 0;
+  let bodyScroll = 0;
+  let activeView: TuiView = 'main';
+  let detailRuleId: string | null = null;
 
   const syncSelection = () => {
     const view = buildScoreReportView(result);
@@ -90,6 +96,8 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
 
   const getFrameState = (): TuiFrameState => ({
     result,
+    activeView,
+    detailRuleId,
     watchMode: Boolean(input.watchMode),
     verbose: input.opts.verbose,
     isRefreshing,
@@ -104,9 +112,66 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
     selectedIssueIndex,
   });
 
+  const frameMetrics = () => {
+    const parts = renderTuiFrameParts(getFrameState());
+    const footerLines = footerLineCount(parts.footer);
+    return {
+      parts,
+      footerLines,
+      viewport: bodyViewportRows(process.stdout.rows, footerLines),
+      maxScroll: parts.bodyMaxScroll,
+    };
+  };
+
+  const bodyScrollPage = () => frameMetrics().viewport;
+
+  const scrollBody = (delta: number) => {
+    const parts = renderTuiFrameParts(getFrameState());
+    const max = maxBodyScroll(parts.body, process.stdout.rows, parts.footer);
+    bodyScroll = Math.min(Math.max(0, bodyScroll + delta), max);
+    screen.renderSplit({
+      body: parts.body,
+      footer: parts.footer,
+      commandBuffer,
+      bodyScroll,
+      showPrompt: parts.showPrompt,
+    });
+  };
+
   const redraw = () => {
     syncSelection();
-    screen.render(renderTuiFrame(getFrameState()));
+    const parts = renderTuiFrameParts(getFrameState());
+    const max = maxBodyScroll(parts.body, process.stdout.rows, parts.footer);
+    bodyScroll = Math.min(bodyScroll, max);
+    screen.renderSplit({
+      body: parts.body,
+      footer: parts.footer,
+      commandBuffer,
+      bodyScroll,
+      showPrompt: parts.showPrompt,
+    });
+  };
+
+  const openDetail = (ruleId: string) => {
+    if (!getRuleExplanation(ruleId)) {
+      status = `Unknown rule: ${ruleId}`;
+      redraw();
+      return;
+    }
+    detailRuleId = ruleId.toUpperCase();
+    activeView = 'detail';
+    bodyScroll = 0;
+    copied = null;
+    status = null;
+    track({ action: 'explain', rule: detailRuleId, score: result.score });
+    redraw();
+  };
+
+  const closeDetail = () => {
+    activeView = 'main';
+    detailRuleId = null;
+    bodyScroll = 0;
+    redraw();
   };
 
   const navigatePillar = (delta: number) => {
@@ -120,7 +185,48 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
     const nextPos = nextPillarIndex(base, delta, visible.length);
     selectedPillarIndex = visible[nextPos]!;
     selectedIssueIndex = 0;
+    bodyScroll = 0;
     redraw();
+  };
+
+  const scrollSelectedIssueIntoView = () => {
+    const finding = selectedFinding();
+    if (!finding) return;
+
+    const { parts, viewport, maxScroll } = frameMetrics();
+    const range = findSelectedIssueLineRange(parts.body, finding.id);
+    if (!range) return;
+
+    const nextScroll = scrollToRevealRange(range, bodyScroll, viewport, maxScroll);
+    if (nextScroll === bodyScroll) return;
+
+    bodyScroll = nextScroll;
+    screen.renderSplit({
+      body: parts.body,
+      footer: parts.footer,
+      commandBuffer,
+      bodyScroll,
+      showPrompt: parts.showPrompt,
+    });
+  };
+
+  const mainVerticalNav = (direction: -1 | 1) => {
+    const { maxScroll } = frameMetrics();
+
+    if (direction === 1) {
+      if (bodyScroll < maxScroll) {
+        scrollBody(1);
+        return;
+      }
+      navigatePillar(1);
+      return;
+    }
+
+    if (bodyScroll > 0) {
+      scrollBody(-1);
+      return;
+    }
+    navigatePillar(-1);
   };
 
   const navigateIssue = (delta: number) => {
@@ -130,6 +236,7 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
     if (findings.length === 0) return;
     selectedIssueIndex = nextPillarIndex(selectedIssueIndex, delta, findings.length);
     redraw();
+    scrollSelectedIssueIntoView();
   };
 
   const selectedFinding = () => {
@@ -139,16 +246,41 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
     return findings[selectedIssueIndex] ?? null;
   };
 
-  const openSelectedFile = () => {
+  const explainSelectedIssue = () => {
     const finding = selectedFinding();
-    const path = finding?.locations[0]?.path;
-    if (!path) {
-      status = 'No file path for this issue.';
+    if (!finding) {
+      status = 'No issue selected.';
       redraw();
       return;
     }
-    const ok = openFile(input.opts.root, path);
-    status = ok ? `Opened ${path}` : `Could not open ${path}`;
+    openDetail(finding.id);
+  };
+
+  const navigateDetailIssue = (delta: number) => {
+    const view = buildScoreReportView(result);
+    const filterQuery = commandBuffer.startsWith('/') ? commandBuffer.slice(1) : '';
+    const findings = findingsForPillar(view.pillars[selectedPillarIndex]!, filterQuery);
+    if (findings.length === 0) return;
+    selectedIssueIndex = nextPillarIndex(selectedIssueIndex, delta, findings.length);
+    const finding = findings[selectedIssueIndex];
+    if (finding) {
+      detailRuleId = finding.id;
+      bodyScroll = 0;
+    }
+    redraw();
+  };
+
+  const copyDetailFix = () => {
+    if (!detailRuleId) return;
+    const text = getRuleCopyText(detailRuleId);
+    if (!text) {
+      status = `No copy text for ${detailRuleId}.`;
+      redraw();
+      return;
+    }
+    const ok = copyToClipboard(text);
+    copied = ok ? `Copied fix for ${detailRuleId} to clipboard` : 'Clipboard not available on this system';
+    track({ action: 'copy', rule: detailRuleId, score: result.score });
     redraw();
   };
 
@@ -200,6 +332,12 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
 
   const runCommand = (rawInput: string) => {
     const trimmed = rawInput.trim();
+    const command = parseScoreCommand(rawInput);
+    if (command.kind === 'show_rule' && getRuleExplanation(command.ruleId)) {
+      openDetail(command.ruleId);
+      return;
+    }
+
     const handled = executeTuiCommand(result, rawInput, {
       formatExplanation,
       getRuleCopyText,
@@ -260,6 +398,42 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
   const disableRaw = enableRawInput(key => {
     if (exiting) return;
 
+    if (activeView === 'detail') {
+      if (key.escape) {
+        closeDetail();
+        return;
+      }
+      if (key.ctrl && key.value === 'c') {
+        stop();
+        return;
+      }
+      if (key.value === 'c' && !key.ctrl && !key.meta) {
+        copyDetailFix();
+        return;
+      }
+      if (key.tab) {
+        navigateDetailIssue(1);
+        return;
+      }
+      if (key.upArrow) {
+        scrollBody(-1);
+        return;
+      }
+      if (key.downArrow) {
+        scrollBody(1);
+        return;
+      }
+      if (key.pageUp) {
+        scrollBody(-bodyScrollPage());
+        return;
+      }
+      if (key.pageDown) {
+        scrollBody(bodyScrollPage());
+        return;
+      }
+      return;
+    }
+
     if (key.escape) {
       if (commandBuffer.length > 0) {
         commandBuffer = '';
@@ -283,7 +457,7 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
         redraw();
         return;
       }
-      openSelectedFile();
+      explainSelectedIssue();
       return;
     }
 
@@ -300,6 +474,20 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
       return;
     }
 
+    if (key.pageUp) {
+      if (!isCommandMode(commandBuffer) && !isFilterMode(commandBuffer)) {
+        scrollBody(-bodyScrollPage());
+      }
+      return;
+    }
+
+    if (key.pageDown) {
+      if (!isCommandMode(commandBuffer) && !isFilterMode(commandBuffer)) {
+        scrollBody(bodyScrollPage());
+      }
+      return;
+    }
+
     if (key.upArrow) {
       if (isCommandMode(commandBuffer)) {
         const next = historyUp(history, commandBuffer);
@@ -309,7 +497,7 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
         return;
       }
       if (!isFilterMode(commandBuffer)) {
-        navigatePillar(-1);
+        mainVerticalNav(-1);
       }
       return;
     }
@@ -323,7 +511,7 @@ export async function runTuiScoreApp(input: TuiScoreAppInput): Promise<number> {
         return;
       }
       if (!isFilterMode(commandBuffer)) {
-        navigatePillar(1);
+        mainVerticalNav(1);
       }
       return;
     }

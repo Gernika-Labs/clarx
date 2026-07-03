@@ -40,11 +40,10 @@ export function Transcript({
   }
 
   const slice = sliceLines(lines, scrollOffset, maxLines);
-  const header = Text({ children: `Output (${slice.scrollOffset + 1}-${slice.scrollOffset + slice.visible.length} of ${slice.total})`, bold: true });
-  const scrollHint =
-    slice.maxScroll > 0
-      ? Text({ children: 'PgUp/PgDn scroll output · t top · b bottom', dim: true })
-      : null;
+  const header = Text({
+    children: `Output (${slice.scrollOffset + 1}-${slice.scrollOffset + slice.visible.length} of ${slice.total})`,
+    bold: true,
+  });
 
-  return [header, ...slice.visible, scrollHint].filter(Boolean).join('\n').trimEnd();
+  return [header, ...slice.visible].join('\n').trimEnd();
 }

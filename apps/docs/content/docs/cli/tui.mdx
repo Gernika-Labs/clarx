@@ -1,0 +1,121 @@
+---
+title: Interactive TUI
+description: Keyboard-driven dashboard for exploring scores, issues, and rule details in the terminal.
+---
+
+# Interactive TUI
+
+In a TTY, `clarx score` defaults to an interactive terminal UI (`--ui tui`). The TUI is built from **pure ANSI string components** — no React, no Ink, no browser. Rendering lives in `packages/cli/src/presentation/tui/`.
+
+Machine-readable formats (`--format json`, `markdown`, or `sarif`) always use plain text output and skip the TUI.
+
+---
+
+## Layout
+
+```
+┌─ Score header + pillar summary ─────────────────────────────┐
+│  Scrollable body: pillars, issue cards, migrations          │
+├─────────────────────────────────────────────────────────────┤
+│  › command prompt (main view only)                          │
+│  context-aware keyboard hints                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+The body scrolls; the prompt and hints stay pinned to the footer.
+
+---
+
+## Main dashboard
+
+The main view shows:
+
+- Overall score and pillar breakdown
+- Selectable pillar rows with inline WARN / REC issue cards
+- Optional migration opportunities and verbose rule output (`--verbose`)
+- Command transcript after running text commands (e.g. `show all`, `copy all`)
+
+### Keyboard shortcuts — main view
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Scroll the body when content is clipped; at the scroll edge, move between pillars |
+| `PgUp` / `PgDn` | Page-scroll the body |
+| `Tab` | Next issue in the selected pillar *(only when 2+ issues)* |
+| `Enter` | Open **rule detail view** for the selected issue |
+| `/` | Start filtering issues by rule ID or message |
+| `c` | Copy fix text for the selected issue |
+| `r` | Rescan the repo |
+| `q` | Quit |
+
+Enter opens a formatted detail screen — it does **not** launch `$EDITOR`.
+
+### Filter mode (`/…`)
+
+| Key | Action |
+|-----|--------|
+| type | Narrow pillars and issues |
+| `Enter` | Apply filter and return to main view |
+| `Esc` | Cancel filter |
+
+### Command prompt
+
+Type rule IDs (`C3`), section letters (`C`), or commands (`show all`, `copy all`, `r`). History is available with `↑` / `↓` while typing.
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Run command |
+| `↑` / `↓` | Command history |
+| `Esc` | Clear buffer |
+
+A rule ID like `C3` opens the **detail view** directly instead of dumping plain text into the transcript.
+
+---
+
+## Rule detail view
+
+Press `Enter` on an issue, or type a rule ID at the prompt, to open a colored detail screen:
+
+- Rule ID, severity badge, and title
+- Pillar and severity
+- Engine finding message (when the rule failed)
+- File locations
+- **Why this matters** and **How to fix it**
+
+### Keyboard shortcuts — detail view
+
+| Key | Action |
+|-----|--------|
+| `Esc` | Return to main dashboard |
+| `↑` / `↓` | Scroll detail content |
+| `PgUp` / `PgDn` | Page scroll |
+| `c` | Copy fix text |
+| `Tab` | Next issue in the pillar *(only when 2+ issues)* |
+
+`Esc` priority: detail → main, then clear command buffer, then quit.
+
+---
+
+## Watch mode
+
+Pair with `--watch` (or `-w`) to rescan on file changes:
+
+```bash
+clarx score --watch
+```
+
+The TUI shows refresh status and the last changed file path.
+
+---
+
+## Text mode
+
+Use `--ui text` for a readline-style prompt (no dashboard):
+
+```bash
+clarx score --ui text
+```
+
+Non-TTY environments (CI, pipes) default to text mode automatically.
+
+The legacy `--ui ink` alias is still accepted and maps to `tui`.

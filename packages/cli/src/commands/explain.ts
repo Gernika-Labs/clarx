@@ -15,8 +15,8 @@ const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pilla
   B5: { title: 'Test files mirror source structure or are co-located', severity: 'recommendation', pillar: 'Boundary Clarity', why: 'Scattered test files force an agent to search for coverage rather than predict it. An agent that cannot find the test for a file it edited cannot verify its change.', fix: 'Either co-locate tests next to source files (Button.tsx → Button.test.tsx) or mirror the source tree under a __tests__/ directory. Pick one pattern and apply it consistently.' },
   C1: { title: 'Generated artifacts are excluded from the source tree', severity: 'hard_failure', pillar: 'Context Efficiency', why: 'An agent that encounters generated files in a source tree cannot tell what is hand-written versus computed. It may attempt to edit generated output.', fix: 'Add generated directories to .gitignore and declare them in clarx-manifest.json. Never commit build output to source directories.' },
   C2: { title: 'No source file exceeds 400 lines', severity: 'warning', pillar: 'Context Efficiency', why: 'An agent asked to make a targeted change to a 900-line file must load the entire file to locate the relevant section.', fix: 'Split large files by responsibility. Extract types, constants, and helpers into separate files. Declare justified exceptions (registries, token maps) in clarx-manifest.json.' },
-  C3: { title: 'No file imports from more than 15 distinct modules', severity: 'warning', pillar: 'Context Efficiency', why: 'A file with 20+ imports is likely a coordination layer mixing concerns that belong in separate files. Every import is a potential context chain an agent must follow to understand what the file does.', fix: 'Split coordination files by concern. If a file is a known registry or hub (e.g. an MDX component map), declare it in manifest.highFanIn to exempt it from this rule.' },
-  C4: { title: 'High fan-in files are documented', severity: 'recommendation', pillar: 'Context Efficiency', why: 'A file imported by 10 or more other files is an architectural load-bearing point. A change to it has wide blast radius. An agent has no way to know this without being told.', fix: 'Add the file path to the highFanIn array in clarx-manifest.json. This signals to any agent that changes here require extra caution and broader verification.' },
+  C3: { title: 'No file imports from more than 15 distinct modules', severity: 'warning', pillar: 'Context Efficiency', why: 'A file with 20+ imports is likely a coordination layer mixing concerns that belong in separate files. Every import is a potential context chain an agent must follow to understand what the file does.', fix: 'Split coordination files by concern, starting with the largest import clusters shown in the finding. If a file is an intentional aggregation point (e.g. a Server Actions file or MDX component registry), declare its path in manifest.highFanOut to exempt it from this rule.' },
+  C4: { title: 'High fan-in files are documented', severity: 'recommendation', pillar: 'Context Efficiency', why: 'A file imported by 10 or more other files is an architectural load-bearing point — a change there can break callers silently across the repo. An agent has no way to infer that blast radius from the file alone.', fix: 'Add a clarx-manifest.json if the repo does not have one. Copy the paths from the C4 finding into highFanIn (the scan lists each file with its caller count). That labels load-bearing files so agents slow down and run broader verification before editing. Files under ui/ directories are exempt — shared primitives are expected to have many callers.' },
   C5: { title: 'Import graph depth does not exceed 8 hops from entry to leaf', severity: 'recommendation', pillar: 'Context Efficiency', why: 'A chain of 12 imports means an agent following a call must load 12 files to understand the full path. Context is consumed before the relevant code is reached.', fix: 'Introduce an abstraction boundary or facade that flattens the import chain. Avoid deep re-export chains.' },
   C6: { title: 'Entry files expose a local boundary surface before infrastructure', severity: 'recommendation', pillar: 'Context Efficiency', why: 'The cost of a task is not just how many files an agent opens, but how many abstraction layers it must cross. Entry files that coordinate hooks, queries, services, and types directly force dependency tracing. A local boundary surface gives the agent one explicit place to stop.', fix: 'Introduce a nearby view-model, presenter, facade, or adapter for entry files that import multiple infrastructure dependencies. The entry file should consume that surface instead of reconstructing data ownership from lower layers.' },
   O1: { title: 'A machine-readable guidance file exists', severity: 'hard_failure', pillar: 'Operational Guidance', why: 'Without any guidance file, an agent has no declared entry point for understanding the project. It must guess at conventions and structure.', fix: 'Create a CLAUDE.md or AGENTS.md at the repo root, or add a clarx-manifest.json. These are not optional — they are the minimum contract between the repo and any AI agent.' },
@@ -31,9 +31,23 @@ const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pilla
   E5: { title: 'Each package has a single declared entry point', severity: 'warning', pillar: 'Edit Safety', why: 'Packages with arbitrary internal import paths have no encapsulation. An agent will follow the path of least resistance.', fix: 'Ensure all package consumers import only from the package name (e.g. @clarxai/ui), never from internal paths.' },
 };
 
-export function getRuleFix(ruleId: string): string | null {
+export interface RuleExplanation {
+  id: string;
+  title: string;
+  severity: string;
+  pillar: string;
+  why: string;
+  fix: string;
+}
+
+export function getRuleExplanation(ruleId: string): RuleExplanation | null {
   const rule = RULE_EXPLANATIONS[ruleId.toUpperCase()];
-  return rule?.fix ?? null;
+  if (!rule) return null;
+  return { id: ruleId.toUpperCase(), ...rule };
+}
+
+export function getRuleFix(ruleId: string): string | null {
+  return getRuleExplanation(ruleId)?.fix ?? null;
 }
 
 export function getRuleCopyText(ruleId: string): string | null {
@@ -82,7 +96,7 @@ export async function explainCommand(args: string[]) {
   const rule = RULE_EXPLANATIONS[ruleId];
   if (!rule) {
     console.error(`Unknown rule: ${ruleId}`);
-    console.error('Valid rules: D1–D5, B1–B5, C1–C6, O1–O5, E1–E5');
+    console.error('Valid rules: D1–D6, B1–B5, C1–C6, O1–O5, E1–E5');
     exit(3);
   }
 
