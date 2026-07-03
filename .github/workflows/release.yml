@@ -33,13 +33,14 @@ jobs:
       - name: Test
         run: pnpm --filter @clarxai/engine test
 
-      - name: Publish @clarxai/engine
-        run: pnpm --filter @clarxai/engine publish --no-git-checks
+      - name: Publish @clarxai/cli
+        run: pnpm --filter @clarxai/cli publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @clarxai/cli
-        run: pnpm --filter @clarxai/cli publish --no-git-checks
+      - name: Publish @clarxai/engine
+        continue-on-error: true
+        run: pnpm --filter @clarxai/engine publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
