@@ -4,6 +4,7 @@ import { scoreCommand } from './commands/score.js';
 import { initCommand } from './commands/init.js';
 import { explainCommand } from './commands/explain.js';
 import { telemetryCommand } from './commands/telemetry.js';
+import { getCliVersion } from './utils/version.js';
 
 const [, , command, ...args] = argv;
 
@@ -26,6 +27,10 @@ async function main() {
     case '-h':
       printHelp();
       break;
+    case '--version':
+    case '-v':
+      console.log(getCliVersion());
+      break;
     default:
       console.error(`Unknown command: ${command}`);
       printHelp();
@@ -35,13 +40,17 @@ async function main() {
 
 function printHelp() {
   console.log(`
-clarx — AI-First Codebase Standard v0.1
+clarx — AI-First Codebase Standard v${getCliVersion()}
 
 Usage:
   clarx score [path] [options]    Score a codebase
   clarx init [path]               Generate a starter clarx-manifest.json
   clarx explain <rule-id> [--copy] Explain a rule and optionally copy the fix to clipboard
   clarx telemetry [on|off|status]  Manage anonymous usage telemetry
+
+Global options:
+  --help, -h                       Show this help
+  --version, -v                    Print CLI version
 
 Options for score:
   --format text|json|markdown|sarif Output format (default: text)

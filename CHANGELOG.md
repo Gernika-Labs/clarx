@@ -13,6 +13,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ### Added
 
+**CLI**
+- `--version` / `-v` flag prints the CLI package version; help text reads version from `package.json` instead of a hardcoded value
+
 **CLI — interactive TUI overhaul**
 - Scrollable body with pinned footer: pillar summary, issue cards, and command transcript stay navigable on small terminals
 - Rule detail view (`Enter` on an issue) with full explanation, remediation, and copy support

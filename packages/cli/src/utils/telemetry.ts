@@ -1,17 +1,13 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { getCliVersion } from './version.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-let _version = 'unknown';
-try {
-  const pkg = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8')) as { version: string };
-  _version = pkg.version;
-} catch { /* ignore */ }
+const _version = getCliVersion();
 
 const CONFIG_DIR  = join(homedir(), '.clarx');
 const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
