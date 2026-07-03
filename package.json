@@ -7,7 +7,14 @@
     "dev": "node scripts/dev.mjs",
     "build": "turbo build",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md,mdx}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md,mdx}\"",
+    "clarx": "sh -c 'pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js \"$@\"' --",
+    "clarx:score": "pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js score .",
+    "clarx:watch": "pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js score . --watch",
+    "clarx:text": "pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js score . --ui text",
+    "clarx:json": "pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js score . --format json",
+    "clarx:sarif": "pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js score . --format sarif",
+    "clarx:verbose": "pnpm --filter @clarxai/cli build && node packages/cli/dist/cli.js score . --verbose"
   },
   "devDependencies": {
     "@types/blessed": "^0.1.27",

@@ -23,11 +23,14 @@ clarx score [path] [options]
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--format` | Output format: `text`, `json`, `markdown` (alias `md`) | `text` |
+| `--format` | Output format: `text`, `json`, `markdown` (alias `md`), `sarif` | `text` |
 | `--min-score` | Exit code 1 if overall score is below this value | none |
 | `--min-pillar-score` | Exit code 1 if any pillar score is below this value | none |
 | `--ignore` | Comma-separated glob patterns to exclude | none |
 | `--verbose` | Include passing rules in output | false |
+| `--ui` | Interactive UI mode: `tui` (default in TTY) or `text` | `tui` |
+| `--watch`, `-w` | Re-run analysis on file changes (pairs with `--ui tui`) | false |
+| `--copy-all` | Copy all failing rules and fixes to clipboard | false |
 
 **Exit codes:**
 

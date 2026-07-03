@@ -8,7 +8,9 @@
   },
   "scripts": {
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006 -c .storybook",
+    "build-storybook": "storybook build -c .storybook"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -16,7 +18,15 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.2",
+    "@storybook/react-vite": "latest",
+    "@tailwindcss/postcss": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "postcss": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "storybook": "latest",
+    "tailwindcss": "latest",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {

@@ -5,7 +5,7 @@ import { bucketFindings } from '../app/score/findings.js';
 import { buildCopyAllText } from '../app/score/copy-text.js';
 import { runScan, startWatchSession } from '../app/score/runtime.js';
 import type { ScoreOptions } from '../app/score/types.js';
-import { formatJson, formatMarkdown, formatText, runInkScoreApp } from '../presentation/index.js';
+import { formatJson, formatMarkdown, formatSarif, formatText, runTuiScoreApp } from '../presentation/index.js';
 import { formatExplanation, getRuleCopyText } from './explain.js';
 import { copyToClipboard } from '../utils/clipboard.js';
 import { Spinner } from '../utils/spinner.js';
@@ -24,8 +24,8 @@ export async function scoreCommand(args: string[]) {
   const pathArg = args.find(a => !a.startsWith('--')) ?? '.';
   const root = resolve(pathArg);
   const watchMode = args.includes('--watch') || args.includes('-w');
-  const uiMode = getFlagValue(args, '--ui') ?? 'ink';
-  const useInk = uiMode === 'ink' && optsFormatAllowsInk(args) && isTTY;
+  const uiMode = normalizeUiMode(getFlagValue(args, '--ui'));
+  const useTui = (uiMode === 'tui') && optsFormatAllowsTui(args) && isTTY;
 
   const opts: ScoreOptions = {
     root,
@@ -39,14 +39,14 @@ export async function scoreCommand(args: string[]) {
 
   await showDisclosureIfNeeded();
 
-  if (watchMode && !useInk) {
+  if (watchMode && !useTui) {
     await runWatch(opts);
   } else {
-    const { result, code } = await runOnce(opts, { renderOutput: !useInk });
+    const { result, code } = await runOnce(opts, { renderOutput: !useTui });
 
-    if (useInk) {
-      const inkCode = await runInkScoreApp({ opts, result, code, watchMode });
-      exit(inkCode);
+    if (useTui) {
+      const tuiCode = await runTuiScoreApp({ opts, result, code, watchMode });
+      exit(tuiCode);
     }
 
     if (opts.format === 'text') showFooter(result, false);
@@ -80,6 +80,9 @@ async function runOnce(
     switch (opts.format) {
       case 'json':
         console.log(formatJson(result));
+        break;
+      case 'sarif':
+        console.log(formatSarif(result));
         break;
       case 'markdown':
       case 'md':
@@ -165,7 +168,13 @@ function getFlagValue(args: string[], flag: string): string | null {
   return args[i + 1] ?? null;
 }
 
-function optsFormatAllowsInk(args: string[]): boolean {
+function normalizeUiMode(mode: string | null): 'tui' | 'text' {
+  if (mode === 'text') return 'text';
+  if (mode === 'ink' || mode === 'tui' || mode === null) return 'tui';
+  return 'text';
+}
+
+function optsFormatAllowsTui(args: string[]): boolean {
   const format = getFlagValue(args, '--format') ?? 'text';
   return format === 'text';
 }

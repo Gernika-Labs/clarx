@@ -44,8 +44,8 @@ Usage:
   clarx telemetry [on|off|status]  Manage anonymous usage telemetry
 
 Options for score:
-  --format text|json|markdown     Output format (default: text)
-  --ui text|ink                   UI mode for interactive terminal output (default: ink in TTY, text otherwise)
+  --format text|json|markdown|sarif Output format (default: text)
+  --ui text|tui                   UI mode for interactive terminal output (default: tui in TTY, text otherwise)
   --watch, -w                     Re-run on file changes
   --min-score <n>                 Exit 1 if score is below n
   --min-pillar-score <n>          Exit 1 if any pillar score is below n

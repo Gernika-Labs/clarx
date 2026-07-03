@@ -10,7 +10,8 @@
   "highFanIn": [
     "src/commands/score.ts",
     "src/app/score/command-core.ts",
-    "src/presentation/ink/app.ts"
+    "src/presentation/tui/app.ts",
+    "src/presentation/score-report/model.ts"
   ],
   "verificationCommands": {
     "typecheck": "pnpm --filter @clarxai/cli typecheck",
@@ -20,7 +21,8 @@
   "commonTasks": {
     "add a cli command": "src/commands/ and wire in src/cli.ts",
     "change score behavior": "src/app/score/ first, then adapt presentation/",
-    "change text or markdown output": "src/presentation/reporters/",
-    "change the interactive tty ui": "src/presentation/ink/"
+    "change text markdown or sarif output": "src/presentation/reporters/",
+    "change the interactive tty ui": "src/presentation/tui/",
+    "change shared score layout": "src/presentation/score-report/"
   }
 }

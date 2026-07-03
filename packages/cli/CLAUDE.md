@@ -1,6 +1,6 @@
 # @clarxai/cli
 
-Purpose: terminal interface for the Clarx engine. It owns command parsing, interactive score flows, reporter selection, and the Ink/text UI adapters.
+Purpose: terminal interface for the Clarx engine. It owns command parsing, interactive score flows, reporter selection, and the TUI/text UI adapters.
 
 ## Generated Directories
 
@@ -19,11 +19,13 @@ Do not edit generated output in `dist/`.
 ## Common Changes
 
 - Add a new CLI command in `src/commands/` and wire it in `src/cli.ts`.
-- Update score behavior in `src/app/score/` first, then adapt text/Ink presentation layers.
+- Update score behavior in `src/app/score/` first, then adapt `score-report` and `tui` presentation layers.
 - Add or adjust machine-readable output in `src/presentation/reporters/`.
 
 ## High-Risk Files
 
 - `src/commands/score.ts` — entrypoint tying together score command behavior and UI mode selection.
 - `src/app/score/command-core.ts` — shared command semantics used by both the text watch prompt and Ink.
-- `src/presentation/ink/app.ts` — default TTY experience; keep command behavior aligned with the shared score core.
+- `src/presentation/tui/app.ts` — default TTY dashboard; pillar navigation + issue cards + command prompt.
+- `src/presentation/tui/components/` — reusable terminal components (badge, box, issue-card, pillar-nav-row).
+- `src/presentation/score-report/model.ts` — shared score view used by text reporter and TUI.
