@@ -1,6 +1,8 @@
 import type { AnalysisResult, Confidence, PillarName, PillarScore, RuleId, RuleResult } from '../types.js';
 
-const PILLAR_RULES: Record<PillarName, RuleId[]> = {
+/** Authoritative rule → pillar grouping. Exported so consumers (CLI explain,
+ * docs, tests) can assert full coverage of the rule set. */
+export const PILLAR_RULES: Record<PillarName, RuleId[]> = {
   discoverability: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'],
   boundary_clarity: ['B1', 'B2', 'B3', 'B4', 'B5'],
   context_efficiency: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'],
@@ -8,7 +10,13 @@ const PILLAR_RULES: Record<PillarName, RuleId[]> = {
   edit_safety: ['E1', 'E2', 'E3', 'E4', 'E5'],
 };
 
-function hardFailureFloor(count: number): number {
+/**
+ * Graduated cap applied by unresolved hard failures:
+ * 1 → 65, 2 → 50, 3 → 35, 4+ → 25.
+ * Graduated rather than a flat cap so fixing each hard failure visibly moves
+ * the score — a repo at 35 has an obvious two-item fix list, not a wall.
+ */
+export function hardFailureFloor(count: number): number {
   if (count <= 0) return Infinity;
   return Math.max(65 - (count - 1) * 15, 25);
 }

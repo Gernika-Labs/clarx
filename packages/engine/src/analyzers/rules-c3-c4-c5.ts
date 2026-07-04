@@ -3,12 +3,12 @@ import { join } from 'node:path';
 import type { FileEntry } from './filesystem.js';
 import type { ImportGraph } from './import-graph.js';
 import type { Manifest, RuleResult } from '../types.js';
+import { DEFAULT_THRESHOLDS, type Thresholds } from '../thresholds.js';
 
-// C3 — no file imports from more than 15 distinct modules
+// C3 — no file imports from more than c3ImportLimit distinct modules (thresholds.ts).
 // Files declared in manifest.highFanOut are intentional aggregation points and are exempt.
 // Common mutation/command layer filenames (actions.ts, mutations.ts, etc.) are also auto-exempted
 // because they reach into many domains by design — the coupling is intentional, not accidental.
-const C3_LIMIT = 15;
 
 const AGGREGATION_FILENAME_RE = /(?:^|\/)(?:actions|mutations|resolvers|commands|handlers|routes)\.[jt]sx?$/;
 
@@ -67,11 +67,16 @@ function clusterDetail(path: string, totalCount: number, graph: ImportGraph): st
     : `${totalCount} imports — ${top}`;
 }
 
-export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleResult {
+export function evaluateC3(
+  graph: ImportGraph,
+  manifest: Manifest | null,
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): RuleResult {
+  const limit = thresholds.c3ImportLimit;
   const declared = new Set(manifest?.highFanOut ?? []);
   const violations = [...graph.importCount.entries()]
     .filter(([path, count]) => {
-      if (count <= C3_LIMIT) return false;
+      if (count <= limit) return false;
       if ([...declared].some(d => path === d || path.endsWith('/' + d))) return false;
       if (AGGREGATION_FILENAME_RE.test(path)) return false;
       if (isSingleDomainBarrel(path, graph)) return false;
@@ -86,7 +91,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
       severity: 'warning',
       confidence: 'high',
       scoreImpact: 25,
-      message: `No file has a large import surface (more than ${C3_LIMIT} distinct modules)`,
+      message: `No file has a large import surface (more than ${limit} distinct modules)`,
     };
   }
 
@@ -96,7 +101,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
     severity: 'warning',
     confidence: 'high',
     scoreImpact: 25,
-    message: `${violations.length} file${violations.length > 1 ? 's' : ''} ${violations.length > 1 ? 'have' : 'has'} a large import surface (more than ${C3_LIMIT} modules) — harder to navigate and expensive for LLM context windows`,
+    message: `${violations.length} file${violations.length > 1 ? 's' : ''} ${violations.length > 1 ? 'have' : 'has'} a large import surface (more than ${limit} modules) — harder to navigate and expensive for LLM context windows`,
     remediation: 'The domain breakdown in each finding shows which concerns are already clustered — extract the largest clusters into their own files first. If a file is an intentional aggregation point (e.g. a Server Actions file or API layer), declare it in manifest.highFanOut to suppress this finding.',
     locations: violations.slice(0, 10).map(([path, count]) => ({
       path,
@@ -105,8 +110,7 @@ export function evaluateC3(graph: ImportGraph, manifest: Manifest | null): RuleR
   };
 }
 
-// C4 — high fan-in files are documented
-const C4_THRESHOLD = 10;
+// C4 — high fan-in files are documented (threshold: c4FanInThreshold in thresholds.ts)
 
 // Files in a conventionally-named UI component library directory are designed
 // to have many callers — that's their purpose. Exempting them avoids requiring
@@ -115,7 +119,8 @@ const UI_LIB_DIR_RE = /(?:^|\/)ui(?:\/|$)/i;
 
 export function evaluateC4(
   graph: ImportGraph,
-  manifest: Manifest | null
+  manifest: Manifest | null,
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
 ): RuleResult {
   if (manifest === null) {
     return {
@@ -129,7 +134,7 @@ export function evaluateC4(
   }
 
   const highFanIn = [...graph.fanIn.entries()]
-    .filter(([path, count]) => count >= C4_THRESHOLD && !path.endsWith('/__entry__') && !UI_LIB_DIR_RE.test(path))
+    .filter(([path, count]) => count >= thresholds.c4FanInThreshold && !path.endsWith('/__entry__') && !UI_LIB_DIR_RE.test(path))
     .sort((a, b) => b[1] - a[1]);
 
   if (highFanIn.length === 0) {
@@ -178,10 +183,14 @@ export function evaluateC4(
   };
 }
 
-// C5 — import graph depth does not exceed 8 hops from entry to leaf
-const C5_LIMIT = 8;
+// C5 — import graph depth does not exceed c5ImportDepth hops from entry to leaf (thresholds.ts)
 
-export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
+export function evaluateC5(
+  graph: ImportGraph,
+  files: FileEntry[],
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): RuleResult {
+  const limit = thresholds.c5ImportDepth;
   // Find entry points: files with no fan-in within the graph
   const allTargets = new Set([...graph.edges.values()].flatMap(s => [...s]));
   const entries = [...graph.edges.keys()].filter(f => !allTargets.has(f));
@@ -223,14 +232,14 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
     }
   }
 
-  if (maxDepth <= C5_LIMIT) {
+  if (maxDepth <= limit) {
     return {
       id: 'C5',
       passed: true,
       severity: 'recommendation',
       confidence: 'medium',
       scoreImpact: 0,
-      message: `Maximum import depth is ${maxDepth} hops (limit: ${C5_LIMIT})`,
+      message: `Maximum import depth is ${maxDepth} hops (limit: ${limit})`,
     };
   }
 
@@ -240,7 +249,7 @@ export function evaluateC5(graph: ImportGraph, files: FileEntry[]): RuleResult {
     severity: 'recommendation',
     confidence: 'medium',
     scoreImpact: 0,
-    message: `Import graph depth reaches ${maxDepth} hops (limit: ${C5_LIMIT})`,
+    message: `Import graph depth reaches ${maxDepth} hops (limit: ${limit})`,
     locations: [{ path: deepestPath[deepestPath.length - 1] ?? '', detail: `${maxDepth}-hop chain` }],
   };
 }
@@ -249,8 +258,7 @@ const ENTRY_FILE_RE = /(?:^|\/)(?:page|screen|view|container|layout|route)\.[jt]
 const BOUNDARY_IMPORT_RE = /(?:^|\/)(?:view-models?\/|presenters?\/|facades?\/)|(?:^|\/)(?:use[A-Z][A-Za-z0-9]*ViewModel|[A-Za-z0-9-]+(?:view-model|viewmodel|presenter|facade|adapter))\.[jt]sx?$/;
 const INFRA_IMPORT_RE = /(?:^|\/)(?:api|client|fetch|query|queries|service|services|store|state|pagination|types?|hooks?|use-[a-z0-9-]+)\b/i;
 const IMPORT_PATH_RE = /(?:import|export)\b[^'"]*['"]([^'"]+)['"]/g;
-const C6_IMPORT_THRESHOLD = 8;
-const C6_INFRA_THRESHOLD = 2;
+// C6 thresholds (c6ImportThreshold / c6InfraThreshold) live in thresholds.ts.
 
 function extractImports(source: string): string[] {
   const imports: string[] = [];
@@ -262,7 +270,11 @@ function extractImports(source: string): string[] {
   return imports;
 }
 
-export async function evaluateC6(root: string, files: FileEntry[]): Promise<RuleResult> {
+export async function evaluateC6(
+  root: string,
+  files: FileEntry[],
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): Promise<RuleResult> {
   const sourceFiles = files.filter(
     f => !f.isGenerated && ENTRY_FILE_RE.test(f.relativePath)
   );
@@ -293,7 +305,7 @@ export async function evaluateC6(root: string, files: FileEntry[]): Promise<Rule
     const infraImports = relativeImports.filter(imp => INFRA_IMPORT_RE.test(imp));
     const hasBoundarySurface = relativeImports.some(imp => BOUNDARY_IMPORT_RE.test(imp));
     const needsBoundarySurface =
-      imports.length >= C6_IMPORT_THRESHOLD || infraImports.length >= C6_INFRA_THRESHOLD;
+      imports.length >= thresholds.c6ImportThreshold || infraImports.length >= thresholds.c6InfraThreshold;
 
     if (needsBoundarySurface && !hasBoundarySurface) {
       violations.push({

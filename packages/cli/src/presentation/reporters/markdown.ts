@@ -1,4 +1,5 @@
 import type { AnalysisResult, PillarName, RuleResult } from '@clarxai/engine';
+import { hardFailureFloor } from '@clarxai/engine';
 
 const PILLAR_LABELS: Record<PillarName, string> = {
   discoverability: 'Discoverability',
@@ -12,13 +13,21 @@ export function formatMarkdown(result: AnalysisResult, opts: { verbose?: boolean
   const lines: string[] = [];
   const scoreEmoji = result.score >= 90 ? '🟢' : result.score >= 70 ? '🟡' : '🔴';
 
-  lines.push(`## Clarx AI-First Score — ${scoreEmoji} ${result.score} / 100`);
+  lines.push(`## Clarx AI-Readiness — ${scoreEmoji} ${result.score} / 100`);
+  lines.push('');
+  lines.push('*How easily an AI agent can navigate and safely edit this repo — not a measure of code quality, security, or correctness.*');
   lines.push('');
   lines.push(`**Confidence:** ${result.confidence} &nbsp;|&nbsp; **Standard:** v${result.version} &nbsp;|&nbsp; **Scanned:** ${result.meta.filesScanned} files`);
   lines.push('');
 
   if (result.confidenceCaveat) {
     lines.push(`> ⚠️ **Low confidence:** ${result.confidenceCaveat}`);
+    lines.push('');
+  }
+
+  const notEvaluated = Object.values(result.rules).filter(r => r.inapplicable).map(r => r.id);
+  if (notEvaluated.length > 0) {
+    lines.push(`> ℹ️ **Not evaluated for this stack:** ${notEvaluated.map(id => `\`${id}\``).join(', ')} — no resolvable JS/TS import graph. Guidance and filesystem rules still apply.`);
     lines.push('');
   }
 
@@ -53,9 +62,10 @@ export function formatMarkdown(result: AnalysisResult, opts: { verbose?: boolean
   const recommendations = Object.values(result.rules).filter(r => !r.passed && r.severity === 'recommendation');
 
   if (hardFailures.length > 0) {
-    lines.push('### 🔴 Hard Failures');
+    const cap = hardFailureFloor(hardFailures.length);
+    lines.push('### 🔴 Hard Failures — fix first');
     lines.push('');
-    lines.push('> These rules cap the overall score at 50 until resolved.');
+    lines.push(`> ${hardFailures.length === 1 ? 'This rule caps' : 'These rules cap'} the overall score at **${cap}** until resolved (graduated: 1 → 65, 2 → 50, 3 → 35, 4+ → 25). Each fix visibly lifts the cap.`);
     lines.push('');
     for (const rule of hardFailures) lines.push(formatRuleBlock(rule));
   }
@@ -100,7 +110,7 @@ export function formatMarkdown(result: AnalysisResult, opts: { verbose?: boolean
 
 function formatRuleBlock(rule: RuleResult): string {
   const lines: string[] = [];
-  lines.push(`**\`${rule.id}\`** — ${rule.message}`);
+  lines.push(`**\`${rule.id}\`** — ${rule.message} <sub>${rule.confidence} confidence</sub>`);
   if (rule.remediation) {
     lines.push('');
     lines.push(`*Fix:* ${rule.remediation}`);

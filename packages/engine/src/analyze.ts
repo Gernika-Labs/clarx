@@ -59,7 +59,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
   const { score, confidence, hardFailures, pillars } = computeScore(rules, { importGraphResolved, manifestFound: manifest !== null });
 
   const manifestKeyTip = unknownManifestKeys.length > 0
-    ? `Unknown key${unknownManifestKeys.length > 1 ? 's' : ''} in clarx-manifest.json: ${unknownManifestKeys.map(k => `"${k}"`).join(', ')} — ${unknownManifestKeys.length > 1 ? 'these have' : 'this has'} no effect. Valid keys: generated, highFanIn, highFanOut, verificationCommands, commonTasks, workspaces.`
+    ? `Unknown key${unknownManifestKeys.length > 1 ? 's' : ''} in clarx-manifest.json: ${unknownManifestKeys.map(k => `"${k}"`).join(', ')} — ${unknownManifestKeys.length > 1 ? 'these have' : 'this has'} no effect. Valid keys: generated, highFanIn, highFanOut, verificationCommands, commonTasks, workspaces, thresholds.`
     : undefined;
 
   const tip = manifestKeyTip

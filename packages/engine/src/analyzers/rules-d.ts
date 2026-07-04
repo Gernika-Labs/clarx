@@ -2,6 +2,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { FileEntry } from './filesystem.js';
 import type { Manifest, RuleResult } from '../types.js';
+import { DEFAULT_THRESHOLDS, type Thresholds } from '../thresholds.js';
 
 // Names that are always noise regardless of extension
 const UTILITY_DUMP_NAMES = new Set([
@@ -10,9 +11,7 @@ const UTILITY_DUMP_NAMES = new Set([
 ]);
 
 // D1 — root directory has ≤N meaningful entries
-const D1_LIMIT_DEFAULT = 10;
-const D1_LIMIT_NEXTJS = 17;
-const D1_LIMIT_MONOREPO = 20;
+// Limits live in thresholds.ts (d1RootEntries / d1RootEntriesNextjs / d1RootEntriesMonorepo).
 
 // Exact-match names that don't count as meaningful
 const D1_IGNORED_EXACT = new Set([
@@ -79,7 +78,11 @@ function isGeneratedEntry(entry: string, generated: string[]): boolean {
   });
 }
 
-export async function evaluateD1(root: string, manifest: Manifest | null): Promise<RuleResult> {
+export async function evaluateD1(
+  root: string,
+  manifest: Manifest | null,
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): Promise<RuleResult> {
   let entries: string[];
   try {
     entries = await readdir(root);
@@ -90,7 +93,7 @@ export async function evaluateD1(root: string, manifest: Manifest | null): Promi
   const generated = manifest?.generated ?? [];
   const isMonorepo = entries.some(e => MONOREPO_SIGNALS.has(e));
   const isNextJs = !isMonorepo && entries.some(e => NEXTJS_CONFIG_RE.test(e));
-  const limit = isMonorepo ? D1_LIMIT_MONOREPO : isNextJs ? D1_LIMIT_NEXTJS : D1_LIMIT_DEFAULT;
+  const limit = isMonorepo ? thresholds.d1RootEntriesMonorepo : isNextJs ? thresholds.d1RootEntriesNextjs : thresholds.d1RootEntries;
   const meaningful = entries.filter(e => !isIgnored(e) && !isGeneratedEntry(e, generated));
 
   if (meaningful.length <= limit) {
@@ -116,9 +119,9 @@ export async function evaluateD1(root: string, manifest: Manifest | null): Promi
 }
 
 // D4 — no utility dumping ground files
-// Only flag if the file is large enough to actually be a dump (≥30 lines).
-// Small focused helpers (e.g. a single cn() utility) are not a problem.
-const D4_MIN_LINES = 30;
+// Only flag if the file is large enough to actually be a dump (≥ d4MinLines,
+// see thresholds.ts). Small focused helpers (e.g. a single cn() utility) are
+// not a problem.
 
 async function isTypeOnlyFile(filePath: string): Promise<boolean> {
   try {
@@ -135,10 +138,10 @@ async function isTypeOnlyFile(filePath: string): Promise<boolean> {
   }
 }
 
-export function evaluateD4(files: FileEntry[]): RuleResult {
+export function evaluateD4(files: FileEntry[], thresholds: Thresholds = DEFAULT_THRESHOLDS): RuleResult {
   const violations = files.filter(f => {
     if (f.isGenerated) return false;
-    if (f.lines === undefined || f.lines < D4_MIN_LINES) return false;
+    if (f.lines === undefined || f.lines < thresholds.d4MinLines) return false;
     const basename = f.relativePath.split('/').pop() ?? '';
     const name = basename.includes('.') ? basename.slice(0, basename.lastIndexOf('.')) : basename;
     return UTILITY_DUMP_NAMES.has(name.toLowerCase());
@@ -166,10 +169,14 @@ export function evaluateD4(files: FileEntry[]): RuleResult {
   };
 }
 
-export async function evaluateD4WithRoot(root: string, files: FileEntry[]): Promise<RuleResult> {
+export async function evaluateD4WithRoot(
+  root: string,
+  files: FileEntry[],
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): Promise<RuleResult> {
   const candidates = files.filter(f => {
     if (f.isGenerated) return false;
-    if (f.lines === undefined || f.lines < D4_MIN_LINES) return false;
+    if (f.lines === undefined || f.lines < thresholds.d4MinLines) return false;
     const basename = f.relativePath.split('/').pop() ?? '';
     const name = basename.includes('.') ? basename.slice(0, basename.lastIndexOf('.')) : basename;
     return UTILITY_DUMP_NAMES.has(name.toLowerCase());

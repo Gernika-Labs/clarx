@@ -14,7 +14,7 @@ Every codebase receives:
 
 ---
 
-## Overall score
+## Overall score (reported as "AI-readiness")
 
 ```
 overall = Σ (pillar_score × pillar_weight)
@@ -42,6 +42,8 @@ When one or more hard failures are active, the overall score is capped:
 | 2 | 50 |
 | 3 | 35 |
 | 4+ | 25 |
+
+The floor is graduated rather than flat so that fixing each hard failure visibly moves the score. The CLI's **Fix first** section lists active hard failures with the cap they impose — a repo at 35 has an obvious two-item fix list, not a wall.
 
 ---
 

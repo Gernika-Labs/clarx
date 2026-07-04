@@ -6,7 +6,7 @@ const DEFAULT_MANIFEST_PATH = 'clarx-manifest.json';
 
 const KNOWN_KEYS = new Set<string>([
   'version', 'generated', 'workspaces', 'highFanIn', 'highFanOut',
-  'verificationCommands', 'commonTasks',
+  'verificationCommands', 'commonTasks', 'thresholds',
 ]);
 
 export type ManifestLoadResult = {

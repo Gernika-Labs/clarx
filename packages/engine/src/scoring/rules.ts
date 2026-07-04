@@ -28,6 +28,7 @@ import {
   evaluateO5,
 } from '../analyzers/index.js';
 import type { Manifest, RuleId, RuleResult } from '../types.js';
+import { resolveThresholds } from '../thresholds.js';
 
 export type EvaluationResult = {
   rules: Partial<Record<RuleId, RuleResult>>;
@@ -58,6 +59,23 @@ async function readRootPkgScripts(root: string, files: FileEntry[]): Promise<Set
   }
 }
 
+// Rules that can only be evaluated when a JS/TS import graph resolved. On other
+// stacks (Python, Go, …) these are reported as inapplicable rather than passing
+// silently — declared thinness, not phantom health.
+const IMPORT_GRAPH_RULES: RuleId[] = ['B1', 'C3', 'C4', 'C5', 'C6'];
+
+function markInapplicable(rule: RuleResult): RuleResult {
+  return {
+    id: rule.id,
+    passed: true,
+    severity: rule.severity,
+    confidence: 'low',
+    scoreImpact: 0,
+    inapplicable: true,
+    message: 'Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.',
+  };
+}
+
 export async function evaluateRules(
   root: string,
   files: FileEntry[],
@@ -66,13 +84,15 @@ export async function evaluateRules(
   gitTrackedPaths: Set<string> = new Set()
 ): Promise<EvaluationResult> {
   const rules: Partial<Record<RuleId, RuleResult>> = {};
+  const thresholds = resolveThresholds(manifest);
+  const importGraphResolved = importGraph.edges.size > 0;
 
   // ── Discoverability ───────────────────────────────────────────────────────
 
-  rules['D1'] = await evaluateD1(root, manifest);
+  rules['D1'] = await evaluateD1(root, manifest, thresholds);
   rules['D2'] = await evaluateD2(root, manifest, files);
   rules['D3'] = evaluateD3(files, manifest);
-  rules['D4'] = await evaluateD4WithRoot(root, files);
+  rules['D4'] = await evaluateD4WithRoot(root, files, thresholds);
   rules['D5'] = evaluateD5(files, manifest);
   rules['D6'] = evaluateD6(files);
 
@@ -87,11 +107,11 @@ export async function evaluateRules(
   // ── Context Efficiency ────────────────────────────────────────────────────
 
   rules['C1'] = evaluateC1(files, manifest, gitTrackedPaths);
-  rules['C2'] = await evaluateC2(root, files);
-  rules['C3'] = evaluateC3(importGraph, manifest);
-  rules['C4'] = evaluateC4(importGraph, manifest);
-  rules['C5'] = evaluateC5(importGraph, files);
-  rules['C6'] = await evaluateC6(root, files);
+  rules['C2'] = await evaluateC2(root, files, thresholds);
+  rules['C3'] = evaluateC3(importGraph, manifest, thresholds);
+  rules['C4'] = evaluateC4(importGraph, manifest, thresholds);
+  rules['C5'] = evaluateC5(importGraph, files, thresholds);
+  rules['C6'] = await evaluateC6(root, files, thresholds);
 
   // ── Operational Guidance ──────────────────────────────────────────────────
 
@@ -173,11 +193,17 @@ export async function evaluateRules(
 
   // ── Edit Safety ───────────────────────────────────────────────────────────
 
-  rules['E1'] = evaluateE1(files);
+  rules['E1'] = evaluateE1(files, thresholds);
   rules['E2'] = evaluateE2(files);
-  rules['E3'] = await evaluateE3(root, files);
+  rules['E3'] = await evaluateE3(root, files, thresholds);
   rules['E4'] = await evaluateE4(root, files);
   rules['E5'] = await evaluateE5(root, files, manifest);
 
-  return { rules, importGraphResolved: true };
+  if (!importGraphResolved) {
+    for (const id of IMPORT_GRAPH_RULES) {
+      if (rules[id]) rules[id] = markInapplicable(rules[id]!);
+    }
+  }
+
+  return { rules, importGraphResolved };
 }

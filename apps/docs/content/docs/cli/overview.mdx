@@ -12,10 +12,12 @@ The CLI is the primary way to run Clarx analysis. It scores a local codebase aga
 ## Install
 
 ```bash
-npm install -g clarx
+npm install -g @clarxai/cli
 # or run without installing
-npx clarx
+npx @clarxai/cli score .
 ```
+
+The package installs a `clarx` binary.
 
 ---
 
@@ -47,16 +49,17 @@ In a terminal, `clarx score` opens the [interactive TUI](/docs/cli/tui) by defau
 In TTY mode, the default is the interactive dashboard. With `--ui text` or in CI, the report is human-readable plain text:
 
 ```
-Clarx AI-First Score — v0.1
-Confidence: medium
-
-  Overall         72 / 100
+clarx v0.1 · scoring 275 files…
 
   Discoverability     85
   Boundary Clarity    90
   Context Efficiency  60  ⚠
   Operational Guidance 50  ⚠
   Edit Safety         80
+
+AI-readiness    72 / 100  (confidence: medium)
+How easily an AI agent can navigate and safely edit this repo —
+not a measure of code quality, security, or correctness.
 
 Warnings (4):
   C2  3 files exceed 400 lines:

@@ -14,7 +14,7 @@ test('formatMarkdown renders score summary and findings sections', () => {
 
   const output = formatMarkdown(result);
 
-  assert.match(output, /## Clarx AI-First Score/);
+  assert.match(output, /## Clarx AI-Readiness/);
   assert.match(output, /### 🔴 Hard Failures/);
   assert.match(output, /### 🟡 Warnings/);
   assert.match(output, /\*\*`B1`\*\* — Cycle found/);

@@ -75,7 +75,7 @@ function renderMainBody(state: TuiFrameState): string {
   return joinLines([
     ScoreHeaderBar({ score: view.score }),
     Text({
-      children: `confidence ${view.confidence} · engine v${view.version} · ${view.filesScanned} files${state.watchMode ? ' · watch' : ''}${state.verbose ? ' · verbose' : ''}`,
+      children: `confidence ${view.confidence}${view.notEvaluated.length > 0 ? ` · ${view.notEvaluated.length} rules n/a for stack` : ''} · engine v${view.version} · ${view.filesScanned} files${state.watchMode ? ' · watch' : ''}${state.verbose ? ' · verbose' : ''}`,
       dim: true,
     }),
     state.isRefreshing ? StatusLine({ message: 'Refreshing...', tone: 'warning' }) : null,

@@ -17,6 +17,7 @@
     "ai-rules/templates/agents",
     "---Standard---",
     "standard/overview",
+    "standard/what-clarx-measures",
     "standard/pillars",
     "standard/scoring",
     "standard/manifest",
@@ -25,6 +26,7 @@
     "cli/tui",
     "cli/commands",
     "cli/ci-integration",
+    "cli/non-js-repos",
     "---Engine---",
     "engine/overview",
     "engine/output-format"

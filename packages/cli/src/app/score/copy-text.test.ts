@@ -5,7 +5,7 @@ import { makeResult, makeRule } from './test-helpers.js';
 
 test('buildCopyAllText returns a no-issues message when there are no failing rules', () => {
   const result = makeResult({ score: 92 });
-  assert.equal(buildCopyAllText(result), 'Clarx AI-First Score: 92/100 — No issues found.');
+  assert.equal(buildCopyAllText(result), 'Clarx AI-Readiness: 92/100 — No issues found.');
 });
 
 test('buildCopyAllText includes grouped section headings', () => {

@@ -53,13 +53,30 @@ export function formatScoreReport(view: ScoreReportView): string {
   const confLabel = view.confidenceCaveat
     ? chalk.yellow(`⚠ confidence: ${view.confidence}`)
     : chalk.green(`(confidence: ${view.confidence})`);
-  lines.push(`${padName('Overall score')}  ${chalk.bold(`${view.score} / 100`)}  ${confLabel}`);
+  lines.push(`${padName('AI-readiness')}  ${chalk.bold(`${view.score} / 100`)}  ${confLabel}`);
+  lines.push(chalk.dim('How easily an AI agent can navigate and safely edit this repo —'));
+  lines.push(chalk.dim('not a measure of code quality, security, or correctness.'));
 
   if (view.confidenceCaveat) {
     lines.push(chalk.yellow('  Scan confidence is low — hard failures are real findings but may shift'));
     lines.push(chalk.yellow('  once a clarx-manifest.json is added. Treat as soft-critical for now.'));
   }
+
+  if (view.notEvaluated.length > 0) {
+    lines.push(chalk.yellow(`Not evaluated for this stack: ${view.notEvaluated.join(', ')} — no resolvable`));
+    lines.push(chalk.yellow('JS/TS import graph. Guidance and filesystem rules still apply.'));
+  }
   lines.push('');
+
+  if (view.fixFirst) {
+    const count = view.fixFirst.rules.length;
+    lines.push(chalk.red.bold(`Fix first — ${count} hard ${count === 1 ? 'failure caps' : 'failures cap'} the score at ${view.fixFirst.scoreCap}`));
+    for (const rule of view.fixFirst.rules) {
+      lines.push(`  ${chalk.bold(rule.id)}  ${chalk.red(rule.message)}`);
+      lines.push(`      ${chalk.dim('→')} ${chalk.cyan(`clarx explain ${rule.id}`)}`);
+    }
+    lines.push('');
+  }
 
   const parts: string[] = [];
   if (view.summary.hardFailures) {
@@ -109,7 +126,7 @@ export function formatScoreReport(view: ScoreReportView): string {
           : chalk.dim;
     lines.push(color(`${group.label} (${group.rules.length})`));
     for (const rule of group.rules) {
-      lines.push(`  ${chalk.bold(rule.id)}  ${color(rule.message)}`);
+      lines.push(`  ${chalk.bold(rule.id)}  ${color(rule.message)}  ${chalk.dim(`[${rule.confidence} confidence]`)}`);
       if (rule.locations) {
         for (const loc of rule.locations.slice(0, 5)) {
           lines.push(`      ${chalk.dim('→')} ${loc.path}${loc.detail ? chalk.dim(` — ${loc.detail}`) : ''}`);

@@ -1,0 +1,71 @@
+---
+title: Scoring Non-JS Repositories
+description: What full vs. partial analysis means, and how to get a trustworthy score on Python, Go, and other stacks.
+---
+
+# Scoring non-JS repositories
+
+Clarx scores any codebase — but not every rule runs on every stack. This page explains exactly what you get on a repository without JavaScript/TypeScript sources, so a partial analysis is declared, never silent.
+
+---
+
+## Full vs. partial analysis
+
+Most of the standard operates on the **filesystem and guidance layers**, which are language-agnostic:
+
+- All **Discoverability** rules (D1–D6)
+- All **Operational Guidance** rules (O1–O5)
+- Filesystem-based **Boundary Clarity** and **Edit Safety** rules
+- Line-count rules (C2, E1) — line counting covers `.py`, `.go`, `.rs`, `.rb`, `.java`, and more
+
+Five rules require a resolvable **JS/TS import graph** and are reported as **not evaluated** on other stacks:
+
+| Rule | What it needs |
+|------|---------------|
+| **B1** — circular imports | import graph |
+| **C3** — import surface per file | import graph |
+| **C4** — high fan-in documentation | import graph |
+| **C5** — import chain depth | import graph |
+| **C6** — boundary surface in entry files | JS/TS entry-file analysis |
+
+When these don't run, the CLI says so explicitly:
+
+```
+Not evaluated for this stack: B1, C3, C4, C5, C6 — no resolvable
+JS/TS import graph. Guidance and filesystem rules still apply.
+```
+
+Not-evaluated rules never move the score in either direction — they are excluded, not counted as passing.
+
+---
+
+## What this does to confidence
+
+Without an import graph, confidence drops one level:
+
+| Manifest present | Import graph | Confidence |
+|------------------|--------------|-----------|
+| yes | yes | `high` |
+| yes | no | `medium` |
+| no | no | `low` |
+
+A Python or Go repo **with a manifest scores at `medium` confidence** — a meaningful, comparable result for the pillars that ran.
+
+---
+
+## How to raise confidence on a non-JS repo
+
+1. **Add a `clarx-manifest.json`** — this is the single highest-leverage step. Declare `generated`, `verificationCommands`, `workspaces`, and `commonTasks`. All of the Operational Guidance pillar and much of Discoverability become fully evaluable.
+2. **Add a `CLAUDE.md` or `AGENTS.md`** with verification commands and common-change locations.
+3. **Keep the filesystem rules honest** — root entry count, utility dumping grounds, file sizes, and route shadowing are all fully evaluated regardless of language.
+
+```bash
+npx @clarxai/cli init   # scaffolds a starter manifest
+npx @clarxai/cli score .
+```
+
+---
+
+## Roadmap
+
+Native import-graph support for Python (and later Go) is on the roadmap; it will move B1/C3/C4/C5 from *not evaluated* to fully scored on those stacks. Until then, the honest contract is: **guidance-layer analysis everywhere, graph-layer analysis on JS/TS.**

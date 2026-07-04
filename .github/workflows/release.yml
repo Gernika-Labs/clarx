@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  # Manual retry: if a tagged publish fails (e.g. npm token issues), fix the
+  # secret and re-run this workflow against the same tag ref instead of
+  # cutting a new release.
+  workflow_dispatch:
 
 jobs:
   release:

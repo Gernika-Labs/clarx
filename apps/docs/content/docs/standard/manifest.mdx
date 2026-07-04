@@ -88,6 +88,22 @@ A map of common task descriptions to the file or directory where that work belon
 - `"add an API route"` → where route handlers live
 - `"add a migration"` → where database migrations live
 
+### `thresholds`
+Per-repo overrides for the standard's numeric thresholds. Use this to tune rules to your repo's reality instead of forking the standard — for example, a repo with legitimately large generated-adjacent files can raise the C2 line limit:
+
+```json
+{
+  "thresholds": {
+    "c2FileLines": 500,
+    "c3ImportLimit": 20
+  }
+}
+```
+
+Available keys (defaults in parentheses): `d1RootEntries` (10), `d1RootEntriesNextjs` (17), `d1RootEntriesMonorepo` (20), `d4MinLines` (30), `c2FileLines` (400), `c2FileLinesHard` (600), `c3ImportLimit` (15), `c4FanInThreshold` (10), `c5ImportDepth` (8), `c6ImportThreshold` (8), `c6InfraThreshold` (2), `e1RouteFileLines` (300), `e3UtilityExports` (20).
+
+Only finite positive numbers are honored — a malformed override can never disable a rule. Each default's rationale is documented in the engine's `thresholds.ts`; overrides are per-repo tuning, not a change to the standard itself.
+
 ---
 
 ## Confidence impact
@@ -107,7 +123,7 @@ Adding a `clarx-manifest.json` with at minimum `generated` and `verificationComm
 Run `clarx init` to generate a starter manifest based on your repo structure:
 
 ```bash
-npx clarx init
+npx @clarxai/cli init
 ```
 
 The command detects common patterns (Next.js, Turborepo, Vite, etc.) and pre-fills what it can. Review and commit the result.

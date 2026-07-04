@@ -2,10 +2,9 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { FileEntry } from './filesystem.js';
 import type { Manifest, RuleResult } from '../types.js';
+import { DEFAULT_THRESHOLDS, type Thresholds } from '../thresholds.js';
 
-// ── E1 — no route/controller files exceeding 300 lines ───────────────────────
-
-const E1_LIMIT = 300;
+// ── E1 — no route/controller files exceeding e1RouteFileLines (thresholds.ts) ─
 const ROUTE_PATTERNS = [
   /route[s]?\.[jt]sx?$/i,
   /router[s]?\.[jt]sx?$/i,
@@ -14,11 +13,12 @@ const ROUTE_PATTERNS = [
   /endpoint[s]?\.[jt]sx?$/i,
 ];
 
-export function evaluateE1(files: FileEntry[]): RuleResult {
+export function evaluateE1(files: FileEntry[], thresholds: Thresholds = DEFAULT_THRESHOLDS): RuleResult {
+  const limit = thresholds.e1RouteFileLines;
   const violations = files.filter(f => {
     if (f.isGenerated || f.lines === undefined) return false;
     const name = f.relativePath.split('/').pop() ?? '';
-    return ROUTE_PATTERNS.some(p => p.test(name)) && f.lines > E1_LIMIT;
+    return ROUTE_PATTERNS.some(p => p.test(name)) && f.lines > limit;
   });
 
   if (violations.length === 0) {
@@ -28,7 +28,7 @@ export function evaluateE1(files: FileEntry[]): RuleResult {
       severity: 'warning',
       confidence: 'medium',
       scoreImpact: 25,
-      message: 'No route or controller files exceed 300 lines',
+      message: `No route or controller files exceed ${limit} lines`,
     };
   }
 
@@ -38,17 +38,21 @@ export function evaluateE1(files: FileEntry[]): RuleResult {
     severity: 'warning',
     confidence: 'medium',
     scoreImpact: 25,
-    message: `${violations.length} route/controller file${violations.length > 1 ? 's' : ''} exceed 300 lines`,
+    message: `${violations.length} route/controller file${violations.length > 1 ? 's' : ''} exceed ${limit} lines`,
     locations: violations.map(f => ({ path: f.relativePath, detail: `${f.lines} lines` })),
   };
 }
 
-// ── E3 — no utility file exports more than 20 unrelated functions ─────────────
+// ── E3 — no utility file exports more than e3UtilityExports functions (thresholds.ts) ─
 
-const E3_EXPORT_LIMIT = 20;
 const UTILITY_NAMES = new Set(['utils', 'util', 'helpers', 'helper', 'misc', 'common', 'shared', 'lib']);
 
-export async function evaluateE3(root: string, files: FileEntry[]): Promise<RuleResult> {
+export async function evaluateE3(
+  root: string,
+  files: FileEntry[],
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): Promise<RuleResult> {
+  const limit = thresholds.e3UtilityExports;
   const utilityFiles = files.filter(f => {
     if (f.isGenerated) return false;
     const basename = f.relativePath.split('/').pop() ?? '';
@@ -60,7 +64,7 @@ export async function evaluateE3(root: string, files: FileEntry[]): Promise<Rule
 
   for (const f of utilityFiles) {
     const count = await countExports(join(root, f.relativePath));
-    if (count > E3_EXPORT_LIMIT) violations.push({ path: f.relativePath, exports: count });
+    if (count > limit) violations.push({ path: f.relativePath, exports: count });
   }
 
   if (violations.length === 0) {
@@ -70,7 +74,7 @@ export async function evaluateE3(root: string, files: FileEntry[]): Promise<Rule
       severity: 'warning',
       confidence: 'medium',
       scoreImpact: 25,
-      message: 'No utility files exceed 20 exports',
+      message: `No utility files exceed ${limit} exports`,
     };
   }
 
@@ -80,7 +84,7 @@ export async function evaluateE3(root: string, files: FileEntry[]): Promise<Rule
     severity: 'warning',
     confidence: 'medium',
     scoreImpact: 25,
-    message: `${violations.length} utility file${violations.length > 1 ? 's' : ''} exceed 20 exports`,
+    message: `${violations.length} utility file${violations.length > 1 ? 's' : ''} exceed ${limit} exports`,
     locations: violations.map(v => ({ path: v.path, detail: `${v.exports} exports` })),
   };
 }

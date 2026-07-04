@@ -15,7 +15,7 @@ Clarx is designed to run in CI. Add it to any pipeline to enforce a minimum scor
 
 ```yaml
 # .github/workflows/clarx.yml
-name: Clarx AI-First Score
+name: Clarx AI-Readiness
 
 on:
   pull_request:
@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npx clarx score --min-score 70
+      - run: npx @clarxai/cli score --min-score 70
 ```
 
 ### SARIF for GitHub Code Scanning
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npx clarx score --format sarif > clarx.sarif
+      - run: npx @clarxai/cli score --format sarif > clarx.sarif
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: clarx.sarif
@@ -78,7 +78,7 @@ jobs:
         with:
           script: |
             const { execSync } = require('child_process');
-            const report = execSync('npx clarx score --format markdown').toString();
+            const report = execSync('npx @clarxai/cli score --format markdown').toString();
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -87,7 +87,7 @@ jobs:
             });
 
       - name: Enforce minimum score
-        run: npx clarx score --min-score 65
+        run: npx @clarxai/cli score --min-score 65
 ```
 
 ---
@@ -98,7 +98,7 @@ jobs:
 clarx:
   image: node:20
   script:
-    - npx clarx score --min-score 70 --format json | tee clarx-report.json
+    - npx @clarxai/cli score --min-score 70 --format json | tee clarx-report.json
   artifacts:
     paths:
       - clarx-report.json
@@ -129,7 +129,7 @@ Do not set a threshold higher than the current score on `main`. The first run sh
 Use `--ignore` to exclude generated directories that are not in `.gitignore`:
 
 ```bash
-npx clarx score --ignore "**/.next,**/dist,**/coverage"
+npx @clarxai/cli score --ignore "**/.next,**/dist,**/coverage"
 ```
 
 Or declare them in `clarx-manifest.json` under `generated` — the engine always excludes declared generated paths automatically.

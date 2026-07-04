@@ -48,6 +48,7 @@ type RuleResult = {
   message: string;           // human-readable finding
   remediation?: string;      // fix guidance when rule fails
   locations?: Location[];    // files involved, if applicable
+  inapplicable?: boolean;    // rule could not run on this stack (see below)
 };
 
 type Location = {
@@ -57,6 +58,13 @@ type Location = {
   detail?: string;
 };
 ```
+
+### Confidence and applicability fields
+
+- **`confidence`** (top level) — how much to trust the score: `high` requires a manifest *and* a resolved import graph; `medium` means one of the two; `low` means neither. Reported per-rule as well, since individual analyzers have different signal strength.
+- **`confidenceCaveat`** — present when hard failures were detected at `low` confidence. The findings are real but may shift once a manifest is added; UIs should render them as soft-critical rather than blocking.
+- **`meta.importGraphResolved`** — `false` when the repo has no resolvable JS/TS sources (e.g. a Python or Go repo). Import-graph rules cannot run in that case.
+- **`inapplicable`** (per rule) — set on rules that could not be evaluated for this stack (`B1`, `C3`, `C4`, `C5`, `C6` when the import graph is unresolved). Such rules carry `passed: true` and `scoreImpact: 0` so they never move the score, and should be displayed as **not evaluated**, never as passing. See [Scoring non-JS repositories](/docs/cli/non-js-repos).
 
 ---
 

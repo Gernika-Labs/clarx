@@ -1,6 +1,6 @@
 {
   "name": "@clarxai/cli",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Clarx CLI — score any codebase against the AI-First Standard",
   "type": "module",
   "bin": {
@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/**/*.test.ts",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
     "dev": "tsc --watch",
     "prepublishOnly": "pnpm build"
   },

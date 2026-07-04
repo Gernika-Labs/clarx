@@ -34,11 +34,11 @@ export function normalizeCopySectionTarget(target: string): Severity | null {
 
 export function buildCopyAllText(result: ScoreResult): string {
   const failing = getFailingRules(result);
-  if (failing.length === 0) return `Clarx AI-First Score: ${result.score}/100 — No issues found.`;
+  if (failing.length === 0) return `Clarx AI-Readiness: ${result.score}/100 — No issues found.`;
 
   const sep = '─'.repeat(56);
   const sections: string[] = [
-    `Clarx AI-First Score: ${result.score}/100`,
+    `Clarx AI-Readiness: ${result.score}/100`,
     `Confidence: ${result.confidence}`,
     '',
   ];
@@ -77,12 +77,12 @@ export function buildCopySectionText(result: ScoreResult, target: string): strin
 
   if (group.length === 0) {
     const label = severity === 'hard_failure' ? 'failures' : severity === 'warning' ? 'warnings' : 'recommendations';
-    return `Clarx AI-First Score: ${result.score}/100 — No ${label}.`;
+    return `Clarx AI-Readiness: ${result.score}/100 — No ${label}.`;
   }
 
   const sep = '─'.repeat(56);
   const sections: string[] = [
-    `Clarx AI-First Score: ${result.score}/100`,
+    `Clarx AI-Readiness: ${result.score}/100`,
     `Confidence: ${result.confidence}`,
     '',
     COPY_SECTION_LABELS[severity],

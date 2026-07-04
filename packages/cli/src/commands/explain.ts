@@ -8,6 +8,7 @@ const RULE_EXPLANATIONS: Record<string, { title: string; severity: string; pilla
   D3: { title: 'Source, test, config, and generated directories are segregated', severity: 'warning', pillar: 'Discoverability', why: 'Mixing file types forces an agent to classify every file before using it.', fix: 'Move tests to __tests__/ or co-locate them with source files. Keep config in a dedicated directory.' },
   D4: { title: 'No utility dumping ground files', severity: 'warning', pillar: 'Discoverability', why: 'Files named utils.ts, helpers.ts, misc.ts, or common.ts carry no semantic information. An agent must read the whole file to understand what\'s inside.', fix: 'Split utility files by domain. utils/date.ts, utils/formatting.ts, utils/validation.ts are all better than utils.ts.' },
   D5: { title: 'Directory depth does not exceed 5 levels before a module boundary', severity: 'recommendation', pillar: 'Discoverability', why: 'Deep nesting without semantic meaning forces an agent to traverse multiple directories to understand structure.', fix: 'Introduce a package or clear domain directory boundary before depth 5.' },
+  D6: { title: 'No route name appears at multiple URL depths (shadow routes)', severity: 'warning', pillar: 'Discoverability', why: 'File-system routers make it possible to ship two handlers for what looks like the same resource (e.g. app/api/mnemonic/route.ts vs app/api/mobile/mnemonic/route.ts). When the same leaf segment appears at different depths, one route likely shadows or duplicates the other — an agent cannot tell which is canonical or current.', fix: 'If both handlers are intentional (e.g. separate mobile and web APIs), document the distinction in clarx-manifest.json or your guidance file. Otherwise pick one canonical URL and delete or redirect the other.' },
   B1: { title: 'No circular imports between packages or workspaces', severity: 'hard_failure', pillar: 'Boundary Clarity', why: 'Circular dependencies make it impossible to reason about change scope. No agent can safely modify either side of a cycle in isolation.', fix: 'Use madge or tsc --project to detect cycles. Extract shared code into a third package that neither side owns.' },
   B2: { title: 'Shared code lives in a declared shared package', severity: 'warning', pillar: 'Boundary Clarity', why: 'Duplicated logic across packages means a change in one place does not propagate. An agent has no way to know which copy is canonical.', fix: 'Create a packages/shared (or packages/common) package and extract duplicated code there.' },
   B3: { title: 'Each package or workspace declares a public API surface', severity: 'warning', pillar: 'Boundary Clarity', why: 'Without an index.ts, an agent cannot know what is internal versus stable surface without reading every file.', fix: 'Add an index.ts to each package that explicitly exports only the public interface.' },
@@ -84,13 +85,44 @@ export function formatExplanation(ruleId: string): string | null {
 `;
 }
 
+function formatOverview(): string {
+  // Derive pillar → rule-id groups from the explanations so the overview can
+  // never drift from the rule set (coverage vs the engine is guarded by test).
+  const byPillar = new Map<string, string[]>();
+  for (const [id, rule] of Object.entries(RULE_EXPLANATIONS)) {
+    const list = byPillar.get(rule.pillar) ?? [];
+    list.push(id);
+    byPillar.set(rule.pillar, list);
+  }
+  const pillarLines = [...byPillar.entries()]
+    .map(([pillar, ids]) => `  ${pillar.padEnd(22)} ${ids.join(' ')}`)
+    .join('\n');
+
+  return `
+Clarx measures structural AI-readiness — how easily an AI agent can
+orient itself in this repo, bound the context it loads, verify its
+changes, and contain the blast radius of its edits.
+
+What Clarx does NOT measure:
+  code quality · security · runtime correctness · test coverage ·
+  business logic. A high score means a good AI navigation surface,
+  not a good product.
+
+Rules by pillar:
+${pillarLines}
+
+Usage: clarx explain <rule-id> [--copy]   e.g. clarx explain C2
+`;
+}
+
 export async function explainCommand(args: string[]) {
   const ruleId = args.find(a => !a.startsWith('--'))?.toUpperCase();
   const wantCopy = args.includes('--copy');
 
   if (!ruleId) {
-    console.error('Usage: clarx explain <rule-id> [--copy]  (e.g. clarx explain C2)');
-    exit(3);
+    console.log(formatOverview());
+    track({ action: 'explain', rule: 'overview' });
+    return;
   }
 
   const rule = RULE_EXPLANATIONS[ruleId];

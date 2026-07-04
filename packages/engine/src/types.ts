@@ -40,6 +40,14 @@ export type RuleResult = {
   message: string;
   remediation?: string;
   locations?: Location[];
+  /**
+   * True when the rule could not be evaluated for this repo's stack (e.g.
+   * import-graph rules on a repo with no resolvable JS/TS sources). Distinct
+   * from a pass: the rule neither passed nor failed — it did not run. Such
+   * rules carry `passed: true` and `scoreImpact: 0` so they never move the
+   * score, and UIs should report them as "not evaluated" rather than "passing".
+   */
+  inapplicable?: boolean;
 };
 
 export type PillarName =
@@ -124,4 +132,11 @@ export type Manifest = {
     lint?: string;
   };
   commonTasks?: Record<string, string>;
+  /**
+   * Per-repo overrides for the standard's numeric thresholds (see
+   * thresholds.ts for keys, defaults, and rationale). Only finite positive
+   * numbers are honored. Overrides tune rules to a repo's reality — they do
+   * not change the standard itself, and scan output notes when they are active.
+   */
+  thresholds?: Partial<Record<keyof import('./thresholds.js').Thresholds, number>>;
 };

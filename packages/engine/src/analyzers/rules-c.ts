@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { minimatch } from 'minimatch';
 import type { FileEntry } from './filesystem.js';
 import type { Manifest, RuleResult } from '../types.js';
+import { DEFAULT_THRESHOLDS, type Thresholds } from '../thresholds.js';
 
 const GENERATED_PATTERNS = [
   'dist', '.next', 'out', 'build', 'coverage', '.turbo', '.cache',
@@ -72,10 +73,8 @@ export function evaluateC1(
   };
 }
 
-// C2 — no source file exceeds 400 lines
-const C2_LIMIT = 400;
-// Hard failure threshold: files above this are unambiguously too large regardless of structure.
-const C2_HARD_LIMIT = 600;
+// C2 — no source file exceeds the line limit (c2FileLines / c2FileLinesHard in
+// thresholds.ts; files above the hard limit escalate to hard failure).
 
 // Files whose names signal static data — exempt from the line-count limit
 // regardless of whether they contain a small incidental helper.
@@ -165,10 +164,10 @@ function countTopLevelExports(content: string): { total: number; types: number; 
 const EXPORT_DENSITY_THRESHOLD = 1.0; // exports per 100 lines
 const TYPE_MAJORITY_MIN = 5; // minimum type exports before "extract types" fires
 
-function exportDetail(lines: number, total: number, types: number, starExports: number): string {
+function exportDetail(lines: number, total: number, types: number, starExports: number, softLimit: number): string {
   const effectiveTotal = total + starExports;
   const density = lines > 0 ? (effectiveTotal * 100) / lines : 0;
-  const overage = lines > C2_LIMIT ? Math.round(((lines - C2_LIMIT) / C2_LIMIT) * 100) : 0;
+  const overage = lines > softLimit ? Math.round(((lines - softLimit) / softLimit) * 100) : 0;
   const overageTag = overage > 0 ? ` (${overage}% over)` : '';
   const starTag = starExports > 0 ? ` +${starExports} re-export module${starExports > 1 ? 's' : ''}` : '';
   if (density >= EXPORT_DENSITY_THRESHOLD) {
@@ -181,8 +180,12 @@ function exportDetail(lines: number, total: number, types: number, starExports: 
   return `${lines} lines${overageTag}, ${total} export${total === 1 ? '' : 's'}${starTag} — single complex component, consider reducing internal complexity rather than splitting`;
 }
 
-export async function evaluateC2(root: string, files: FileEntry[]): Promise<RuleResult> {
-  const candidates = files.filter(f => !f.isGenerated && f.lines !== undefined && f.lines > C2_LIMIT);
+export async function evaluateC2(
+  root: string,
+  files: FileEntry[],
+  thresholds: Thresholds = DEFAULT_THRESHOLDS
+): Promise<RuleResult> {
+  const candidates = files.filter(f => !f.isGenerated && f.lines !== undefined && f.lines > thresholds.c2FileLines);
 
   const violations: Array<{ file: FileEntry; total: number; types: number; starExports: number }> = [];
   for (const f of candidates) {
@@ -208,11 +211,11 @@ export async function evaluateC2(root: string, files: FileEntry[]): Promise<Rule
       severity: 'warning',
       confidence: 'high',
       scoreImpact: 25,
-      message: 'No source file exceeds 400 lines',
+      message: `No source file exceeds ${thresholds.c2FileLines} lines`,
     };
   }
 
-  const hasHardViolation = violations.some(v => (v.file.lines ?? 0) > C2_HARD_LIMIT);
+  const hasHardViolation = violations.some(v => (v.file.lines ?? 0) > thresholds.c2FileLinesHard);
 
   return {
     id: 'C2',
@@ -220,10 +223,10 @@ export async function evaluateC2(root: string, files: FileEntry[]): Promise<Rule
     severity: hasHardViolation ? 'hard_failure' : 'warning',
     confidence: 'high',
     scoreImpact: 25,
-    message: `${violations.length} source file${violations.length > 1 ? 's' : ''} exceed${violations.length === 1 ? 's' : ''} 400 lines`,
+    message: `${violations.length} source file${violations.length > 1 ? 's' : ''} exceed${violations.length === 1 ? 's' : ''} ${thresholds.c2FileLines} lines`,
     locations: violations.slice(0, 10).map(({ file: f, total, types, starExports }) => ({
       path: f.relativePath,
-      detail: exportDetail(f.lines ?? 0, total, types, starExports),
+      detail: exportDetail(f.lines ?? 0, total, types, starExports, thresholds.c2FileLines),
     })),
   };
 }

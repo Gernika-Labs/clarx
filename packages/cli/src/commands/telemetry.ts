@@ -35,7 +35,7 @@ export async function telemetryCommand(args: string[]) {
 
   ${dim('What is sent:')}
   ${dim('·')} Which rules were scored, explained, or copied
-  ${dim('·')} Overall score and pillar breakdown
+  ${dim('·')} AI-readiness score and pillar breakdown
   ${dim('·')} Stack signals (monorepo, manifest found, files scanned range)
   ${dim('·')} Anonymous session ID — never linked to you or your code
 

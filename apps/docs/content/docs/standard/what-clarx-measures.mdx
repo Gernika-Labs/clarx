@@ -1,0 +1,52 @@
+---
+title: What Clarx Measures
+description: What the AI-readiness score means — and, just as importantly, what it does not.
+---
+
+# What Clarx measures — and what it doesn't
+
+Clarx measures **structural AI-readiness**: how easily an AI agent can orient itself in a repository, bound the context it loads, verify its changes, and contain the blast radius of its edits.
+
+That is the whole claim. Read `83 / 100` as *"this repo has a good AI navigation surface"* — never as *"this is a good codebase."*
+
+---
+
+## What the score means
+
+The five pillars map to the five ways agents actually fail in real repos:
+
+| Pillar | Agent failure it measures |
+|--------|--------------------------|
+| **Discoverability** | Getting lost — scanning everything before understanding anything |
+| **Boundary Clarity** | Crossing module boundaries it shouldn't |
+| **Context Efficiency** | Loading far more context than the task needs |
+| **Operational Guidance** | Not knowing how to verify its own changes |
+| **Edit Safety** | Making edits with wide, invisible blast radius |
+
+A high score means an agent can work in the repo without wasting context or breaking boundaries. It says nothing about whether the code it finds there is any good.
+
+---
+
+## What Clarx does NOT measure
+
+- **Code quality** — a beautifully structured repo can be full of bad logic
+- **Security** — Clarx is not a vulnerability scanner
+- **Runtime correctness** — it never executes your code
+- **Test coverage** — it checks that verification *commands are declared*, not that tests exist or pass
+- **Business logic** — it cannot tell whether the code does the right thing
+
+Clarx is a **new layer alongside** tests, types, linters, and security scanners — not a replacement for any of them. A repo can score 95 and be broken; a repo can score 40 and be correct, secure, and profitable. The 40 just costs every agent (and every new human) more context to work in.
+
+---
+
+## Honest limits by stack
+
+The guidance and filesystem layers (Discoverability, Operational Guidance, most of Edit Safety) apply to **any codebase** — Python, Go, Rust, anything.
+
+The import-graph rules (**B1, C3, C4, C5, C6**) currently require a resolvable JS/TS import graph. On other stacks these rules are reported as **not evaluated** rather than silently passing, and scan confidence is reduced. See [Scoring non-JS repositories](/docs/cli/non-js-repos) for what a partial analysis covers and how to raise confidence with a manifest.
+
+---
+
+## Where the thresholds come from
+
+Rules like "no file over 400 lines" or "no more than 15 imports" use numeric thresholds. These are heuristics informed by the repositories the standard was developed against, chosen to approximate the point where structure starts costing agents real context. They are documented with their rationale in the engine's `thresholds.ts`, and every one of them can be [overridden per-repo via the manifest](/docs/standard/manifest#thresholds) — tune them to your reality rather than arguing with the defaults.

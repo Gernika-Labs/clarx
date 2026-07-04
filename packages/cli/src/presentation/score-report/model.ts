@@ -1,4 +1,5 @@
 import type { AnalysisResult, PillarName, Severity } from '@clarxai/engine';
+import { hardFailureFloor } from '@clarxai/engine';
 import { barTone, primaryNote, renderBarUnits } from './pillar.js';
 import { NAME_W, PILLAR_LABELS } from './tokens.js';
 
@@ -52,6 +53,13 @@ export interface ScoreReportView {
   topRule?: Rule;
   migrations: MigrationRowView[];
   verboseGroups: RuleGroupView[];
+  /** Rule ids that could not be evaluated for this stack (e.g. import-graph
+   * rules on a repo with no resolvable JS/TS sources). Shown as "not
+   * evaluated" so partial coverage is declared, never silent. */
+  notEvaluated: string[];
+  /** Hard failures in fix-first order, with the score cap they impose.
+   * Present only when there is at least one hard failure. */
+  fixFirst?: { rules: Rule[]; scoreCap: number };
 }
 
 export function buildScoreReportView(
@@ -87,6 +95,7 @@ export function buildScoreReportView(
   const hardFails = allRules.filter(r => !r.passed && r.severity === 'hard_failure');
   const warnings = allRules.filter(r => !r.passed && r.severity === 'warning');
   const recs = allRules.filter(r => !r.passed && r.severity === 'recommendation');
+  const notEvaluated = allRules.filter(r => r.inapplicable).map(r => r.id);
 
   const verboseGroups: RuleGroupView[] = opts.verbose
     ? [
@@ -110,6 +119,10 @@ export function buildScoreReportView(
       recommendations: recs.length,
     },
     topRule: hardFails[0] ?? warnings[0],
+    notEvaluated,
+    fixFirst: hardFails.length > 0
+      ? { rules: hardFails, scoreCap: hardFailureFloor(hardFails.length) }
+      : undefined,
     migrations: result.opportunities.viewModelMigrations.slice(0, 5).map(item => ({
       rating: item.rating,
       path: item.path,

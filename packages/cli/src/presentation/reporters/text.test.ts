@@ -12,7 +12,7 @@ test('formatText includes score header and explain hint', () => {
   const output = formatText(result);
 
   assert.match(output, /clarx v0\.1\.0-test/);
-  assert.match(output, /Overall score/);
+  assert.match(output, /AI-readiness/);
   assert.match(output, /78 \/ 100/);
   assert.match(output, /clarx explain C2/);
 });
