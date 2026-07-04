@@ -1,24 +1,21 @@
 ---
 title: Clarx
-description: An intention-driven design system for modern software.
+description: The AI-first codebase standard and the tools to measure it.
 ---
 
-Clarx is a three-part system for building interfaces where meaning drives implementation.
+Clarx helps any codebase become more legible to AI agents — through a versioned standard, a machine-readable manifest, and open-source scoring tools.
 
-## The three layers
+## What Clarx is
 
-**Philosophy** — A framework for thinking about UI as communication. Components express what things mean, not just how they look. Semantic intent is more durable than visual recipes.
+**The standard** — 27 rules across five pillars: discoverability, boundary clarity, context efficiency, operational guidance, and edit safety. Technology-agnostic. Applies to any language, framework, or monorepo.
 
-**Reference implementation** — Copyable components that demonstrate the philosophy in code. `Badge`, `Button`, `Alert`, `Text`, and a set of AI-native primitives built for streaming, tool calls, and agent state. You own the source.
+**The tools** — `clarx score` analyzes a repo locally or in CI. `clarx init` scaffolds a manifest. `clarx explain` surfaces rationale and fixes for any rule.
 
-**AI rules layer** — Portable instructions for AI tools. Drop a `CLAUDE.md` or Cursor rules file into your repo and your AI assistant starts generating semantic, system-consistent UI instead of inventing patterns from scratch.
-
-Each layer is independently useful. Teams can adopt the philosophy without replacing their component library. They can adopt the AI rules without adopting the components. Or they can use all three together.
+**The manifest** — `clarx-manifest.json` tells agents what to skip, where common tasks live, and how to verify changes. The fastest on-ramp to a higher score.
 
 ## Start here
 
-- [Introduction](/docs/introduction) — what intention-driven design means and why it matters now
-- [Manifesto](/docs/manifesto) — the worldview in full
-- [Principles](/docs/principles) — the operating rules
-- [Installation](/docs/installation) — copy your first component
-- [AI Rules Layer](/docs/ai-rules/overview) — guide AI to build with intention
+- [Standard overview](/docs/standard/overview) — what the rules measure and why
+- [CLI overview](/docs/cli/overview) — install and run your first score
+- [Adoption guide](/docs/adoption-guide) — start with philosophy, CI gates, or full manifest adoption
+- [AI rules layer](/docs/ai-rules/overview) — portable guidance files for Claude, Cursor, and other agents

@@ -32,7 +32,7 @@ node packages/cli/dist/cli.js score .
 ```
 packages/engine/   — analysis engine (@clarxai/engine)
 packages/cli/      — CLI wrapping the engine (@clarxai/cli)
-packages/ui/       — UI component library (@clarxai/ui)
+packages/ui/       — internal reference components (not published)
 apps/docs/         — documentation site (Next.js + fumadocs)
 standard/          — versioned standard spec and rubric
 journal/           — architecture decisions and process docs
@@ -60,14 +60,12 @@ See `CLAUDE.md` for the full task map.
 2. Wire it up in `packages/cli/src/cli.ts`
 3. Document it in `apps/docs/content/docs/cli/commands.mdx`
 
-### Adding a UI component
+### Adding an internal UI component
+
+`packages/ui` is internal to this repo (not published). If you need a new reference component for the docs site:
 
 1. Create `packages/ui/src/[name].tsx` — follow `badge.tsx` as the reference pattern
 2. Export from `packages/ui/src/index.ts`
-3. Create demo in `apps/docs/components/demos/[name]-demo.tsx`
-4. Register demo in `apps/docs/lib/mdx-components.ts`
-5. Create `apps/docs/content/docs/components/[name].mdx`
-6. Add to `apps/docs/content/docs/meta.json`
 
 ### Fixing a bug
 

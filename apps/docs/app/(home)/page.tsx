@@ -1,7 +1,7 @@
 import styles from './landing.module.css'
 import { Nav, HeroSection } from './landing-hero'
 import { ProblemSection, PillarsSection } from './landing-standard'
-import { CliSection, ManifestSection, UIKitSection } from './landing-tools'
+import { CliSection, ManifestSection } from './landing-tools'
 import { AdoptionSection, ManifestoSection, FooterCtaSection, Footer } from './landing-footer'
 
 export default function HomePage() {
@@ -13,7 +13,6 @@ export default function HomePage() {
       <PillarsSection />
       <CliSection />
       <ManifestSection />
-      <UIKitSection />
       <AdoptionSection />
       <ManifestoSection />
       <FooterCtaSection />

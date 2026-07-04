@@ -6,12 +6,12 @@ export function AdoptionSection() {
       <div className="wrap">
         <div className="section-head">
           <div className="section-label">
-            <span className="id">§06</span>Adoption
+            <span className="id">§05</span>Adoption
           </div>
           <h2 className="section-title">Start where you are.</h2>
           <p className="section-lede">
-            The standard works without the components. The components work without the CLI.
-            Everything gets better together.
+            Start with the vocabulary, add CI scoring, or go all-in with manifest and AI rules.
+            Each layer stands on its own.
           </p>
         </div>
 
@@ -45,13 +45,13 @@ export function AdoptionSection() {
             <span className="step mono">03 · Full</span>
             <h3>Full adoption</h3>
             <div className="desc">
-              Standard + CLI + reference components. The same intent vocabulary from the README to
-              the runtime.
+              Standard + manifest + CI + AI rules files. Agents load guidance every session;
+              pipelines enforce the score.
             </div>
             <div className="what">
-              <div><span className="check">✓</span>Manifest + CI</div>
-              <div><span className="check">✓</span>Reference components</div>
-              <div><span className="check">✓</span>Org-wide score dashboard</div>
+              <div><span className="check">✓</span>Manifest + guidance files</div>
+              <div><span className="check">✓</span>CLI in CI with thresholds</div>
+              <div><span className="check">✓</span>AI rules committed to repo</div>
             </div>
           </div>
 

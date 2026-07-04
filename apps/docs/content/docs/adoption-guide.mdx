@@ -1,54 +1,49 @@
 ---
 title: Adoption Guide
-description: Three ways to adopt Clarx, with or without replacing your current design system.
+description: Three ways to adopt the Clarx standard and scoring tools.
 ---
 
-Clarx is designed to be adopted in layers. You do not have to replace your current component library to benefit from it.
+Clarx is designed to be adopted in layers. You do not need to restructure your entire codebase on day one.
 
 ## Three adoption paths
 
 ### Option 1 — Philosophy only
 
-Use the manifesto, principles, and vocabulary as a shared framework for how your team talks about UI decisions.
+Use the standard vocabulary in design review, architecture discussions, and PR feedback.
 
-This is useful for teams that want to align on semantic thinking without changing any code. It helps design and engineering converge on the same language — "what does this communicate?" before "what does this look like?" — even when the implementation stays with an existing system.
-
-**What to do:**
-- Read the [Manifesto](/docs/manifesto) and [Principles](/docs/principles)
-- Share them with your team as a design review checklist
-- Use the vocabulary (`intent`, `appearance`, `emphasis`) in design handoffs and code review
-
-### Option 2 — AI rules only
-
-Add the AI rules layer to your existing codebase so that AI tools start generating more semantic, consistent UI immediately.
-
-This works even if you use a completely different component library. The rules teach AI assistants to prefer system-level semantics over ad hoc styling — which improves output quality regardless of which components are available.
+This is useful when you want shared language around discoverability, boundaries, and edit safety before changing tooling or repo layout.
 
 **What to do:**
-- Add a [CLAUDE.md template](/docs/ai-rules/templates/claude) to your repo root
-- Add [Cursor rules](/docs/ai-rules/templates/cursor) to `.cursor/rules/`
-- Add an [AGENTS.md snippet](/docs/ai-rules/templates/agents) if you use other agent tools
+- Read the [Standard overview](/docs/standard/overview) and [Pillars](/docs/standard/pillars)
+- Reference rule IDs (e.g. `C3`, `O1`) in code review
+- Share the [Manifesto](/docs/manifesto) with your team as a framing doc
 
-### Option 3 — Full adoption
+### Option 2 — Score in CI
 
-Use the philosophy, the AI rules layer, and the reference components together.
+Add `clarx-manifest.json`, guidance files, and `clarx score` to your pipeline.
 
-This is the highest-leverage path. The components demonstrate what intention-driven APIs look like in practice. The AI rules layer ensures that AI tools generate code that uses those components correctly. The philosophy gives your team a shared framework for evolving the system over time.
+This works with any stack. The CLI exits non-zero when thresholds are not met, so you can gate merges on structural health.
 
 **What to do:**
-1. Follow the [Installation guide](/docs/installation) to copy components into your project
-2. Add the AI rules files to your repo
-3. Review the [Migration examples](/docs/migration-examples) to see how to convert override-heavy patterns
+- Run `clarx init` to scaffold a manifest
+- Add [CI integration](/docs/cli/ci-integration) with `--min-score` or `--min-pillar-score`
+- Use `clarx explain <rule>` to turn failures into actionable fixes
+
+### Option 3 — Full operational adoption
+
+Standard + manifest + CI + AI rules files committed to the repo.
+
+This is the highest-leverage path. Agents load the manifest every session, CI enforces the standard, and portable rules keep generated code aligned with your conventions.
+
+**What to do:**
+1. Commit `clarx-manifest.json` with verification commands and common task locations
+2. Add [CLAUDE.md](/docs/ai-rules/templates/claude), [Cursor rules](/docs/ai-rules/templates/cursor), or [AGENTS.md](/docs/ai-rules/templates/agents) snippets
+3. Track score trends over time and fix pillar gaps iteratively
 
 ---
 
-## For teams with existing design systems
+## For any codebase
 
-If your team already has a component library and cannot replace it, you can still adopt Clarx as an extension layer:
+Clarx is not tied to a specific framework. The filesystem and guidance rules apply everywhere. Import-graph rules are deepest on JavaScript and TypeScript projects, but every repo benefits from a clear manifest, generated-artifact hygiene, and operational guidance.
 
-- Use the vocabulary and principles when reviewing or extending your existing components
-- Add the AI rules so that AI generates code aligned with your system instead of inventing patterns
-- Copy individual components (like `Badge`, `Alert`, `ToolCall`) that your system does not yet have
-- Use the semantic prop pattern as a model for new components you build
-
-Many teams will not adopt the reference components wholesale. That is fine. The most portable part of Clarx is the thinking, not the files.
+Start with `clarx score .` and improve from the findings.

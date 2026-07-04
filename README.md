@@ -1,16 +1,16 @@
 # Clarx
 
-AI-first codebase standard, analysis engine, and design system.
+AI-first codebase standard, analysis engine, and CLI.
 
 ## What's in here
 
 | Package           | Name              | Description                                                        |
 | ----------------- | ----------------- | ------------------------------------------------------------------ |
-| `packages/ui`     | `@clarxai/ui`     | Semantic React component library for AI interfaces                 |
 | `packages/engine` | `@clarxai/engine` | Codebase analysis engine — scores repos against the Clarx standard |
 | `packages/cli`    | `@clarxai/cli`    | CLI tool: `clarx score`, `clarx init`, `clarx explain`             |
 | `apps/docs`       | —                 | Documentation site (Next.js 15 + fumadocs)                         |
 | `standard/`       | —                 | Versioned Clarx AI-First Standard spec and rubric                  |
+| `packages/ui`     | —                 | Internal reference components (not published)                      |
 
 ## Prerequisites
 
@@ -102,48 +102,24 @@ clarx explain O1                                   # explain rule O1
 
 ---
 
-## UI components (`@clarxai/ui`)
-
-Copy-and-own model — no npm publish, you copy the source into your project.
-
-Components: `Badge`, `Button`, `Alert`, `Text`, `StatusIndicator`, `ChatMessage`, `ChatInput`, `ToolCall`, `StreamingText`, `AgentStatus`.
-
-Read `packages/ui/src/badge.tsx` as the reference pattern. Every component follows the same shape:
-
-1. Types from `tokens.ts` (`Intent`, `Appearance`, `Size`)
-2. CVA variants mapping semantic props → Tailwind classes
-3. Pure function, no side effects, no context
-
----
-
 ## Monorepo layout
 
 ```
-packages/ui/src/          — UI components
 packages/engine/src/      — analysis engine
 packages/cli/src/         — CLI
 apps/docs/                — documentation site
 apps/docs/content/docs/   — MDX page content
-apps/docs/components/demos/ — live demo components used in MDX
 standard/                 — AI-First Standard spec (v0.1)
 standard/v0.1.md          — full standard document
 standard/rubric/          — scoring rubric
 journal/                  — architecture decisions and audits
 clarx-manifest.json       — machine-readable repo guidance
+packages/ui/src/          — internal reference components (not published)
 ```
 
 ---
 
 ## Contributing
-
-### Add a UI component
-
-1. Create `packages/ui/src/[name].tsx` — follow `badge.tsx` pattern
-2. Export from `packages/ui/src/index.ts`
-3. Create `apps/docs/components/demos/[name]-demo.tsx`
-4. Register the demo in `apps/docs/lib/mdx-components.ts`
-5. Create `apps/docs/content/docs/components/[name].mdx`
-6. Add to `apps/docs/content/docs/meta.json`
 
 ### Add a doc page
 

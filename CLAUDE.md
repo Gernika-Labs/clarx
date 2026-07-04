@@ -1,11 +1,11 @@
 # Clarx
 
-AI-first codebase standard, analysis engine, and design system. Four workspaces:
+AI-first codebase standard, analysis engine, and CLI. Public product is the standard and scoring tools; UI components are internal to this repo.
 
 ## Monorepo layout
 
 ```
-packages/ui/src/          — reusable semantic UI components (production code)
+packages/ui/src/          — internal reference UI components (not published)
 packages/engine/src/      — codebase analysis engine (@clarxai/engine)
 packages/cli/src/         — CLI wrapping the engine (@clarxai/cli)
 apps/docs/                — documentation site (Next.js 15 + fumadocs)

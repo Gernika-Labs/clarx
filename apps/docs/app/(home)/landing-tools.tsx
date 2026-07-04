@@ -1,5 +1,5 @@
 import styles from './landing.module.css'
-import { JSON_BODY, BEFORE_CODE, AFTER_CODE } from './landing-content'
+import { JSON_BODY } from './landing-content'
 
 export function CliSection() {
   return (
@@ -154,56 +154,4 @@ export function ManifestSection() {
   )
 }
 
-export function UIKitSection() {
-  return (
-    <section id="kit">
-      <div className="wrap">
-        <div className="section-head">
-          <div className="section-label">
-            <span className="id">§05</span>The semantic UI kit
-          </div>
-          <h2 className="section-title">A component API that speaks in intent.</h2>
-          <p className="section-lede">
-            Legible to AI tools, design tokens, and the engineer on call at 2am.
-          </p>
-        </div>
 
-        <div className="compare">
-          <div className="col">
-            <div className="col-head">
-              <span className="ttl">Before · utility sprawl</span>
-              <span className="badge mono">opaque</span>
-            </div>
-            {/* eslint-disable-next-line react/no-danger */}
-            <div className="codeblock" dangerouslySetInnerHTML={{ __html: BEFORE_CODE }} />
-            <div className="preview-row">
-              <span className="badge-old">Failed</span>
-              <button className="btn-old">Delete</button>
-            </div>
-          </div>
-          <div className="col">
-            <div className="col-head">
-              <span className="ttl">After · semantic Clarx</span>
-              <span className="badge mono">intent-driven</span>
-            </div>
-            {/* eslint-disable-next-line react/no-danger */}
-            <div className="codeblock" dangerouslySetInnerHTML={{ __html: AFTER_CODE }} />
-            <div className="preview-row">
-              <span className="badge-new" data-intent="danger">
-                <span className="dot" />Failed
-              </span>
-              <span className="badge-new" data-intent="warn">
-                <span className="dot" />Pending
-              </span>
-              <span className="badge-new" data-intent="success">
-                <span className="dot" />Healthy
-              </span>
-              <button className="btn-new" data-intent="primary">Save</button>
-              <button className="btn-new" data-intent="danger">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}

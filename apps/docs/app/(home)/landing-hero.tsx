@@ -14,7 +14,6 @@ export function Nav() {
           <a href="#standard">Standard</a>
           <a href="#cli">CLI</a>
           <a href="#manifest">Manifest</a>
-          <a href="#kit">UI Kit</a>
           <Link href="/docs">Docs</Link>
         </div>
         <a className="nav-cta mono" href="#cli">
@@ -41,9 +40,9 @@ export function HeroSection() {
         </h1>
 
         <p className="hero-sub">
-          <strong>Clarx</strong> scores your repository against five structural pillars, generates
-          a manifest agents can follow, and gives you a semantic component vocabulary that means
-          the same thing to engineers and AI.
+          <strong>Clarx</strong> scores your repository against five structural pillars, ships a
+          manifest agents can follow, and gives you open-source tools to measure and improve any
+          codebase — any language, any stack.
         </p>
 
         <div className="hero-cmd-row">

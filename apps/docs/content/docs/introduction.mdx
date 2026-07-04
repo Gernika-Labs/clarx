@@ -1,43 +1,37 @@
 ---
 title: Introduction
-description: Clarx is an intention-driven design system for modern software.
+description: Clarx is an AI-first codebase standard and the tools to measure it.
 ---
 
-Clarx is an intention-driven design system for modern software.
+Clarx is an AI-first codebase standard — a versioned set of rules that measure how legible a repository is to agents, plus open-source tools to score and improve it.
 
-It starts from a simple belief: UI components should communicate meaning, not force developers to manually recreate presentation. Instead of encoding decisions through one-off `className` overrides, Clarx encourages APIs that describe purpose, state, and emphasis directly.
+It starts from a simple belief: as AI becomes part of every implementation workflow, **codebase structure is communication**. Agents need to find the right files, respect boundaries, avoid loading irrelevant context, and verify their work. A repo that optimizes for those behaviors scores higher — and ships safer changes.
 
-This approach matters more now than ever. Product interfaces are changing faster, AI is increasingly part of the implementation process, and teams need systems that are legible not only to designers and engineers, but also to the tools helping build the product. In that environment, semantic instructions are more durable than visual ones. "This is destructive." "This is pending." "This should be subtle." Those are the decisions that should live in the API.
+This applies to any stack. The standard is technology-agnostic. Python services, Go CLIs, React monorepos, and mixed polyglot repos all benefit from discoverable roots, clear module boundaries, committed manifests, and explicit verification commands.
 
-Clarx treats the design system as a communication layer between design, code, and AI-assisted development. It keeps visual quality high by centralizing styling decisions, while making implementation simpler, more consistent, and easier to evolve.
+## What Clarx provides
 
-It is for teams who believe the future of design systems is not more styling flexibility at the callsite, but better expression of intent at the system level.
+**The standard** — 27 rules across five pillars, each with severity, score impact, and remediation guidance.
 
-## Design systems as communication systems
+**The CLI** — `clarx score` runs locally or in CI. Exit codes gate merges. `clarx explain` turns rule IDs into fixes.
 
-Design systems should no longer be treated primarily as collections of styled components. They should be treated as communication systems.
+**The manifest** — `clarx-manifest.json` is the on-ramp: generated directories, verification commands, common task locations, and workspace maps that agents load every session.
 
-That communication happens on three levels:
-
-- Between the product and the user
-- Between design and engineering
-- Between humans and AI systems generating or modifying UI
-
-The reason this matters now is that implementation has changed. Increasingly, the person writing UI is not hand-tuning every visual detail. They are specifying meaning, state, priority, and intent — often to another abstraction layer: a component API, a design token system, or an AI assistant. In that world, `px-2 text-red-500 rounded-sm` is low-value instruction. "This is a destructive action with high emphasis" is durable instruction.
+**AI rules files** — portable `CLAUDE.md`, Cursor rules, and `AGENTS.md` snippets that keep generated code aligned with your conventions.
 
 ## Philosophy
 
-**UI is communication before decoration.**
-A component exists to communicate meaning: status, urgency, confidence, availability, next action, system state. Styling is not the goal; styling is the delivery mechanism.
+**Structure is communication before convenience.**
+A repo should tell an agent where things live, what to skip, and how to verify changes — not bury that in tribal knowledge.
 
-**Intention should be explicit in the API.**
-Developers should say what something means, not reconstruct its appearance from utility classes. The API should encode semantics like intent, appearance, priority, state, and role.
+**Intent should be explicit in the repo.**
+Manifests, guidance files, and clear entry points encode semantics that scattered README fragments cannot.
 
-**Visual decisions should be centralized.**
-Color, spacing, weight, and motion still matter, but they should be decided in the design system — not repeatedly improvised at callsites.
+**Boundaries should be enforceable.**
+Import graphs, package indexes, and generated-artifact hygiene prevent agents from taking shortcuts that humans would catch in review.
 
-**Design systems must now serve humans and machines.**
-A good component API is no longer just ergonomic for engineers. It must also be legible to AI tools. Semantic props are easier for models to use correctly than scattered visual overrides.
+**Standards must serve humans and machines.**
+Rule IDs, deterministic scoring, and machine-readable output make improvement measurable — not subjective.
 
 **The system should survive change.**
-If interfaces, platforms, and implementation methods keep changing, the durable layer is meaning. A system built around intention adapts better than one built around frozen visual recipes.
+Frameworks and languages churn. Discoverability, boundaries, and operational guidance compound over time.
