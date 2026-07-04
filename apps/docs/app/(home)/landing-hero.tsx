@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CopyButton, ScoreCounter } from '@/components/landing-interactive'
+import { formatClarxVersion } from '@/lib/version'
 
 export function Nav() {
   return (
@@ -8,7 +9,7 @@ export function Nav() {
         <Link className="brand" href="/">
           <span className="brand-mark" />
           Clarx
-          <span className="ver mono">v0.1.10</span>
+          <span className="ver mono">{formatClarxVersion()}</span>
         </Link>
         <div className="nav-links">
           <a href="#standard">Standard</a>

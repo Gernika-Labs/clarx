@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { formatClarxVersion } from '@/lib/version'
 
 export function AdoptionSection() {
   return (
@@ -120,7 +121,7 @@ export function Footer() {
     <footer className="foot">
       <div className="wrap">
         <div className="foot-inner">
-          <span className="copy">© 2026 · Clarx · v0.1.10 · MIT licensed</span>
+          <span className="copy">© 2026 · Clarx · {formatClarxVersion()} · MIT licensed</span>
           <nav>
             <a href="#standard">Standard</a>
             <a href="#cli">CLI</a>
