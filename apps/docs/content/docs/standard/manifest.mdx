@@ -64,32 +64,34 @@ All fields are optional.
 
 ## Fields
 
+Rule codes like <RuleRef id="C3" /> appear throughout — hover any of them for a plain-language explanation, or click through to the full definition.
+
 ### `version`
 The manifest schema version. Currently `"0.1"`.
 
 ### `generated`
-Glob patterns or paths that are generated artifacts. The engine will exclude these from source analysis and verify they are not committed as source. Declaring these correctly satisfies **O2** and helps resolve **C1**.
+Folders and files that are **built or generated** rather than written by hand — things like `dist/`, `.next/`, or coverage reports. Clarx skips them when scoring, and AI agents learn not to edit them (the next build would just overwrite their work). Declaring these satisfies <RuleRef id="O2" /> and helps resolve <RuleRef id="C1" />.
 
 ### `workspaces`
-A map of workspace paths to one-line purpose statements. Satisfies **D2** when provided here instead of (or in addition to) per-package READMEs.
+One line per package saying **what it's for** — e.g. `"packages/ui": "Semantic UI component library"`. This is how someone (or some agent) skimming the repo learns what each part owns without opening files. If you'd rather not maintain a README in every package, declaring purposes here satisfies <RuleRef id="D2" /> too.
 
 ### `highFanIn`
-Files imported by **10 or more** other files. Copy paths from the C4 finding (listed with caller counts) into this array. Satisfies **C4**. Files under `ui/` directories are auto-exempt — shared primitives are expected to have many callers.
+The **load-bearing files** of your codebase — ones that many other files import, where a small change can quietly break callers all over the repo. You don't have to find them yourself: run `clarx score` and copy the paths from the <RuleRef id="C4" /> finding, which lists each file with its caller count. Once declared, every agent knows to tread carefully there. Files inside `ui/` folders are exempt automatically — shared buttons and inputs are *supposed* to have many callers.
 
 ### `highFanOut`
-Files that intentionally import from many modules — aggregation points such as Server Actions files, MDX component registries, or API coordination layers. Declaring a path here exempts it from **C3** (15-module import limit). The engine also auto-exempts common aggregation filenames (`actions.ts`, `mutations.ts`, `handlers.ts`, etc.) and single-domain barrel files.
+Files that import from lots of places **on purpose** — deliberate hubs like a Server Actions file, an MDX component registry, or an API coordination layer. Clarx normally flags files with a very large import list (<RuleRef id="C3" />), because they're usually doing too many jobs at once. If one of yours is a hub by design, declare it here and the warning goes away. Common hub filenames (`actions.ts`, `mutations.ts`, `handlers.ts`, …) and index files that only gather their own folder's contents are already exempt automatically.
 
 ### `verificationCommands`
-Commands for `typecheck`, `test`, and `lint`. Satisfies **O3**. The CLI uses these when suggesting how to verify changes.
+The commands that **prove a change works** — `typecheck`, `test`, and `lint`. With these declared, an agent can check its own work instead of guessing (or asking you). Satisfies <RuleRef id="O3" />.
 
 ### `commonTasks`
-A map of common task descriptions to the file or directory where that work belongs. Satisfies **O4**. Examples:
+A map from everyday tasks to **where that work happens** in your repo, so nobody has to guess. Satisfies <RuleRef id="O4" />. Examples:
 - `"add a component"` → where component files live
 - `"add an API route"` → where route handlers live
 - `"add a migration"` → where database migrations live
 
 ### `thresholds`
-Per-repo overrides for the standard's numeric thresholds. Use this to tune rules to your repo's reality instead of forking the standard — for example, a repo with legitimately large generated-adjacent files can raise the C2 line limit:
+The standard's rules use numeric limits — lines per file, imports per file, and so on. If a default doesn't fit your repo's reality, override it here instead of living with a warning you disagree with. For example, a repo with legitimately large files can raise the <RuleRef id="C2" /> line limit:
 
 ```json
 {

@@ -16,17 +16,17 @@ Most of the standard operates on the **filesystem and guidance layers**, which a
 - All **Discoverability** rules (D1–D6)
 - All **Operational Guidance** rules (O1–O5)
 - Filesystem-based **Boundary Clarity** and **Edit Safety** rules
-- Line-count rules (C2, E1) — line counting covers `.py`, `.go`, `.rs`, `.rb`, `.java`, and more
+- Line-count rules (<RuleRef id="C2" />, <RuleRef id="E1" />) — line counting covers `.py`, `.go`, `.rs`, `.rb`, `.java`, and more
 
 Five rules require a resolvable **JS/TS import graph** and are reported as **not evaluated** on other stacks:
 
 | Rule | What it needs |
 |------|---------------|
-| **B1** — circular imports | import graph |
-| **C3** — import surface per file | import graph |
-| **C4** — high fan-in documentation | import graph |
-| **C5** — import chain depth | import graph |
-| **C6** — boundary surface in entry files | JS/TS entry-file analysis |
+| <RuleRef id="B1" /> — circular imports | import graph |
+| <RuleRef id="C3" /> — import surface per file | import graph |
+| <RuleRef id="C4" /> — high fan-in documentation | import graph |
+| <RuleRef id="C5" /> — import chain depth | import graph |
+| <RuleRef id="C6" /> — boundary surface in entry files | JS/TS entry-file analysis |
 
 When these don't run, the CLI says so explicitly:
 

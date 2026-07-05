@@ -53,10 +53,10 @@ Hard failures are structural — they undermine AI navigability in ways that no 
 
 | Rule | Description |
 |------|-------------|
-| **B1** | Circular imports between packages or workspaces |
-| **C1** | Generated artifacts **committed** to the source tree |
-| **C2** | Any source file exceeds **600** lines |
-| **O1** | No machine-readable guidance file |
+| <RuleRef id="B1" /> | Circular imports between packages or workspaces |
+| <RuleRef id="C1" /> | Generated artifacts **committed** to the source tree |
+| <RuleRef id="C2" /> | Any source file exceeds **600** lines |
+| <RuleRef id="O1" /> | No machine-readable guidance file |
 
 **C1 note:** Gitignored generated directories in the working tree trigger a **warning**, not a hard failure, unless they are tracked in git.
 
@@ -96,11 +96,11 @@ my-app/
   clarx-manifest.json
 ```
 
-- Root is clean (D1 ✓)
-- Every package has README and index.ts (D2 ✓, B3 ✓)
-- CLAUDE.md present with full content (O1 ✓, O2 ✓, O3 ✓, O4 ✓)
-- No utility dumping grounds (D4 ✓, E3 ✓)
-- No circular deps (B1 ✓)
+- Root is clean (<RuleRef id="D1" /> ✓)
+- Every package has README and index.ts (<RuleRef id="D2" /> ✓, <RuleRef id="B3" /> ✓)
+- CLAUDE.md present with full content (<RuleRef id="O1" /> ✓, <RuleRef id="O2" /> ✓, <RuleRef id="O3" /> ✓, <RuleRef id="O4" /> ✓)
+- No utility dumping grounds (<RuleRef id="D4" /> ✓, <RuleRef id="E3" /> ✓)
+- No circular deps (<RuleRef id="B1" /> ✓)
 
 ### Low-scoring repo (34/100, medium confidence)
 
@@ -117,10 +117,10 @@ my-app/
 ```
 
 Failures:
-- `.next/` committed to git → **C1 hard failure** → score capped (graduated floor)
-- No guidance file → **O1 hard failure**
-- `utils.ts`, `helpers.ts` → D4, E3
-- `routes.ts` at 600 lines → C2, E1
+- `.next/` committed to git → <RuleRef id="C1" /> hard failure → score capped (graduated floor)
+- No guidance file → <RuleRef id="O1" /> hard failure
+- `utils.ts`, `helpers.ts` → <RuleRef id="D4" />, <RuleRef id="E3" />
+- `routes.ts` at 600 lines → <RuleRef id="C2" />, <RuleRef id="E1" />
 
 ---
 

@@ -19,32 +19,32 @@ Each pillar has a small set of rules. Rules have three severity levels:
 
 Discoverability measures how quickly an AI agent can orient itself in a repo. A discoverable repo has a clean root, meaningful names, and clear separation between types of files.
 
-### D1 — Root directory has ≤N meaningful entries
+### D1 — Root directory has ≤N meaningful entries [#d1]
 Severity: `warning`
 
 The repo root should contain only top-level directories and essential config files. Dotfiles, lockfiles, and common config filenames are excluded from the count. Limits: **10** (default), **17** (Next.js repos), **20** (monorepos). Noise at the root forces an agent to scan everything before understanding anything.
 
-### D2 — Every workspace or package has a one-line purpose statement
+### D2 — Every workspace or package has a one-line purpose statement [#d2]
 Severity: `warning`
 
 Each package or workspace must have a README with at least one sentence describing what it owns. An agent that cannot read purpose from a file name alone must open the file — that costs context.
 
-### D3 — Source, test, config, and generated directories are segregated
+### D3 — Source, test, config, and generated directories are segregated [#d3]
 Severity: `warning`
 
 Source code, tests, configuration, and generated artifacts must not coexist in the same flat directory. Mixing them forces an agent to classify every file before using it.
 
-### D4 — No utility dumping ground files
+### D4 — No utility dumping ground files [#d4]
 Severity: `warning`
 
 Files named `utils.ts`, `helpers.ts`, `misc.ts`, `common.ts`, `shared.ts`, or similar are banned. These names carry no semantic information. An agent has no basis for deciding whether to look there without reading the whole file.
 
-### D5 — Directory depth does not exceed 5 levels before a module boundary
+### D5 — Directory depth does not exceed 5 levels before a module boundary [#d5]
 Severity: `recommendation`
 
 Deep nesting without semantic meaning forces an agent to traverse multiple directories to understand structure. A module boundary (package, workspace, clear domain directory) should appear within 5 levels.
 
-### D6 — No shadow routes at multiple URL depths
+### D6 — No shadow routes at multiple URL depths [#d6]
 Severity: `warning`
 
 In file-system routers (Next.js App Router, Remix, SvelteKit), the same route leaf segment must not appear at multiple URL depths without a documented distinction — e.g. `/api/mnemonic` and `/api/mobile/mnemonic` both handling `mnemonic`. Shadow routes make it unclear which handler is canonical. Document intentional pairs in the manifest or consolidate to one URL.
@@ -57,27 +57,27 @@ In file-system routers (Next.js App Router, Remix, SvelteKit), the same route le
 
 Boundary clarity measures how clearly a codebase separates concerns. An agent working on a well-bounded codebase can confidently limit its context to a single module.
 
-### B1 — No circular imports between packages or workspaces
+### B1 — No circular imports between packages or workspaces [#b1]
 Severity: `hard_failure`
 
 Circular dependencies make it impossible to reason about change scope. If module A depends on module B which depends on module A, no agent can safely modify either in isolation.
 
-### B2 — Shared code lives in a declared shared package
+### B2 — Shared code lives in a declared shared package [#b2]
 Severity: `warning`
 
 Code used by multiple packages must live in a single declared location. Duplicated logic across packages means a change in one place does not propagate — an agent has no way to know which copy is canonical.
 
-### B3 — Each package or workspace declares a public API surface
+### B3 — Each package or workspace declares a public API surface [#b3]
 Severity: `warning`
 
 Every package must have an `index.ts` (or equivalent) that explicitly exports its public interface. Without it, an agent cannot know what is internal versus stable surface without reading every file.
 
-### B4 — UI primitives and application logic are in separate locations
+### B4 — UI primitives and application logic are in separate locations [#b4]
 Severity: `recommendation`
 
 Generic reusable components must not live in the same directory as application-specific logic. An agent building a new screen should never have to decide whether a file in the primitives directory is reusable.
 
-### B5 — Test files mirror source structure or are co-located
+### B5 — Test files mirror source structure or are co-located [#b5]
 Severity: `recommendation`
 
 Tests must either live next to the source file they test or in a directory that mirrors the source tree. Scattered test files force an agent to search for coverage rather than predict it.
@@ -90,36 +90,36 @@ Tests must either live next to the source file they test or in a directory that 
 
 Context efficiency measures how much of the codebase an agent needs to load to complete a representative task. Every unnecessary file loaded is tokens burned and coherence lost.
 
-### C1 — Generated artifacts are excluded from the source tree
+### C1 — Generated artifacts are excluded from the source tree [#c1]
 Severity: `hard_failure` (when committed) · `warning` (gitignored but present)
 
 Generated directories (build output, compiled files, framework artifacts) must not live inside authored source directories. An agent that encounters generated files in a source tree cannot tell what is hand-written versus computed. **Hard failure** applies only when generated output is **committed to git**. Gitignored build artifacts in the working tree downgrade to a warning.
 
-### C2 — No source file exceeds 400 lines
+### C2 — No source file exceeds 400 lines [#c2]
 Severity: `warning` · escalates to `hard_failure` above 600 lines
 
 Files over 400 lines are almost always doing more than one thing. An agent asked to make a targeted change to a 900-line file must load the entire file to locate the relevant section. Files above **600 lines** escalate to hard failure.
 
 **Auto-exemptions:** static data files (`*.content.ts`, fixtures), SVG/icon directories, and shadcn/ui vendor components (`components/ui/` or Radix + `"use client"` fingerprint). There is no manifest-based line-count exemption.
 
-### C3 — No file imports from more than 15 distinct modules
+### C3 — No file imports from more than 15 distinct modules [#c3]
 Severity: `warning`
 
 A file importing more than **15** distinct modules is likely a coordination layer mixing concerns that belong in separate files. Every import is a potential context chain an agent must follow.
 
 **Exemptions:** paths declared in `manifest.highFanOut`, common aggregation filenames (`actions.ts`, `mutations.ts`, `handlers.ts`, etc.), and single-domain barrel files.
 
-### C4 — High fan-in files are documented
+### C4 — High fan-in files are documented [#c4]
 Severity: `recommendation`
 
 Files imported by **10 or more** other files are architectural load-bearing points. Changes to them have wide blast radius. Copy paths from the finding into `manifest.highFanIn`. Files under `ui/` directories are auto-exempt.
 
-### C5 — Import graph depth does not exceed 8 hops from entry to leaf
+### C5 — Import graph depth does not exceed 8 hops from entry to leaf [#c5]
 Severity: `recommendation`
 
 Deep import chains mean a small change can trigger a wide re-evaluation. An agent navigating a chain of 12 imports loses coherence before reaching the relevant code.
 
-### C6 — Entry files expose a local boundary surface before infrastructure
+### C6 — Entry files expose a local boundary surface before infrastructure [#c6]
 Severity: `recommendation`
 
 The real cost of a task is often dependency tracing rather than raw file count. Entry files that directly coordinate hooks, queries, services, and types force an agent to reconstruct implicit contracts across multiple layers. A local boundary surface such as a view-model, presenter, facade, or adapter gives the agent one explicit place to stop.
@@ -132,27 +132,27 @@ The real cost of a task is often dependency tracing rather than raw file count. 
 
 Operational guidance measures how explicitly a codebase declares its own conventions, structure, and verification paths. This is the pillar most directly improved by human action — it requires writing, not refactoring.
 
-### O1 — A machine-readable guidance file exists
+### O1 — A machine-readable guidance file exists [#o1]
 Severity: `hard_failure`
 
 The repo must contain at least one of: `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`, or `clarx-manifest.json`. Without any guidance file, an agent has no declared entry point for understanding the project.
 
-### O2 — Guidance file declares generated directories
+### O2 — Guidance file declares generated directories [#o2]
 Severity: `warning`
 
 The guidance file must explicitly list directories that are generated and should not be edited. An agent that edits generated output wastes a full round trip.
 
-### O3 — Guidance file declares verification commands
+### O3 — Guidance file declares verification commands [#o3]
 Severity: `warning`
 
 The guidance file must include at minimum: how to typecheck, how to run tests, and how to lint. An agent that cannot verify its changes cannot close the loop.
 
-### O4 — Guidance file declares where common changes belong
+### O4 — Guidance file declares where common changes belong [#o4]
 Severity: `warning`
 
 For the most frequent types of changes (e.g. "add a component", "add an API route", "add a test"), the guidance file must say which directory to work in. An agent should never guess the right location for a standard task.
 
-### O5 — Architecture document identifies high-risk files
+### O5 — Architecture document identifies high-risk files [#o5]
 Severity: `recommendation`
 
 A `CLAUDE.md`, `ARCHITECTURE.md`, or similar document must identify high fan-in files, shared utilities, and other locations where a change has wide blast radius.
@@ -165,27 +165,27 @@ A `CLAUDE.md`, `ARCHITECTURE.md`, or similar document must identify high fan-in 
 
 Edit safety measures how well a codebase is structured to contain the blast radius of changes.
 
-### E1 — No multi-purpose controller or route files exceeding 300 lines
+### E1 — No multi-purpose controller or route files exceeding 300 lines [#e1]
 Severity: `warning`
 
 A route handler or controller that mixes authentication, validation, business logic, and response formatting in a single 400-line file is an edit safety hazard. Split by responsibility.
 
-### E2 — Related files are co-located or grouped
+### E2 — Related files are co-located or grouped [#e2]
 Severity: `recommendation`
 
 A component, its types, its tests, and its styles (if any) should live together or in a predictable adjacent location. An agent that cannot find the type definition for a component it is editing may invent one.
 
-### E3 — No utility file exports more than 20 unrelated functions
+### E3 — No utility file exports more than 20 unrelated functions [#e3]
 Severity: `warning`
 
 A utility file with 35 exports across unrelated domains is a grab-bag. An agent asked to "update the date formatting utility" cannot tell where to look or what else it might affect. Split by domain.
 
-### E4 — Package boundaries are enforced by tooling
+### E4 — Package boundaries are enforced by tooling [#e4]
 Severity: `recommendation`
 
 Cross-package imports should be enforced by TypeScript path configuration, ESLint import rules, or workspace configuration — not just by convention. Unenforced boundaries are boundaries an agent will cross accidentally.
 
-### E5 — Each package has a single declared entry point
+### E5 — Each package has a single declared entry point [#e5]
 Severity: `warning`
 
 Packages that can be imported via arbitrary internal paths (`import x from '@clarxai/ui/src/internal/thing'`) have no encapsulation. An agent will follow the path of least resistance, which is often not the intended API surface.

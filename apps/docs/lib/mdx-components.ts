@@ -33,6 +33,7 @@ import {
   StatusIndicatorSizeDemo,
 } from '@/components/demos/status-indicator-demo'
 import { TemplateCopyBlock } from '@/components/template-copy-block'
+import { RuleRef } from '@/components/rule-ref'
 
 export const mdxComponents = {
   ...defaultMdxComponents,
@@ -62,4 +63,5 @@ export const mdxComponents = {
   StatusIndicatorAllStatesDemo,
   StatusIndicatorSizeDemo,
   TemplateCopyBlock,
+  RuleRef,
 }
