@@ -25,15 +25,17 @@ export function RuleRef({ id }: { id: string }) {
       <code className="rounded border border-fd-border bg-fd-muted px-1 py-0.5 text-[0.8em] font-medium text-fd-foreground transition-colors group-hover:border-fd-primary/50 group-hover:text-fd-primary">
         {code}
       </code>
+      {/* Explicit opaque backgrounds: the fd-popover theme token carries
+          alpha in this theme, which let page text bleed through. */}
       <span
         role="tooltip"
-        className="pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-1.5 w-72 -translate-x-1/2 rounded-lg border border-fd-border bg-fd-popover p-3 text-left text-xs font-normal leading-relaxed text-fd-popover-foreground opacity-0 shadow-lg transition-opacity duration-100 group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100"
+        className="pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-1.5 w-72 -translate-x-1/2 rounded-lg border border-zinc-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-zinc-700 opacity-0 shadow-lg transition-opacity duration-100 group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
       >
-        <span className="mb-1 block font-semibold">
+        <span className="mb-1 block font-semibold text-zinc-900 dark:text-zinc-50">
           {code} — {rule.title}
         </span>
         {rule.hint}
-        <span className="mt-1.5 block text-fd-muted-foreground">
+        <span className="mt-1.5 block text-zinc-500 dark:text-zinc-400">
           Click for the full definition →
         </span>
       </span>
