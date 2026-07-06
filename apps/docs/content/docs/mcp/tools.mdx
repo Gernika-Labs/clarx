@@ -1,0 +1,100 @@
+---
+title: MCP Tools Reference
+description: Inputs, outputs, and behavior of every tool exposed by the Clarx MCP server.
+---
+
+# MCP Tools Reference
+
+`@clarxai/mcp` exposes up to five tools. The first three always register; the AI tools register only when `ANTHROPIC_API_KEY` is set in the server environment.
+
+| Tool | Purpose | Requires |
+|------|---------|----------|
+| `analyze_manifest` | Score a CLAUDE.md / AGENTS.md manifest | — |
+| `analyze_clarx_manifest` | Validate `clarx-manifest.json` against the engine schema | — |
+| `get_ci_workflow` | Generate a GitHub Actions PR gate | — |
+| `suggest_manifest_fix` | AI-write one manifest section | `ANTHROPIC_API_KEY` |
+| `generate_manifest_draft` | AI-draft a full manifest from the README | `ANTHROPIC_API_KEY` |
+
+---
+
+## analyze_manifest
+
+Scores manifest content with the same rules as the Clarx Cloud manifest studio — identical input produces identical scores.
+
+**Input**
+
+| Parameter | Type | Notes |
+|-----------|------|-------|
+| `content` | string | Full markdown body. Pass this **or** `file_path`, not both |
+| `file_path` | string | Preferred — the server reads the file locally instead of inlining it into agent context |
+| `include_outline` | boolean | Heading outline with line numbers (default `true`) |
+
+**Output** — `overall_score` (0–100), `score_type: "manifest_quality_estimate"`, `pillar_scores` (Discoverability, Boundary clarity, Context efficiency, Operational guidance, Edit safety), `findings` (rule, severity, line, description, `section_key`), `sections` checklist, and the outline.
+
+---
+
+## analyze_clarx_manifest
+
+Validates a [`clarx-manifest.json`](/docs/standard/manifest) machine manifest.
+
+**Input** — `content` or `file_path` (one required, as above).
+
+**Output**
+
+```json
+{
+  "valid": true,
+  "errors": [],
+  "keys_recognized": ["generated", "verificationCommands"],
+  "suggestions": [
+    "Consider adding \"highFanIn\": Files many modules import — agents edit these with extra care."
+  ]
+}
+```
+
+Unknown keys and malformed `thresholds` overrides are reported; malformed overrides are ignored by the engine and can never disable a rule.
+
+---
+
+## get_ci_workflow
+
+Generates the GitHub Actions workflow described in [CI Integration](/docs/cli/ci-integration).
+
+**Input**
+
+| Parameter | Default | Notes |
+|-----------|---------|-------|
+| `min_score` | `80` | Fail the check below this overall score |
+| `min_pillar_score` | `null` | Optional per-pillar floor |
+| `upload_sarif` | `false` | Findings as Code Scanning annotations |
+| `upload_artifact` | `true` | Markdown report artifact |
+| `ignore_patterns` | `[]` | Globs to exclude |
+| `cli_version` | latest pinned | `@clarxai/cli` version to pin |
+
+**Output** — `{ "filename": ".github/workflows/clarx.yml", "yaml": "…" }`. The agent writes the file; commit it and set up [branch protection](/docs/cli/ci-integration).
+
+---
+
+## suggest_manifest_fix
+
+Writes one well-formed markdown section to close an `analyze_manifest` finding. Runs against your `ANTHROPIC_API_KEY` (bring-your-own-key; requests go directly from your machine to the Anthropic API).
+
+**Input** — `section_key` (e.g. `build`, `testing`, `architecture` — any section from the analyzer checklist), `current_content` or `file_path`, optional `doc_path`, `repo_name`, `repo_description`, `repo_readme` for grounding.
+
+**Output** — `{ "section_markdown": "## Build\n…", "section_key": "build", "pillar": "O" }`. The generated section satisfies the analyzer's validator rules (minimum words, required code blocks, required structure) so the finding actually closes.
+
+---
+
+## generate_manifest_draft
+
+First-draft manifest grounded in the repository README and description.
+
+**Input** — `filename` (`CLAUDE.md` | `AGENTS.md` | `GEMINI.md`), plus `repo_readme` (preferred) and/or `repo_description`, optional `repo_name`.
+
+**Output** — `{ "filename": "AGENTS.md", "markdown": "…" }`. Claims the model cannot ground in the provided context are marked as `<!-- TODO: … -->` comments — resolve them before committing.
+
+---
+
+## Coming with Clarx Cloud tokens
+
+Setting `CLARX_MCP_TOKEN` will unlock hosted tools — scan results, findings, and remediation prompts from your Clarx Cloud dashboard. Not available yet; the token is acknowledged but unlocks nothing in the current version.

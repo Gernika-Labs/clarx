@@ -1,0 +1,89 @@
+---
+title: MCP Server
+description: Use Clarx inside Cursor, Claude Code, and any MCP-capable coding agent — score manifests, validate clarx-manifest.json, and generate CI workflows without leaving the IDE.
+---
+
+# Clarx MCP Server
+
+`@clarxai/mcp` puts Clarx's manifest tooling inside your coding agent via the [Model Context Protocol](https://modelcontextprotocol.io). Your agent can score `CLAUDE.md` / `AGENTS.md` files, validate `clarx-manifest.json`, generate CI workflows, and (with your Anthropic key) write manifest sections — all as native tool calls.
+
+**No account required.** The core tools run entirely on your machine. Files are read locally and never uploaded.
+
+The server is listed in the official MCP registry as **`ai.clarx/mcp`**.
+
+---
+
+## Install
+
+### Cursor
+
+Add to `.cursor/mcp.json` in your repo (or `~/.cursor/mcp.json` for all projects):
+
+```json
+{
+  "mcpServers": {
+    "clarx": {
+      "command": "npx",
+      "args": ["-y", "@clarxai/mcp@latest"]
+    }
+  }
+}
+```
+
+### Claude Code
+
+```bash
+claude mcp add clarx -- npx -y @clarxai/mcp@latest
+```
+
+### Claude Desktop
+
+Add the same JSON block as Cursor to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+
+---
+
+## Enable the AI writing tools (optional)
+
+Two additional tools — `suggest_manifest_fix` and `generate_manifest_draft` — call the Anthropic API with **your own key**. Add it to the server environment and they register automatically:
+
+```json
+{
+  "mcpServers": {
+    "clarx": {
+      "command": "npx",
+      "args": ["-y", "@clarxai/mcp@latest"],
+      "env": { "ANTHROPIC_API_KEY": "sk-ant-…" }
+    }
+  }
+}
+```
+
+Without the key, the AI tools don't register at all — they never occupy your agent's context, and nothing breaks.
+
+---
+
+## The manifest loop
+
+Talk to your agent in plain language; it picks the right tool:
+
+1. **No manifest yet?** — *"Draft an AGENTS.md for this repo from the README"*. The draft is grounded in your README; anything the model can't ground is marked with a TODO comment rather than invented.
+2. **Score it** — *"Score my CLAUDE.md with clarx"*. Returns a 0–100 quality estimate, five pillar scores, and findings with line numbers.
+3. **Close findings** — *"Write the missing Testing section"*. Produces one validator-passing markdown section to insert.
+4. **Declare intent for the engine** — *"Create a clarx-manifest.json and validate it"*. Checks the keys the [engine](/docs/engine/overview) reads: `generated`, `highFanIn`, `highFanOut`, `verificationCommands`, and more. Committing this file closes O1 and makes the Boundary Clarity pillar evaluable.
+5. **Wire up CI** — *"Add a Clarx PR gate at min score 70"*. Generates the GitHub Actions workflow — see [CI Integration](/docs/cli/ci-integration).
+
+---
+
+## Two different scores
+
+The MCP `analyze_manifest` tool returns a **manifest quality estimate** — fast heuristics over a single markdown file. The [CLI](/docs/cli/overview) returns the **repo AI-readiness score** — the full engine over your whole codebase. They use different rule systems and are not comparable: a 90 manifest can live in a 60 repo. Use the estimate to write good manifests; use the CLI score as your quality gate.
+
+Every `analyze_manifest` result carries `score_type: "manifest_quality_estimate"` so agents don't conflate the two.
+
+---
+
+## Next steps
+
+- [Tools reference](/docs/mcp/tools) — inputs and outputs for all five tools
+- [CI Integration](/docs/cli/ci-integration) — the PR gate the MCP server can generate for you
+- [The manifest](/docs/standard/manifest) — what a great agent manifest contains

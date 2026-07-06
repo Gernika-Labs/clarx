@@ -27,6 +27,9 @@
     "cli/commands",
     "cli/ci-integration",
     "cli/non-js-repos",
+    "---MCP---",
+    "mcp/overview",
+    "mcp/tools",
     "---Engine---",
     "engine/overview",
     "engine/output-format"

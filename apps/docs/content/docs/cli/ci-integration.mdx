@@ -7,6 +7,8 @@ description: How to add Clarx scoring to GitHub Actions, GitLab CI, and other pi
 
 Clarx is designed to run in CI. Add it to any pipeline to enforce a minimum score on every pull request.
 
+Two shortcuts before writing YAML by hand: if you use the [Clarx MCP server](/docs/mcp/overview), ask your agent — *"Add a Clarx PR gate at min score 70"* — and it generates this workflow for you. Or use the [composite action](#composite-action) below.
+
 ---
 
 ## GitHub Actions
@@ -89,6 +91,49 @@ jobs:
       - name: Enforce minimum score
         run: npx @clarxai/cli score --min-score 65
 ```
+
+### Composite action
+
+One step instead of hand-rolled YAML — score gate, SARIF, and report artifact behind inputs:
+
+```yaml
+name: Clarx
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  security-events: write # only if upload-sarif: true
+
+jobs:
+  clarx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: clarxai/clarx-cloud/action@v1
+        with:
+          min-score: '70'
+          upload-sarif: 'true'
+```
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `path` | `.` | Directory to scan |
+| `min-score` | — | Fail if overall score is lower |
+| `min-pillar-score` | — | Fail if any pillar is lower |
+| `cli-version` | `0.1.11` | npm version of `@clarxai/cli` |
+| `ignore` | — | Comma-separated globs (`--ignore`) |
+| `upload-sarif` | `false` | Upload findings to Code Scanning |
+| `upload-artifact` | `false` | Upload markdown report artifact |
+
+### Branch protection
+
+To block merges when the gate fails: GitHub → **Settings** → **Branches** → your protection rule → enable **Require status checks to pass before merging** → add the job name (e.g. `clarx`). The check becomes selectable after its first run on a PR.
+
+Fork PRs are safe with the plain `pull_request` trigger — Clarx needs no secrets to score. Do not use `pull_request_target`.
 
 ---
 
