@@ -72,6 +72,16 @@ Talk to your agent in plain language; it picks the right tool:
 4. **Declare intent for the engine** — *"Create a clarx-manifest.json and validate it"*. Checks the keys the [engine](/docs/engine/overview) reads: `generated`, `highFanIn`, `highFanOut`, `verificationCommands`, and more. Committing this file closes O1 and makes the Boundary Clarity pillar evaluable.
 5. **Wire up CI** — *"Add a Clarx PR gate at min score 70"*. Generates the GitHub Actions workflow — see [CI Integration](/docs/cli/ci-integration).
 
+## Connected mode (Clarx Cloud)
+
+With a Clarx Cloud account, create an API token (org settings → API tokens) and add it to the server environment:
+
+```json
+      "env": { "CLARX_MCP_TOKEN": "clarx_…" }
+```
+
+Four hosted tools register — `list_repos`, `get_scan`, `list_findings`, and `get_remediation_prompt` — so your agent can pull real scan results and the dashboard's remediation prompts without leaving the IDE: *"What did the last clarx scan find?"*, *"Get the remediation prompt and fix the top finding."* See the [tools reference](/docs/mcp/tools) for details.
+
 ---
 
 ## Two different scores

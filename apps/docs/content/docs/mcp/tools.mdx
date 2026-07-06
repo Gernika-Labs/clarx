@@ -95,6 +95,35 @@ First-draft manifest grounded in the repository README and description.
 
 ---
 
-## Coming with Clarx Cloud tokens
+## Hosted tools (Clarx Cloud token)
 
-Setting `CLARX_MCP_TOKEN` will unlock hosted tools — scan results, findings, and remediation prompts from your Clarx Cloud dashboard. Not available yet; the token is acknowledged but unlocks nothing in the current version.
+Create an API token in your Clarx Cloud org settings and set it as `CLARX_MCP_TOKEN` in the server environment. Four additional tools register, all org-scoped and enforced server-side:
+
+| Tool | Purpose |
+|------|---------|
+| `list_repos` | Connected repositories with latest AI-readiness scores |
+| `get_scan` | Latest scan summary, or full drill-down via `scan_id` |
+| `list_findings` | Findings + recommended actions from the latest scan |
+| `get_remediation_prompt` | The structured fix prompt behind the dashboard's "Copy AI prompt" |
+
+### list_repos
+
+No input. Returns `repo_id`, `full_name`, `latest_score`, `latest_scan_at`, `threshold` per repository the token can access.
+
+### get_scan
+
+**Input** — `repo_id` **or** `repo_full_name` (both accepted everywhere below); optional `scan_id` for the full detail of one scan.
+
+**Output** — latest scan summary (overall score, pillar scores, confidence) with `score_type: "repo_ai_readiness"`.
+
+### list_findings
+
+**Input** — repo reference, optional `severity` array and `pillar` filters, `limit` (default 50, max 200), `compact` (default `true` — id/rule/severity/title/path only, so results don't crowd out your agent's context).
+
+**Output** — findings, `top_affected_modules`, `recommended_actions` (whose ids feed `get_remediation_prompt`), and `review_status`.
+
+### get_remediation_prompt
+
+**Input** — repo reference; `action_id` from `recommended_actions` (defaults to the top action); `format: "prompt" | "brief"`; `combine_all: true` to merge every action into one prompt.
+
+**Output** — `{ prompt, action, working_set_files }`. The prompt is identical to what the dashboard generates for the same scan — hand it to your coding agent and it will scope the patch to the working set.
