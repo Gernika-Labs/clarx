@@ -8,7 +8,7 @@ export function ProblemSection() {
           </div>
           <h2 className="section-title">
             Your codebase isn&apos;t broken.
-            <br />
+            <br className="break-md" />{' '}
             It wasn&apos;t designed for agents.
           </h2>
           <p className="section-lede">

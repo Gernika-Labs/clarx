@@ -75,7 +75,7 @@ export function ManifestoSection() {
         <div className="quote-mark">▎</div>
         <blockquote>
           The interface is not a decoration layer.
-          <br />
+          <br className="break-md" />{' '}
           <span className="dim">It is a communication layer.</span>
         </blockquote>
         <cite>— from the Clarx standard, §0 · Premise</cite>
@@ -90,7 +90,7 @@ export function FooterCtaSection() {
       <div className="wrap">
         <p className="lede">
           Two paths in.
-          <br />
+          <br className="break-md" />{' '}
           <span className="em">Pick the one that fits today.</span>
         </p>
         <div className="paths">

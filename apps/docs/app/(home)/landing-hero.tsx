@@ -11,14 +11,22 @@ export function Nav() {
           Clarx
           <span className="ver mono">{formatClarxVersion()}</span>
         </Link>
-        <div className="nav-links">
-          <a href="#standard">Standard</a>
-          <a href="#cli">CLI</a>
-          <a href="#manifest">Manifest</a>
+        <nav className="nav-links" aria-label="Primary">
+          <a className="nav-anchor" href="#standard">
+            Standard
+          </a>
+          <a className="nav-anchor" href="#cli">
+            CLI
+          </a>
+          <a className="nav-anchor" href="#manifest">
+            Manifest
+          </a>
           <Link href="/docs">Docs</Link>
-        </div>
+        </nav>
         <a className="nav-cta mono" href="#cli">
-          <span className="dollar">$</span> npx clarx score .
+          <span className="dollar">$</span>{' '}
+          <span className="cta-full">npx clarx score .</span>
+          <span className="cta-short">clarx score</span>
         </a>
       </div>
     </header>
@@ -36,7 +44,7 @@ export function HeroSection() {
 
         <h1 className="hero-title">
           Make your codebase
-          <br />
+          <br className="break-md" />{' '}
           legible <span className="em">to AI.</span>
         </h1>
 
@@ -76,28 +84,48 @@ export function HeroSection() {
           </div>
           <div className="score-bars">
             <div className="score-bar">
-              <span className="name"><span className="ruleid">D</span>Discoverability</span>
-              <span className="track"><span style={{ width: '72%' }} /></span>
+              <span className="name">
+                <span className="ruleid">D</span>Discoverability
+              </span>
+              <span className="track">
+                <span style={{ width: '72%' }} />
+              </span>
               <span className="pct">72</span>
             </div>
             <div className="score-bar">
-              <span className="name"><span className="ruleid">B</span>Boundary clarity</span>
-              <span className="track"><span style={{ width: '94%' }} /></span>
+              <span className="name">
+                <span className="ruleid">B</span>Boundary clarity
+              </span>
+              <span className="track">
+                <span style={{ width: '94%' }} />
+              </span>
               <span className="pct">94</span>
             </div>
             <div className="score-bar warn">
-              <span className="name"><span className="ruleid">C</span>Context efficiency</span>
-              <span className="track"><span style={{ width: '82%' }} /></span>
+              <span className="name">
+                <span className="ruleid">C</span>Context efficiency
+              </span>
+              <span className="track">
+                <span style={{ width: '82%' }} />
+              </span>
               <span className="pct">82</span>
             </div>
             <div className="score-bar">
-              <span className="name"><span className="ruleid">O</span>Operational guidance</span>
-              <span className="track"><span style={{ width: '100%' }} /></span>
+              <span className="name">
+                <span className="ruleid">O</span>Operational guidance
+              </span>
+              <span className="track">
+                <span style={{ width: '100%' }} />
+              </span>
               <span className="pct">100</span>
             </div>
             <div className="score-bar bad">
-              <span className="name"><span className="ruleid">E</span>Edit safety</span>
-              <span className="track"><span style={{ width: '66%' }} /></span>
+              <span className="name">
+                <span className="ruleid">E</span>Edit safety
+              </span>
+              <span className="track">
+                <span style={{ width: '66%' }} />
+              </span>
               <span className="pct">66</span>
             </div>
           </div>

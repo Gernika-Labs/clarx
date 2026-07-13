@@ -12,9 +12,14 @@ export function CopyButton() {
   }
 
   return (
-    <span className="copy" onClick={handleCopy}>
+    <button
+      type="button"
+      className="copy"
+      onClick={handleCopy}
+      aria-label={copied ? 'Copied' : 'Copy command'}
+    >
       {copied ? 'copied' : 'copy'}
-    </span>
+    </button>
   )
 }
 
@@ -25,6 +30,16 @@ export function ScoreCounter({ target }: { target: number }) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
+
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (reduceMotion) {
+      setValue(target)
+      return
+    }
+
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) return
