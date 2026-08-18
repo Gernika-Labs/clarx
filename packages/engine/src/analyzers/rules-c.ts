@@ -18,26 +18,67 @@ export function evaluateC1(
 ): RuleResult {
   const declaredPatterns = manifest?.generated ?? [];
 
-  // Find top-level dirs that look generated but are NOT covered by any declared pattern
-  const leakedDirs = [...new Set(
-    files
-      .filter(f => {
-        if (f.isGenerated) return false;
+  // Whether generated output is committed is a question about git, so ask git.
+  //
+  // Deriving this from the file scan could never work: scanFilesystem strips
+  // dist, build, out, .next, coverage and the rest via DEFAULT_GENERATED_PATTERNS
+  // before rules run, so the scan-derived list was structurally incapable of
+  // containing the thing this rule exists to catch. C1 only ever saw the three
+  // patterns the scanner does not strip (.mypy_cache, target, .gradle) — a
+  // hard_failure rule that could not fail for the entire JS ecosystem, while
+  // reporting a pass it had not verified.
+  const isGeneratedDirName = (name: string | undefined): boolean =>
+    name !== undefined && GENERATED_PATTERNS.some(p => name === p || name === `.${p}`);
+
+  // `build` is the ambiguous one: it names a build *output* directory in some
+  // repos and a directory of build *scripts* in others. hono commits
+  // build/build.ts and build/validate-exports.ts — hand-written TypeScript that
+  // performs the build. Flagging those told the maintainers to delete their
+  // tooling, at hard_failure severity.
+  //
+  // TypeScript is a source language, so committed .ts/.tsx (excluding .d.ts,
+  // which is emitted) means the directory holds source, not output. Compiled
+  // output is .js/.mjs/.cjs/.d.ts/.map.
+  const dirHoldsTypeScriptSource = (dir: string): boolean => {
+    for (const trackedPath of gitTrackedPaths) {
+      if (!trackedPath.startsWith(`${dir}/`)) continue;
+      if (trackedPath.endsWith('.d.ts')) continue;
+      if (trackedPath.endsWith('.ts') || trackedPath.endsWith('.tsx')) return true;
+    }
+    return false;
+  };
+
+  const committedDirs = [...new Set(
+    [...gitTrackedPaths]
+      .filter(trackedPath => {
         // Only a path with a separator has a top-level *directory*. A root-level
         // file would otherwise contribute its own filename as the "directory",
         // which is how `.coveragerc` came to be reported as a committed build
         // artifact — a hard failure worth 100 score impact, for a coverage config.
-        if (!f.relativePath.includes('/')) return false;
-        const topDir = f.relativePath.split('/')[0];
+        if (!trackedPath.includes('/')) return false;
         // Exact match only. `startsWith` treated every name beginning with a
-        // generated prefix as generated: `.coveragerc` matched `.coverage`,
-        // `.buildrc` matched `.build`.
-        const looksGenerated = GENERATED_PATTERNS.some(p => topDir === p || topDir === `.${p}`);
-        if (!looksGenerated) return false;
-        return !declaredPatterns.some(p => minimatch(f.relativePath, p, { dot: true }));
+        // generated prefix as generated: `.coveragerc` matched `.coverage`.
+        if (!isGeneratedDirName(trackedPath.split('/')[0])) return false;
+        return !declaredPatterns.some(p => minimatch(trackedPath, p, { dot: true }));
+      })
+      .map(trackedPath => trackedPath.split('/')[0]!)
+  )].filter(dir => !dirHoldsTypeScriptSource(dir));
+
+  // Directories present in the working tree that the scanner did not strip and
+  // git does not track — agent noise, not committed output.
+  const untrackedDirs = [...new Set(
+    files
+      .filter(f => {
+        if (f.isGenerated) return false;
+        if (!f.relativePath.includes('/')) return false;
+        if (!isGeneratedDirName(f.relativePath.split('/')[0])) return false;
+        if (declaredPatterns.some(p => minimatch(f.relativePath, p, { dot: true }))) return false;
+        return !gitTrackedPaths.has(f.relativePath);
       })
       .map(f => f.relativePath.split('/')[0]!)
-  )];
+  )].filter(dir => !committedDirs.includes(dir));
+
+  const leakedDirs = [...committedDirs, ...untrackedDirs];
 
   if (leakedDirs.length === 0) {
     return {
@@ -50,13 +91,9 @@ export function evaluateC1(
     };
   }
 
-  // Hard failure only if generated files are actually committed to git.
-  // If git info is unavailable or dirs are gitignored, downgrade to warning —
-  // never hard-fail without positive evidence of committed generated output.
-  const committedDirs = gitTrackedPaths.size > 0
-    ? leakedDirs.filter(dir => [...gitTrackedPaths].some(p => p === dir || p.startsWith(dir + '/')))
-    : []; // can't confirm tracking status — warn, don't hard-fail
-
+  // Hard failure only with positive evidence from git that generated output is
+  // committed. No git info means no evidence, so committedDirs is empty and the
+  // rule degrades to the working-tree warning rather than hard-failing blind.
   if (committedDirs.length > 0) {
     return {
       id: 'C1',

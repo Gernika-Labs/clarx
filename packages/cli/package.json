@@ -1,7 +1,7 @@
 {
   "name": "@clarxai/cli",
-  "version": "0.1.11",
-  "description": "Clarx CLI — score any codebase against the AI-First Standard",
+  "version": "0.1.12",
+  "description": "Clarx CLI \u2014 score any codebase against the AI-First Standard",
   "type": "module",
   "bin": {
     "clarx": "./dist/cli.js"

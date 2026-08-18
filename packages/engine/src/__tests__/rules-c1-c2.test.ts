@@ -243,3 +243,45 @@ describe('C1 — generated directory matching is exact', () => {
     expect(evaluateC1(files, null, tracked).passed).toBe(true);
   });
 });
+
+describe('C1 — committed generated output is detected from git', () => {
+  it('flags a generated directory that git actually tracks', () => {
+    // The scanner strips dist/ before rules run, so `files` cannot contain it.
+    // C1 asks git instead, which is where the answer lives.
+    const tracked = new Set(['dist/bundle.js', 'dist/bundle.js.map', 'src/index.ts'])
+    const result = evaluateC1([makeFile('src/index.ts')], null, tracked)
+    expect(result.passed).toBe(false)
+    expect(result.severity).toBe('hard_failure')
+    expect(result.locations?.[0]?.path).toBe('dist')
+  })
+
+  it('does not flag a generated directory that git does not track', () => {
+    const tracked = new Set(['src/index.ts'])
+    expect(evaluateC1([makeFile('src/index.ts')], null, tracked).passed).toBe(true)
+  })
+
+  it('does not flag a build directory holding build scripts', () => {
+    // hono commits build/build.ts and build/validate-exports.ts — TypeScript
+    // that performs the build. `build` names output in some repos and tooling
+    // in others; committed .ts means tooling.
+    const tracked = new Set(['build/build.ts', 'build/validate-exports.ts', 'src/index.ts'])
+    expect(evaluateC1([makeFile('src/index.ts')], null, tracked).passed).toBe(true)
+  })
+
+  it('still flags a build directory holding emitted output', () => {
+    const tracked = new Set(['build/index.js', 'build/index.d.ts', 'src/index.ts'])
+    expect(evaluateC1([makeFile('src/index.ts')], null, tracked).passed).toBe(false)
+  })
+
+  it('respects manifest.generated declarations', () => {
+    const tracked = new Set(['dist/bundle.js', 'src/index.ts'])
+    const manifest = makeManifest({ generated: ['dist/**'] })
+    expect(evaluateC1([makeFile('src/index.ts')], manifest, tracked).passed).toBe(true)
+  })
+
+  it('never hard-fails without git evidence', () => {
+    // No git info is no evidence. The rule must not hard-fail blind.
+    const result = evaluateC1([makeFile('src/index.ts')], null, new Set())
+    expect(result.severity === 'hard_failure' && !result.passed).toBe(false)
+  })
+})

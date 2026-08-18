@@ -9,6 +9,59 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.12] - 2026-08-18
+
+Ships as **CLI 0.1.12** and **engine 0.1.10**. Three scan-quality corrections, all
+found or measured by the new corpus regression harness.
+
+### Fixed
+
+**Engine**
+- **C1 can now fail.** A repo with `dist/bundle.js` committed and no `.gitignore` used to
+  report "Generated artifacts are excluded from the source tree". `scanFilesystem` strips
+  `dist`, `build`, `out`, `.next`, `coverage` and the rest before rules run, so C1 only ever
+  saw `.mypy_cache`, `target`, and `.gradle` — a hard-failure rule that was structurally
+  unable to fail for the JS ecosystem, asserting a pass it had not verified. It now asks git,
+  which is where the answer lives.
+- **C1 no longer reports config dotfiles as build artifacts.** `.coveragerc` matched the
+  `.coverage` prefix and was reported as committed generated output at hard-failure severity,
+  costing `psf/requests` 15 points and telling maintainers to delete their coverage config.
+  Matching is exact, and root-level files no longer contribute their own filename as a
+  "directory".
+- **A `build/` directory of build scripts is not build output.** `build` names output in some
+  repos and tooling in others; committed `.ts`/`.tsx` means tooling. Without this, making C1
+  reachable would have hard-failed `honojs/hono` for committing `build/build.ts`.
+- **Router files are exempt from C3.** A file that binds `Switch`/`Route`/`Routes` from
+  `wouter` / `react-router-dom` / `react-router` and spends most of its imports on
+  `pages`/`views`/`screens`/`routes` is structurally a router, not a fan-out problem. It no
+  longer needs a `manifest.highFanOut` entry.
+- **Scan output is deterministic across platforms.** `readdir` results are now sorted, so
+  `locations[]` ordering no longer differs between macOS (APFS) and Linux CI (ext4).
+
+### Added
+
+**Engine**
+- `packages/corpus` — a regression harness that scores 18 pinned entries (public repos at
+  fixed SHAs, synthetic fixtures, local checkouts) and diffs against committed snapshots.
+  11 regression cases from the customer feedback logs run as executable assertions. Wired
+  into CI.
+
+### Changed
+
+**Release**
+- The engine publishes before the CLI, and neither step is `continue-on-error`. A failed
+  engine publish used to leave the release green while npm kept an older engine — how
+  engine 0.1.8 and CLI 0.1.10 came to be published out of step.
+
+### Score impact
+
+Measured across the corpus: **no pinned public repository changes score.** Repos that commit
+build output will newly hard-fail C1 — correctly, and for the first time. Repos with a
+`.coveragerc`-shaped dotfile gain back what a false hard failure was costing them (15 points
+on `psf/requests`), and SPAs with a router file lose a spurious C3 finding.
+
+---
+
 ## [0.1.10] - 2026-07-03
 
 ### Added
