@@ -1,10 +1,14 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, afterAll } from '@jest/globals';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { evaluateC3, evaluateC4, evaluateC6 } from '../analyzers/rules-c3-c4-c5.js';
 import { makeFile, makeManifest } from './file-fixtures.js';
 import { makeFanInGraph, makeImportGraph } from './graph-fixtures.js';
+
+// Synthetic graphs only — these paths do not exist on disk, so the
+// content-reading exemptions (e.g. router detection) simply do not fire.
+const TEST_ROOT = '/nonexistent-test-root';
 
 describe('C4 — high fan-in files are documented', () => {
   it('passes when no file exceeds the threshold', () => {
@@ -103,49 +107,49 @@ export function Page() {
 });
 
 describe('C3 — import breadth', () => {
-  it('passes when all files have ≤ 15 imports', () => {
+  it('passes when all files have ≤ 15 imports', async () => {
     const graph = makeImportGraph([
       { file: 'src/a.tsx', count: 10 },
       { file: 'src/b.tsx', count: 15 },
     ]);
-    expect(evaluateC3(graph, null).passed).toBe(true);
+    expect((await evaluateC3(TEST_ROOT, graph, null)).passed).toBe(true);
   });
 
-  it('fails when a file exceeds 15 imports', () => {
+  it('fails when a file exceeds 15 imports', async () => {
     const graph = makeImportGraph([{ file: 'src/heavy.tsx', count: 16 }]);
-    const result = evaluateC3(graph, null);
+    const result = await evaluateC3(TEST_ROOT, graph, null);
     expect(result.passed).toBe(false);
     expect(result.locations).toHaveLength(1);
     expect(result.locations?.[0]?.path).toBe('src/heavy.tsx');
   });
 
-  it('sorts violations by import count descending', () => {
+  it('sorts violations by import count descending', async () => {
     const graph = makeImportGraph([
       { file: 'src/a.tsx', count: 20 },
       { file: 'src/b.tsx', count: 25 },
     ]);
-    expect(evaluateC3(graph, null).locations?.[0]?.path).toBe('src/b.tsx');
+    expect((await evaluateC3(TEST_ROOT, graph, null)).locations?.[0]?.path).toBe('src/b.tsx');
   });
 
-  it('auto-exempts actions.ts regardless of import count', () => {
+  it('auto-exempts actions.ts regardless of import count', async () => {
     const graph = makeImportGraph([{ file: 'src/app/actions.ts', count: 30 }]);
-    expect(evaluateC3(graph, null).passed).toBe(true);
+    expect((await evaluateC3(TEST_ROOT, graph, null)).passed).toBe(true);
   });
 
-  it('auto-exempts other aggregation filenames (mutations, resolvers, handlers, routes)', () => {
+  it('auto-exempts other aggregation filenames (mutations, resolvers, handlers, routes)', async () => {
     for (const name of ['mutations.ts', 'resolvers.ts', 'commands.ts', 'handlers.ts', 'routes.ts']) {
       const graph = makeImportGraph([{ file: `src/${name}`, count: 25 }]);
-      expect(evaluateC3(graph, null).passed).toBe(true);
+      expect((await evaluateC3(TEST_ROOT, graph, null)).passed).toBe(true);
     }
   });
 
-  it('respects manifest.highFanOut path exemptions', () => {
+  it('respects manifest.highFanOut path exemptions', async () => {
     const graph = makeImportGraph([{ file: 'src/store.ts', count: 20 }]);
     const manifest = makeManifest({ highFanOut: ['store.ts'] });
-    expect(evaluateC3(graph, manifest).passed).toBe(true);
+    expect((await evaluateC3(TEST_ROOT, graph, manifest)).passed).toBe(true);
   });
 
-  it('shows lib and components as distinct internal domains, not pkg', () => {
+  it('shows lib and components as distinct internal domains, not pkg', async () => {
     const graph = makeImportGraph([{
       file: 'src/components/Page.tsx',
       count: 17,
@@ -157,9 +161,69 @@ describe('C3 — import breadth', () => {
         'src/components/Input.tsx',
       ],
     }]);
-    const detail = evaluateC3(graph, null).locations?.[0]?.detail ?? '';
+    const detail = (await evaluateC3(TEST_ROOT, graph, null)).locations?.[0]?.detail ?? '';
     expect(detail).toContain('lib');
     expect(detail).toContain('components');
     expect(detail).not.toMatch(/\+5 pkg/);
+  });
+});
+
+describe('C3 — router auto-detection', () => {
+  const ROOT = join(tmpdir(), `clarx-router-${Date.now()}`);
+
+  async function write(rel: string, content: string): Promise<void> {
+    await mkdir(join(ROOT, rel.slice(0, rel.lastIndexOf('/'))), { recursive: true });
+    await writeFile(join(ROOT, rel), content, 'utf-8');
+  }
+
+  afterAll(async () => {
+    await rm(ROOT, { recursive: true, force: true });
+  });
+
+  const pages = Array.from({ length: 20 }, (_, i) => `src/pages/Page${i}.tsx`);
+
+  it('exempts a file that binds Switch/Route and imports mostly pages', async () => {
+    await write('src/App.tsx', [
+      "import { Switch, Route } from 'wouter';",
+      ...pages.map((p, i) => `import Page${i} from './pages/Page${i}';`),
+    ].join('\n'));
+
+    const graph = makeImportGraph([{ file: 'src/App.tsx', count: 21, deps: pages }]);
+    expect((await evaluateC3(ROOT, graph, null)).passed).toBe(true);
+  });
+
+  it('exempts react-router-dom routers using Routes', async () => {
+    await write('src/Router.tsx', [
+      "import { Routes, Route } from 'react-router-dom';",
+      ...pages.map((p, i) => `import Page${i} from './pages/Page${i}';`),
+    ].join('\n'));
+
+    const graph = makeImportGraph([{ file: 'src/Router.tsx', count: 21, deps: pages }]);
+    expect((await evaluateC3(ROOT, graph, null)).passed).toBe(true);
+  });
+
+  it('does NOT exempt a file that merely imports from a router library', async () => {
+    // useLocation is not a route declaration. Any component may call it, and a
+    // component with 20 imports is still a fan-out problem.
+    await write('src/Dashboard.tsx', [
+      "import { useLocation } from 'wouter';",
+      ...pages.map((p, i) => `import Page${i} from './pages/Page${i}';`),
+    ].join('\n'));
+
+    const graph = makeImportGraph([{ file: 'src/Dashboard.tsx', count: 21, deps: pages }]);
+    expect((await evaluateC3(ROOT, graph, null)).passed).toBe(false);
+  });
+
+  it('does NOT exempt a Route-binding file whose imports are not route targets', async () => {
+    // Binding Route while pulling in twenty utilities is a god file that happens
+    // to render a route, not a router.
+    const utils = Array.from({ length: 20 }, (_, i) => `src/lib/util${i}.ts`);
+    await write('src/Kitchen.tsx', [
+      "import { Route } from 'wouter';",
+      ...utils.map((p, i) => `import util${i} from './lib/util${i}';`),
+    ].join('\n'));
+
+    const graph = makeImportGraph([{ file: 'src/Kitchen.tsx', count: 21, deps: utils }]);
+    expect((await evaluateC3(ROOT, graph, null)).passed).toBe(false);
   });
 });

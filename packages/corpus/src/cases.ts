@@ -123,7 +123,7 @@ export const CASES: RegressionCase[] = [
     id: 'PA-010',
     title: 'Router files are auto-detected and exempt from the import-surface rule',
     repo: 'fixture-router-fanout',
-    status: 'open',
+    status: 'holds',
     source: 'property-analyser-regression-cases.md',
     assert(s) {
       const c3 = rule(s, 'C3');

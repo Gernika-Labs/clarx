@@ -11,7 +11,7 @@
   "manifestFound": false,
   "pillars": {
     "boundary_clarity": 100,
-    "context_efficiency": 75,
+    "context_efficiency": 100,
     "discoverability": 100,
     "edit_safety": 100,
     "operational_guidance": 25
@@ -91,15 +91,10 @@
     "C3": {
       "confidence": "high",
       "inapplicable": false,
-      "locations": [
-        {
-          "detail": "21 imports — pages (20) +1 pkg",
-          "path": "src/App.tsx"
-        }
-      ],
-      "message": "1 file has a large import surface (more than 15 modules) — harder to navigate and expensive for LLM context windows",
-      "passed": false,
-      "primary": "src/App.tsx",
+      "locations": [],
+      "message": "No file has a large import surface (more than 15 distinct modules)",
+      "passed": true,
+      "primary": null,
       "scoreImpact": 25,
       "severity": "warning"
     },

@@ -12,6 +12,47 @@ import { DEFAULT_THRESHOLDS, type Thresholds } from '../thresholds.js';
 
 const AGGREGATION_FILENAME_RE = /(?:^|\/)(?:actions|mutations|resolvers|commands|handlers|routes)\.[jt]sx?$/;
 
+// A router wires every page of an application into one place. That is the
+// pattern working correctly, not co-located concerns — the same reasoning that
+// exempts shadcn/ui components from C2, and it should not require a
+// manifest.highFanOut entry to say so.
+//
+// Two signals are required, deliberately. Importing a router library proves
+// nothing on its own: any component may call useLocation or useNavigate. The
+// file must bind the route-declaring exports AND spend most of its imports on
+// route targets.
+//
+// `[^}]*` spans newlines, so multi-line import clauses match.
+const ROUTER_BINDING_RE =
+  /import\s*(?:type\s*)?\{[^}]*\b(?:Switch|Route|Routes)\b[^}]*\}\s*from\s*['"](?:wouter|react-router-dom|react-router)['"]/;
+const ROUTE_TARGET_DIR_RE = /(?:^|\/)(?:pages|views|screens|routes)\//;
+
+/**
+ * Detects a router file: binds Switch/Route/Routes from a router library, and
+ * spends the majority of its internal imports on files under a route-target
+ * directory.
+ *
+ * Not applied to C4. That rule is about fan-IN — files many others depend on —
+ * and a router is the opposite shape: it imports widely and is imported once.
+ * An exemption there would be unreachable code.
+ */
+async function isRouterFile(root: string, path: string, graph: ImportGraph): Promise<boolean> {
+  let content: string;
+  try {
+    content = await readFile(join(root, path), 'utf-8');
+  } catch {
+    return false;
+  }
+  if (!ROUTER_BINDING_RE.test(content)) return false;
+
+  const internal = [...(graph.edges.get(path) ?? new Set<string>())]
+    .filter(p => !p.endsWith('/__entry__'));
+  if (internal.length === 0) return false;
+
+  const routeTargets = internal.filter(p => ROUTE_TARGET_DIR_RE.test(p)).length;
+  return routeTargets * 2 > internal.length;
+}
+
 function dirOf(p: string): string {
   const idx = p.lastIndexOf('/');
   return idx >= 0 ? p.slice(0, idx) : '';
@@ -67,14 +108,15 @@ function clusterDetail(path: string, totalCount: number, graph: ImportGraph): st
     : `${totalCount} imports — ${top}`;
 }
 
-export function evaluateC3(
+export async function evaluateC3(
+  root: string,
   graph: ImportGraph,
   manifest: Manifest | null,
   thresholds: Thresholds = DEFAULT_THRESHOLDS
-): RuleResult {
+): Promise<RuleResult> {
   const limit = thresholds.c3ImportLimit;
   const declared = new Set(manifest?.highFanOut ?? []);
-  const violations = [...graph.importCount.entries()]
+  const candidates = [...graph.importCount.entries()]
     .filter(([path, count]) => {
       if (count <= limit) return false;
       if ([...declared].some(d => path === d || path.endsWith('/' + d))) return false;
@@ -83,6 +125,14 @@ export function evaluateC3(
       return true;
     })
     .sort((a, b) => b[1] - a[1]);
+
+  // Router detection reads file contents, so it runs only on files already over
+  // the limit — a handful in practice, not the whole tree.
+  const violations: Array<[string, number]> = [];
+  for (const entry of candidates) {
+    if (await isRouterFile(root, entry[0], graph)) continue;
+    violations.push(entry);
+  }
 
   if (violations.length === 0) {
     return {
