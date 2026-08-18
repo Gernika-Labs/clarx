@@ -195,6 +195,22 @@ export const FIXTURE_REPOS: CorpusRepo[] = [
     maxFiles: 20,
   },
   {
+    id: 'fixture-committed-build-output',
+    rationale:
+      'A repo with dist/bundle.js committed to git and no .gitignore — the exact thing C1 exists to catch. Currently C1 PASSES here, because the filesystem scanner strips dist/ before C1 ever sees it. Pins the gap until it is decided.',
+    source: {
+      kind: 'fixture',
+      files: {
+        'package.json': JSON.stringify({ name: 'fixture-committed-build-output' }, null, 2) + '\n',
+        'README.md': '# Fixture: committed build output\n\nNo .gitignore. dist/ is committed on purpose.\n',
+        'src/index.ts': 'export const value = 1;\n',
+        'dist/bundle.js': 'var value=1;\n',
+        'dist/bundle.js.map': '{"version":3}\n',
+      },
+    },
+    maxFiles: 20,
+  },
+  {
     id: 'local-clarx',
     rationale:
       'The engine repo itself. Dogfood: it ships a real clarx-manifest.json, so it pins the high-confidence path end to end.',

@@ -157,6 +157,26 @@ export const CASES: RegressionCase[] = [
     },
   },
   {
+    id: 'C1-reachability',
+    title: 'C1 detects generated output that is actually committed to git',
+    repo: 'fixture-committed-build-output',
+    status: 'open',
+    source: 'found by the corpus 2026-08-17',
+    assert(s) {
+      const c1 = rule(s, 'C1');
+      if (!c1) return { ok: false, detail: 'C1 missing from snapshot' };
+      return {
+        ok: c1.passed === false,
+        detail: c1.passed
+          ? 'dist/bundle.js is committed with no .gitignore, and C1 reports "Generated artifacts are excluded from the source tree". ' +
+            'scanFilesystem strips dist/ (and build, out, .next, coverage, .turbo, .cache, storybook-static, __pycache__) via DEFAULT_GENERATED_PATTERNS ' +
+            'before C1 runs, so C1 only ever sees .mypy_cache, target, and .gradle. For the JS ecosystem it is a hard_failure rule that cannot fail — ' +
+            'and it asserts a pass it has not verified. C1 already receives gitTrackedPaths and could ask git directly; that would newly hard-fail real repos, so it is a decision, not a patch.'
+          : 'committed build output detected',
+      };
+    },
+  },
+  {
     id: 'PA-006',
     title: 'Unknown manifest keys surface as the scan tip instead of being ignored',
     repo: 'fixture-malformed-manifest',
