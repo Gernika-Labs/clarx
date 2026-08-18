@@ -8,6 +8,7 @@ AI-first codebase standard, analysis engine, and CLI. Public product is the stan
 packages/ui/src/          — internal reference UI components (not published)
 packages/engine/src/      — codebase analysis engine (@clarxai/engine)
 packages/cli/src/         — CLI wrapping the engine (@clarxai/cli)
+packages/corpus/          — regression harness over pinned real repos (not published)
 apps/docs/                — documentation site (Next.js 15 + fumadocs)
 apps/docs/content/docs/   — MDX pages (edit here to change doc content)
 apps/docs/components/demos/ — live demo components referenced by MDX pages
@@ -43,12 +44,22 @@ Every component follows this exact shape — read `badge.tsx` as the reference:
 1. Create MDX file in `apps/docs/content/docs/`
 2. Add it to `apps/docs/content/docs/meta.json` in the right position
 
-## Adding an engine rule
+## Adding or changing an engine rule
 
 1. Add the rule evaluation to `packages/engine/src/scoring/rules.ts`
 2. Update pillar score calculation in `packages/engine/src/scoring/overall.ts` if needed
 3. Add the rule explanation to `packages/cli/src/commands/explain.ts`
 4. Document the rule in `apps/docs/content/docs/standard/pillars.mdx`
+5. **Run `pnpm --filter @clarxai/corpus corpus`** and read the diff before deciding you are done
+
+Rule changes move customer scores. The corpus exists so the blast radius is
+known before a release, not reported afterwards: it scores 18 pinned entries
+and fails on structural, score, or location changes. Accept an intended change
+with `-- --update` and commit the snapshots with the code.
+
+Two things it has already caught that unit tests could not: a C1 fix that
+hard-failed a real repository for committing its build *scripts*, and a
+fingerprint carrying a per-run UI annotation.
 
 ## Adding a CLI command
 

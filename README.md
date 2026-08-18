@@ -11,6 +11,7 @@ AI-first codebase standard, analysis engine, and CLI.
 | `apps/docs`       | —                 | Documentation site (Next.js 15 + fumadocs)                         |
 | `standard/`       | —                 | Versioned Clarx AI-First Standard spec and rubric                  |
 | `packages/ui`     | —                 | Internal reference components (not published)                      |
+| `packages/corpus` | —                 | Regression harness: scores pinned real repos, diffs vs snapshots   |
 
 ## Prerequisites
 
@@ -132,6 +133,24 @@ packages/ui/src/          — internal reference components (not published)
 2. Update pillar score calculation in `packages/engine/src/scoring/overall.ts` if needed
 3. Add rule explanation to `packages/cli/src/commands/explain.ts`
 4. Document in `apps/docs/content/docs/standard/pillars.mdx`
+5. Run the corpus (below) to see what the change does to real repositories
+
+### Change rule behaviour safely
+
+Unit tests cover synthetic fixtures; the corpus covers real code.
+
+```bash
+pnpm --filter @clarxai/corpus corpus              # score 18 entries, diff vs snapshots
+pnpm --filter @clarxai/corpus corpus -- --update  # accept the change, then review the diff
+```
+
+It runs in CI on every PR and takes a few seconds. A diff is not automatically a
+regression — it is the blast radius of your change, stated in advance. Accept it
+deliberately with `--update` and commit the snapshots alongside the code.
+
+`packages/corpus/src/cases.ts` holds the regression cases from the customer
+feedback logs as executable assertions. Status is observed, not aspirational:
+`holds` fails the build if broken, `open` is reported but never gates.
 
 ### Add a CLI command
 
