@@ -66,7 +66,14 @@ export async function scanFilesystem(
   const files: FileEntry[] = [];
 
   async function walk(dir: string): Promise<void> {
-    const entries = await readdir(dir, { withFileTypes: true });
+    // Sorted by name so the scan order — and therefore the order of every
+    // `locations[]` array derived from it — is identical on every platform.
+    // readdir returns entries in filesystem order, which differs between APFS
+    // (macOS) and ext4 (Linux CI); without this, the same commit produces
+    // different location ordering on different machines. Compared by code unit
+    // rather than localeCompare, which varies with the host ICU data.
+    const entries = (await readdir(dir, { withFileTypes: true }))
+      .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
       const rel = relative(root, fullPath);
