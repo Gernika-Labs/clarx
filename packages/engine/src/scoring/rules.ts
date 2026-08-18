@@ -108,7 +108,7 @@ export async function evaluateRules(
 
   rules['C1'] = evaluateC1(files, manifest, gitTrackedPaths);
   rules['C2'] = await evaluateC2(root, files, thresholds);
-  rules['C3'] = evaluateC3(importGraph, manifest, thresholds);
+  rules['C3'] = await evaluateC3(root, importGraph, manifest, thresholds);
   rules['C4'] = evaluateC4(importGraph, manifest, thresholds);
   rules['C5'] = evaluateC5(importGraph, files, thresholds);
   rules['C6'] = await evaluateC6(root, files, thresholds);

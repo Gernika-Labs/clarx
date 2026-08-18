@@ -1,0 +1,830 @@
+{
+  "confidence": "medium",
+  "confidenceCaveat": null,
+  "engineVersion": "0.1.9",
+  "filesScanned": 2323,
+  "gitTrackedFiles": 2360,
+  "hardFailures": [
+    "C2",
+    "O1"
+  ],
+  "importGraphResolved": true,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 100,
+    "context_efficiency": 75,
+    "discoverability": 25,
+    "edit_safety": 25,
+    "operational_guidance": 50
+  },
+  "repo": "ts-monorepo-workspaces",
+  "rules": {
+    "B1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces to check for circular imports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces detected to check for public API surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "packages/query-test-utils/src/__test__/queryKey.test.ts"
+        },
+        {
+          "path": "packages/query-test-utils/src/__test__/sleep.test.ts"
+        }
+      ],
+      "message": "2 test files are not co-located or mirrored",
+      "passed": false,
+      "primary": "packages/query-test-utils/src/__test__/queryKey.test.ts",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated artifacts are excluded from the source tree",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "2200 lines (450% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/eslint-plugin-query/src/__tests__/exhaustive-deps.test.ts"
+        },
+        {
+          "detail": "2408 lines (502% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/preact-query/src/__tests__/useMutation.test.tsx"
+        },
+        {
+          "detail": "6744 lines (1586% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/preact-query/src/__tests__/useQuery.test.tsx"
+        },
+        {
+          "detail": "3118 lines (680% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/query-core/src/__tests__/queryClient.test.tsx"
+        },
+        {
+          "detail": "1929 lines (382% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/query-core/src/__tests__/queryObserver.test.tsx"
+        },
+        {
+          "detail": "3773 lines (843% over), 4 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/query-devtools/src/Devtools.tsx"
+        },
+        {
+          "detail": "2407 lines (502% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/react-query/src/__tests__/useMutation.test.tsx"
+        },
+        {
+          "detail": "7032 lines (1658% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/react-query/src/__tests__/useQuery.test.tsx"
+        },
+        {
+          "detail": "1945 lines (386% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/solid-query/src/__tests__/useInfiniteQuery.test.tsx"
+        },
+        {
+          "detail": "5762 lines (1341% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/solid-query/src/__tests__/useQuery.test.tsx"
+        }
+      ],
+      "message": "84 source files exceed 400 lines",
+      "passed": false,
+      "primary": "packages/react-query/src/__tests__/useQuery.test.tsx",
+      "scoreImpact": 25,
+      "severity": "hard_failure"
+    },
+    "C3": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "18 imports",
+          "path": "packages/svelte-query/src/index.ts"
+        }
+      ],
+      "message": "1 file has a large import surface (more than 15 modules) — harder to navigate and expensive for LLM context windows",
+      "passed": false,
+      "primary": "packages/svelte-query/src/index.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Add a clarx-manifest.json to document high fan-in files once adopted",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Maximum import depth is 6 hops (limit: 8)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "8 imports, 1 infrastructure-style relative imports, no local boundary surface",
+          "path": "integrations/react-next-15/app/page.tsx"
+        },
+        {
+          "detail": "8 imports, 1 infrastructure-style relative imports, no local boundary surface",
+          "path": "integrations/react-next-16/app/page.tsx"
+        }
+      ],
+      "message": "2 entry files appear to coordinate data/state directly without a local boundary surface",
+      "passed": false,
+      "primary": "integrations/react-next-15/app/page.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root directory has 8 meaningful entries (≤20, monorepo)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root README found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/auto-refetching/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/basic-persister/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/basic/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/devtools-panel/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/infinite-query-with-max-pages/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/optimistic-updates/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/pagination/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/query-options-from-a-service/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/router/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/rxjs/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "examples/angular/simple/src/app"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "integrations/angular-cli-20/src/app"
+        }
+      ],
+      "message": "12 directories mix source and config files",
+      "passed": false,
+      "primary": "examples/angular/auto-refetching/src/app",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/preact-query/src/__tests__/utils.tsx"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/preact-query/src/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/query-core/src/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/query-devtools/src/utils.tsx"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/react-query/src/__tests__/utils.tsx"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/solid-query/src/__tests__/utils.tsx"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/vue-query/src/devtools/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/vue-query/src/utils.ts"
+        }
+      ],
+      "message": "8 utility dumping ground files found",
+      "passed": false,
+      "primary": "packages/preact-query/src/__tests__/utils.tsx",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "examples/angular/auto-refetching/src/app/components/auto-refetching.component.html"
+        },
+        {
+          "path": "examples/angular/auto-refetching/src/app/components/auto-refetching.component.ts"
+        },
+        {
+          "path": "examples/angular/auto-refetching/src/app/interceptor/mock-api.interceptor.ts"
+        },
+        {
+          "path": "examples/angular/auto-refetching/src/app/services/tasks.service.ts"
+        },
+        {
+          "path": "examples/angular/basic-persister/src/app/components/post.component.html"
+        },
+        {
+          "path": "examples/angular/basic/src/app/components/post.component.html"
+        },
+        {
+          "path": "examples/angular/basic/src/app/components/post.component.ts"
+        },
+        {
+          "path": "examples/angular/basic/src/app/components/posts.component.html"
+        },
+        {
+          "path": "examples/angular/basic/src/app/components/posts.component.ts"
+        },
+        {
+          "path": "examples/angular/basic/src/app/services/posts-service.ts"
+        }
+      ],
+      "message": "86 files exceed 5 directory levels deep",
+      "passed": false,
+      "primary": "examples/angular/auto-refetching/src/app/components/auto-refetching.component.html",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "same leaf segment as integrations/react-next-16/app/count/route.ts",
+          "path": "integrations/react-next-15/app/count/route.ts"
+        },
+        {
+          "detail": "same leaf segment as integrations/react-next-15/app/count/route.ts",
+          "path": "integrations/react-next-16/app/count/route.ts"
+        }
+      ],
+      "message": "Route 'count': integrations/react-next-15/app/count/route.ts vs integrations/react-next-16/app/count/route.ts appears at multiple URL depths with no documented distinction",
+      "passed": false,
+      "primary": "integrations/react-next-15/app/count/route.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "434 lines",
+          "path": "packages/lit-query/src/createInfiniteQueryController.ts"
+        },
+        {
+          "detail": "362 lines",
+          "path": "packages/lit-query/src/createMutationController.ts"
+        },
+        {
+          "detail": "722 lines",
+          "path": "packages/lit-query/src/createQueriesController.ts"
+        },
+        {
+          "detail": "380 lines",
+          "path": "packages/lit-query/src/createQueryController.ts"
+        }
+      ],
+      "message": "4 route/controller files exceed 300 lines",
+      "passed": false,
+      "primary": "packages/lit-query/src/createInfiniteQueryController.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "examples/preact/simple/src/index.tsx"
+        },
+        {
+          "path": "examples/react/algolia/src/App.tsx"
+        },
+        {
+          "path": "examples/react/algolia/src/Search.tsx"
+        },
+        {
+          "path": "examples/react/algolia/src/SearchResults.tsx"
+        },
+        {
+          "path": "examples/react/algolia/src/index.tsx"
+        },
+        {
+          "path": "examples/react/auto-refetching/src/pages/index.tsx"
+        },
+        {
+          "path": "examples/react/basic-graphql-request/src/index.tsx"
+        },
+        {
+          "path": "examples/react/basic/src/index.tsx"
+        },
+        {
+          "path": "examples/react/chat/src/index.tsx"
+        },
+        {
+          "path": "examples/react/chat/src/message.tsx"
+        }
+      ],
+      "message": "218/230 component files have no co-located test or type file",
+      "passed": false,
+      "primary": "examples/preact/simple/src/index.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "34 exports",
+          "path": "packages/query-core/src/utils.ts"
+        }
+      ],
+      "message": "1 utility file exceed 20 exports",
+      "passed": false,
+      "primary": "packages/query-core/src/utils.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Package boundaries enforced by tooling: eslint config, package exports field",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/auto-refetching"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/basic-persister"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/devtools-panel"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/infinite-query-with-max-pages"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/optimistic-updates"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/pagination"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/query-options-from-a-service"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/router"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/rxjs"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/angular/simple"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/lit/basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/lit/pagination"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/lit/ssr"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/preact/simple"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/algolia"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/auto-refetching"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/basic-graphql-request"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/chat"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/default-query-function"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/devtools-panel"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/eslint-legacy"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/eslint-plugin-demo"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/infinite-query-with-max-pages"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/load-more-infinite-scroll"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/nextjs"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/nextjs-app-prefetching"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/nextjs-suspense-streaming"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/offline"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/optimistic-updates-cache"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/optimistic-updates-ui"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/pagination"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/playground"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/prefetching"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/react-router"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/rick-morty"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/shadow-dom"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/simple"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/star-wars"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/react/suspense"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/astro"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/basic-graphql-request"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/default-query-function"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/offline"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/simple"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/solid/solid-start-streaming"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/auto-refetching"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/load-more-infinite-scroll"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/optimistic-updates"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/playground"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/simple"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/ssr"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/svelte/star-wars"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/2.6-basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/2.7-basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/basic"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/dependent-queries"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/nuxt3"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/persister"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/vue/simple"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/angular-cli-20"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/lit-vite"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/react-next-14"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/react-next-15"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/react-next-16"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/react-vite"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/react-webpack-4"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/react-webpack-5"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/solid-vite"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/svelte-vite"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "integrations/vue-vite"
+        }
+      ],
+      "message": "74 library packages missing a declared entry point",
+      "passed": false,
+      "primary": "examples/angular/auto-refetching",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No CLAUDE.md, AGENTS.md, or clarx-manifest.json found",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Verification commands found in package.json scripts",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No common task locations found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 50,
+  "sha": "279bb5508b81ce0d88b8f0f72441d96abf7ca03c",
+  "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
+}

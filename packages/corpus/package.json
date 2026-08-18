@@ -1,0 +1,20 @@
+{
+  "name": "@clarxai/corpus",
+  "version": "0.0.0",
+  "description": "Corpus regression harness — scores pinned real repositories and diffs the result against committed snapshots",
+  "private": true,
+  "type": "module",
+  "main": "./dist/run.js",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "corpus": "tsc && node dist/run.js"
+  },
+  "dependencies": {
+    "@clarxai/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0"
+  }
+}

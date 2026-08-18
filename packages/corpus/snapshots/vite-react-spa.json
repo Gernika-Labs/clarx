@@ -1,0 +1,532 @@
+{
+  "confidence": "medium",
+  "confidenceCaveat": null,
+  "engineVersion": "0.1.9",
+  "filesScanned": 1269,
+  "gitTrackedFiles": 1269,
+  "hardFailures": [
+    "C2"
+  ],
+  "importGraphResolved": true,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 75,
+    "context_efficiency": 75,
+    "discoverability": 25,
+    "edit_safety": 25,
+    "operational_guidance": 75
+  },
+  "repo": "vite-react-spa",
+  "rules": {
+    "B1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces to check for circular imports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Add an index.ts that exports the public API",
+          "path": "dev-docs"
+        }
+      ],
+      "message": "1 library workspace missing an index file",
+      "passed": false,
+      "primary": "dev-docs",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "All test files are co-located or in mirrored test directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated artifacts are excluded from the source tree",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "3199 lines (700% over), 36 exports — co-located concerns, consider splitting by domain",
+          "path": "packages/element/src/binding.ts"
+        },
+        {
+          "detail": "2310 lines (478% over), 3 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/element/src/elbowArrow.ts"
+        },
+        {
+          "detail": "2539 lines (535% over), 1 export — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/element/src/linearElementEditor.ts"
+        },
+        {
+          "detail": "2273 lines (468% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/element/tests/bucketFill.test.ts"
+        },
+        {
+          "detail": "2223 lines (456% over), 21 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/excalidraw/actions/actionProperties.tsx"
+        },
+        {
+          "detail": "13950 lines (3388% over), 15 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/excalidraw/components/App.tsx"
+        },
+        {
+          "detail": "2583 lines (546% over), 208 exports — co-located concerns, consider splitting by domain",
+          "path": "packages/excalidraw/components/icons.tsx"
+        },
+        {
+          "detail": "4052 lines (913% over), 1 export — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/excalidraw/subset/woff2/woff2-bindings.ts"
+        },
+        {
+          "detail": "5309 lines (1227% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/excalidraw/tests/history.test.tsx"
+        },
+        {
+          "detail": "2220 lines (455% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "packages/excalidraw/tests/lasso.test.tsx"
+        }
+      ],
+      "message": "111 source files exceed 400 lines",
+      "passed": false,
+      "primary": "packages/excalidraw/components/App.tsx",
+      "scoreImpact": 25,
+      "severity": "hard_failure"
+    },
+    "C3": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "38 imports — excalidraw-app (20), packages (12), utility-types.ts (1), utils.ts (1) +4 pkg",
+          "path": "excalidraw-app/App.tsx"
+        },
+        {
+          "detail": "19 imports — packages (7), excalidraw-app (6), utility-types.ts (1) +5 pkg",
+          "path": "excalidraw-app/collab/Collab.tsx"
+        },
+        {
+          "detail": "50 imports — arrows (2), sizeHelpers.ts (1), align.ts (1), arrowEndpointText.ts (1) +1 pkg",
+          "path": "packages/element/src/index.ts"
+        },
+        {
+          "detail": "20 imports — packages (14) +6 pkg",
+          "path": "packages/excalidraw/components/Actions.tsx"
+        },
+        {
+          "detail": "71 imports — packages (60), utility-types.ts (1) +10 pkg",
+          "path": "packages/excalidraw/components/App.tsx"
+        },
+        {
+          "detail": "27 imports — packages (22), utility-types.ts (1) +4 pkg",
+          "path": "packages/excalidraw/components/CommandPalette/CommandPalette.tsx"
+        },
+        {
+          "detail": "43 imports — packages (37), types.ts (1) +5 pkg",
+          "path": "packages/excalidraw/components/LayerUI.tsx"
+        },
+        {
+          "detail": "24 imports — packages (16), types.ts (1) +7 pkg",
+          "path": "packages/excalidraw/components/Stats/index.tsx"
+        },
+        {
+          "detail": "210 imports — packages (1) +209 pkg",
+          "path": "packages/excalidraw/fonts/Xiaolai/index.ts"
+        },
+        {
+          "detail": "30 imports — packages (25) +5 pkg",
+          "path": "packages/excalidraw/index.tsx"
+        }
+      ],
+      "message": "20 files have a large import surface (more than 15 modules) — harder to navigate and expensive for LLM context windows",
+      "passed": false,
+      "primary": "packages/excalidraw/fonts/Xiaolai/index.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Add a clarx-manifest.json to document high fan-in files once adopted",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "12-hop chain",
+          "path": "packages/excalidraw/subset/harfbuzz/harfbuzz-bindings.ts"
+        }
+      ],
+      "message": "Import graph depth reaches 12 hops (limit: 8)",
+      "passed": false,
+      "primary": "packages/excalidraw/subset/harfbuzz/harfbuzz-bindings.ts",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Entry files that coordinate multiple dependencies expose a local boundary surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "Dockerfile"
+        },
+        {
+          "path": "crowdin.yml"
+        },
+        {
+          "path": "dev-docs"
+        },
+        {
+          "path": "docker-compose.yml"
+        },
+        {
+          "path": "examples"
+        },
+        {
+          "path": "excalidraw-app"
+        },
+        {
+          "path": "firebase-project"
+        },
+        {
+          "path": "packages"
+        },
+        {
+          "path": "public"
+        },
+        {
+          "path": "scripts"
+        },
+        {
+          "path": "setupTests.ts"
+        },
+        {
+          "path": "vercel.json"
+        }
+      ],
+      "message": "Root directory has 12 meaningful entries (limit: 10)",
+      "passed": false,
+      "primary": "Dockerfile",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Add a README.md with at least one sentence describing the package",
+          "path": "excalidraw-app"
+        }
+      ],
+      "message": "1 package missing a README",
+      "passed": false,
+      "primary": "excalidraw-app",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Source and config files are properly segregated",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "examples/with-script-in-browser/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/common/src/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/element/src/arrows/helpers.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/element/src/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/excalidraw/components/Stats/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/excalidraw/components/TTDDialog/common.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/excalidraw/components/Tools.tsx"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/excalidraw/components/hyperlink/helpers.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/excalidraw/lasso/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/excalidraw/renderer/helpers.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "packages/math/src/utils.ts"
+        }
+      ],
+      "message": "11 utility dumping ground files found",
+      "passed": false,
+      "primary": "examples/with-script-in-browser/utils.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No files exceed 5 directory levels",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No file-system route handlers found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "319 lines",
+          "path": "packages/excalidraw/components/ColorPicker/keyboardNavHandlers.ts"
+        }
+      ],
+      "message": "1 route/controller file exceed 300 lines",
+      "passed": false,
+      "primary": "packages/excalidraw/components/ColorPicker/keyboardNavHandlers.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "dev-docs/src/components/Homepage/index.tsx"
+        },
+        {
+          "path": "dev-docs/src/pages/index.tsx"
+        },
+        {
+          "path": "examples/with-nextjs/src/app/layout.tsx"
+        },
+        {
+          "path": "examples/with-nextjs/src/app/page.tsx"
+        },
+        {
+          "path": "examples/with-nextjs/src/excalidrawWrapper.tsx"
+        },
+        {
+          "path": "examples/with-nextjs/src/pages/excalidraw-in-pages.tsx"
+        },
+        {
+          "path": "examples/with-script-in-browser/components/CustomFooter.tsx"
+        },
+        {
+          "path": "examples/with-script-in-browser/components/ExampleApp.tsx"
+        },
+        {
+          "path": "examples/with-script-in-browser/components/MobileFooter.tsx"
+        },
+        {
+          "path": "examples/with-script-in-browser/components/sidebar/ExampleSidebar.tsx"
+        }
+      ],
+      "message": "174/229 component files have no co-located test or type file",
+      "passed": false,
+      "primary": "dev-docs/src/components/Homepage/index.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "94 exports",
+          "path": "packages/common/src/utils.ts"
+        }
+      ],
+      "message": "1 utility file exceed 20 exports",
+      "passed": false,
+      "primary": "packages/common/src/utils.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Package boundaries enforced by tooling: tsconfig paths, eslint config, package exports field",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "dev-docs"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/with-nextjs"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "examples/with-script-in-browser"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "excalidraw-app"
+        }
+      ],
+      "message": "4 library packages missing a declared entry point",
+      "passed": false,
+      "primary": "dev-docs",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Machine-readable guidance file found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Verification commands declared in guidance",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Common task locations declared in guidance",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 55,
+  "sha": "e160ff7ba0641fba729c528482de5277ffb19c58",
+  "tip": null
+}

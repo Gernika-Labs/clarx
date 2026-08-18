@@ -214,3 +214,32 @@ describe('C2 — no source file exceeds 400 lines', () => {
     }
   });
 });
+
+describe('C1 — generated directory matching is exact', () => {
+  const tracked = new Set<string>();
+
+  it('does not treat a root dotfile as a generated directory', () => {
+    // `.coveragerc` begins with `.coverage`; `.buildrc` begins with `.build`.
+    // Both are committed configuration, not build output. Found on psf/requests,
+    // where this was a hard failure capping the repo's score.
+    const files = [
+      makeFile('.coveragerc'),
+      makeFile('.buildrc'),
+      makeFile('src/index.ts'),
+    ];
+    expect(evaluateC1(files, null, tracked).passed).toBe(true);
+  });
+
+  it('still flags a real generated directory that is committed', () => {
+    const files = [makeFile('dist/index.js'), makeFile('src/index.ts')];
+    const committed = new Set(['dist/index.js']);
+    const result = evaluateC1(files, null, committed);
+    expect(result.passed).toBe(false);
+    expect(result.locations?.[0]?.path).toBe('dist');
+  });
+
+  it('does not flag a directory whose name merely starts with a generated prefix', () => {
+    const files = [makeFile('distribution/index.ts'), makeFile('building/index.ts')];
+    expect(evaluateC1(files, null, tracked).passed).toBe(true);
+  });
+});

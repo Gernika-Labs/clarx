@@ -4,6 +4,10 @@ import { evaluateE1, evaluateE3 } from '../analyzers/rules-e.js';
 import type { ImportGraph } from '../analyzers/import-graph.js';
 import { makeFile, makeManifest } from './file-fixtures.js';
 
+// Synthetic graphs only — these paths do not exist on disk, so the
+// content-reading exemptions (e.g. router detection) simply do not fire.
+const TEST_ROOT = '/nonexistent-test-root';
+
 // ── C3 ────────────────────────────────────────────────────────────────────────
 
 function makeImportGraph(importCounts: Record<string, number>): ImportGraph {
@@ -15,42 +19,42 @@ function makeImportGraph(importCounts: Record<string, number>): ImportGraph {
 }
 
 describe('C3 — no file imports from more than 15 distinct modules', () => {
-  it('passes when all files are within the limit', () => {
+  it('passes when all files are within the limit', async () => {
     const graph = makeImportGraph({ 'src/index.ts': 10, 'src/utils.ts': 5 });
-    expect(evaluateC3(graph, null).passed).toBe(true);
+    expect((await evaluateC3(TEST_ROOT, graph, null)).passed).toBe(true);
   });
 
-  it('fails when a file exceeds 15 imports', () => {
+  it('fails when a file exceeds 15 imports', async () => {
     const graph = makeImportGraph({ 'src/god.ts': 20 });
-    const result = evaluateC3(graph, null);
+    const result = await evaluateC3(TEST_ROOT, graph, null);
     expect(result.passed).toBe(false);
     expect(result.locations?.[0]?.path).toBe('src/god.ts');
     expect(result.locations?.[0]?.detail).toBe('20 imports');
   });
 
-  it('exempts files declared in manifest.highFanOut', () => {
+  it('exempts files declared in manifest.highFanOut', async () => {
     const graph = makeImportGraph({ 'src/registry.ts': 20 });
     const manifest = makeManifest({ highFanOut: ['src/registry.ts'] });
-    expect(evaluateC3(graph, manifest).passed).toBe(true);
+    expect((await evaluateC3(TEST_ROOT, graph, manifest)).passed).toBe(true);
   });
 
-  it('does not exempt files not in highFanOut', () => {
+  it('does not exempt files not in highFanOut', async () => {
     const graph = makeImportGraph({ 'src/registry.ts': 20, 'src/other.ts': 18 });
     const manifest = makeManifest({ highFanOut: ['src/registry.ts'] });
-    const result = evaluateC3(graph, manifest);
+    const result = await evaluateC3(TEST_ROOT, graph, manifest);
     expect(result.passed).toBe(false);
     expect(result.locations).toHaveLength(1);
     expect(result.locations?.[0]?.path).toBe('src/other.ts');
   });
 
-  it('auto-exempts aggregation layer filenames (actions.ts, mutations.ts, etc.)', () => {
+  it('auto-exempts aggregation layer filenames (actions.ts, mutations.ts, etc.)', async () => {
     const graph = makeImportGraph({
       'src/app/actions.ts': 25,
       'src/mutations.ts': 20,
       'src/resolvers.ts': 18,
       'src/god.ts': 17,
     });
-    const result = evaluateC3(graph, null);
+    const result = await evaluateC3(TEST_ROOT, graph, null);
     expect(result.passed).toBe(false);
     expect(result.locations).toHaveLength(1);
     expect(result.locations?.[0]?.path).toBe('src/god.ts');

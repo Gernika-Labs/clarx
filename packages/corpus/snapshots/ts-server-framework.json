@@ -1,0 +1,433 @@
+{
+  "confidence": "medium",
+  "confidenceCaveat": null,
+  "engineVersion": "0.1.9",
+  "filesScanned": 480,
+  "gitTrackedFiles": 485,
+  "hardFailures": [
+    "C2",
+    "O1"
+  ],
+  "importGraphResolved": true,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 100,
+    "context_efficiency": 100,
+    "discoverability": 50,
+    "edit_safety": 50,
+    "operational_guidance": 50
+  },
+  "repo": "ts-server-framework",
+  "rules": {
+    "B1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces to check for circular imports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces detected to check for public API surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "runtime-tests/bun/color.test.ts"
+        },
+        {
+          "path": "runtime-tests/bun/index.test.tsx"
+        },
+        {
+          "path": "runtime-tests/deno-jsx/jsx.test.tsx"
+        },
+        {
+          "path": "runtime-tests/deno/hono.test.ts"
+        },
+        {
+          "path": "runtime-tests/deno/middleware.test.tsx"
+        },
+        {
+          "path": "runtime-tests/deno/ssg.test.tsx"
+        },
+        {
+          "path": "runtime-tests/deno/stream.test.ts"
+        },
+        {
+          "path": "src/router/common.case.test.ts"
+        }
+      ],
+      "message": "8 test files are not co-located or mirrored",
+      "passed": false,
+      "primary": "runtime-tests/bun/color.test.ts",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated artifacts are excluded from the source tree",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "2019 lines (405% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/client/client.test.ts"
+        },
+        {
+          "detail": "3815 lines (854% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/hono.test.ts"
+        },
+        {
+          "detail": "2949 lines (637% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/jsx/dom/index.test.tsx"
+        },
+        {
+          "detail": "1345 lines (236% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/jsx/dom/intrinsic-element/components.test.tsx"
+        },
+        {
+          "detail": "1687 lines (322% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/jsx/index.test.tsx"
+        },
+        {
+          "detail": "1158 lines (190% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/jsx/streaming.test.tsx"
+        },
+        {
+          "detail": "1162 lines (191% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/middleware/cache/index.test.ts"
+        },
+        {
+          "detail": "4140 lines (935% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/types.test.ts"
+        },
+        {
+          "detail": "1775 lines (344% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/utils/jwt/jwt.test.ts"
+        },
+        {
+          "detail": "1489 lines (272% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/validator/validator.test.ts"
+        }
+      ],
+      "message": "43 source files exceed 400 lines",
+      "passed": false,
+      "primary": "src/types.test.ts",
+      "scoreImpact": 25,
+      "severity": "hard_failure"
+    },
+    "C3": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No file has a large import surface (more than 15 distinct modules)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Add a clarx-manifest.json to document high fan-in files once adopted",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Maximum import depth is 8 hops (limit: 8)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Entry files that coordinate multiple dependencies expose a local boundary surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root directory has 10 meaningful entries (≤10)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root README found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "runtime-tests/lambda"
+        },
+        {
+          "detail": "Move config files to the package root or a dedicated config/ directory",
+          "path": "runtime-tests/workerd"
+        }
+      ],
+      "message": "2 directories mix source and config files",
+      "passed": false,
+      "primary": "runtime-tests/lambda",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "src/adapter/cloudflare-workers/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "src/client/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "src/helper/css/common.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "src/helper/ssg/utils.ts"
+        },
+        {
+          "detail": "Rename to a domain-specific file",
+          "path": "src/jsx/utils.ts"
+        }
+      ],
+      "message": "5 utility dumping ground files found",
+      "passed": false,
+      "primary": "src/adapter/cloudflare-workers/utils.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No files exceed 5 directory levels",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No file-system route handlers found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "675 lines",
+          "path": "src/adapter/aws-lambda/handler.ts"
+        }
+      ],
+      "message": "1 route/controller file exceed 300 lines",
+      "passed": false,
+      "primary": "src/adapter/aws-lambda/handler.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "benchmarks/jsx/src/page-react.tsx"
+        },
+        {
+          "path": "benchmarks/jsx/src/page.tsx"
+        },
+        {
+          "path": "benchmarks/jsx/src/react-jsx/page-hono.tsx"
+        },
+        {
+          "path": "benchmarks/jsx/src/react-jsx/page-nano.tsx"
+        },
+        {
+          "path": "benchmarks/jsx/src/react-jsx/page-preact.tsx"
+        },
+        {
+          "path": "benchmarks/jsx/src/react-jsx/page-react.tsx"
+        }
+      ],
+      "message": "6/6 component files have no co-located test or type file",
+      "passed": false,
+      "primary": "benchmarks/jsx/src/page-react.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility files exceed 20 exports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No package boundary enforcement detected (no tsconfig paths, eslint import rules, or exports field)",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "benchmarks/fetch"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "benchmarks/query-param"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "benchmarks/routers"
+        },
+        {
+          "detail": "Add an \"exports\" or \"main\" field to package.json",
+          "path": "benchmarks/utils"
+        }
+      ],
+      "message": "4 library packages missing a declared entry point",
+      "passed": false,
+      "primary": "benchmarks/fetch",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No CLAUDE.md, AGENTS.md, or clarx-manifest.json found",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Verification commands found in package.json scripts",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No common task locations found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 50,
+  "sha": "eea9735fe308e6549509c312d80e13cd9e18898b",
+  "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
+}

@@ -40,3 +40,10 @@ jobs:
 
       - name: Score (dogfood)
         run: node packages/cli/dist/cli.js score . --min-score 80
+
+      # Scores pinned real repositories and diffs against committed snapshots.
+      # Clones ~8 public repos at depth 1; the whole run is a few seconds.
+      # A failure here means engine behaviour changed on real code — if the
+      # change is intended, re-run locally with --update and commit the diff.
+      - name: Corpus regression
+        run: pnpm --filter @clarxai/corpus corpus
