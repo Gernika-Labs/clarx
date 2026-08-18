@@ -1,0 +1,331 @@
+{
+  "confidence": "medium",
+  "confidenceCaveat": null,
+  "engineVersion": "0.1.9",
+  "filesScanned": 23,
+  "gitTrackedFiles": 23,
+  "hardFailures": [
+    "O1"
+  ],
+  "importGraphResolved": true,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 100,
+    "context_efficiency": 75,
+    "discoverability": 100,
+    "edit_safety": 100,
+    "operational_guidance": 25
+  },
+  "repo": "fixture-router-fanout",
+  "rules": {
+    "B1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces to check for circular imports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces detected to check for public API surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No test files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated artifacts are excluded from the source tree",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No source file exceeds 400 lines",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C3": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "21 imports — pages (20) +1 pkg",
+          "path": "src/App.tsx"
+        }
+      ],
+      "message": "1 file has a large import surface (more than 15 modules) — harder to navigate and expensive for LLM context windows",
+      "passed": false,
+      "primary": "src/App.tsx",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Add a clarx-manifest.json to document high fan-in files once adopted",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Maximum import depth is 1 hops (limit: 8)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No entry files detected that need local boundary-surface checks",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root directory has 1 meaningful entries (≤10)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root README found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Source and config files are properly segregated",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility dumping ground files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No files exceed 5 directory levels",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No file-system route handlers found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No route or controller files exceed 300 lines",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "src/App.tsx"
+        },
+        {
+          "path": "src/pages/Page0.tsx"
+        },
+        {
+          "path": "src/pages/Page1.tsx"
+        },
+        {
+          "path": "src/pages/Page10.tsx"
+        },
+        {
+          "path": "src/pages/Page11.tsx"
+        },
+        {
+          "path": "src/pages/Page12.tsx"
+        },
+        {
+          "path": "src/pages/Page13.tsx"
+        },
+        {
+          "path": "src/pages/Page14.tsx"
+        },
+        {
+          "path": "src/pages/Page15.tsx"
+        },
+        {
+          "path": "src/pages/Page16.tsx"
+        }
+      ],
+      "message": "21/21 component files have no co-located test or type file",
+      "passed": false,
+      "primary": "src/App.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility files exceed 20 exports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No package boundary enforcement detected (no tsconfig paths, eslint import rules, or exports field)",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No library packages to check",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No CLAUDE.md, AGENTS.md, or clarx-manifest.json found",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No verification commands found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No common task locations found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 65,
+  "sha": null,
+  "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
+}

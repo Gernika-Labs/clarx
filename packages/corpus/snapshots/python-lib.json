@@ -1,0 +1,364 @@
+{
+  "confidence": "low",
+  "confidenceCaveat": "Hard failures detected, but scan confidence is low — the import graph did not resolve fully and no manifest was found. These findings are real but may shift once a clarx-manifest.json is added. Treat them as soft-critical rather than confirmed blockers.",
+  "engineVersion": "0.1.9",
+  "filesScanned": 128,
+  "gitTrackedFiles": 130,
+  "hardFailures": [
+    "C1",
+    "C2",
+    "O1"
+  ],
+  "importGraphResolved": false,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 100,
+    "context_efficiency": 100,
+    "discoverability": 75,
+    "edit_safety": 100,
+    "operational_guidance": 25
+  },
+  "repo": "python-lib",
+  "rules": {
+    "B1": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces detected to check for public API surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No test files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "Remove from git tracking and add to .gitignore",
+          "path": ".coveragerc"
+        }
+      ],
+      "message": "Generated artifacts committed to source control: .coveragerc",
+      "passed": false,
+      "primary": ".coveragerc",
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "749 lines (87% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/requests/adapters.py"
+        },
+        {
+          "detail": "626 lines (56% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/requests/cookies.py"
+        },
+        {
+          "detail": "1185 lines (196% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/requests/models.py"
+        },
+        {
+          "detail": "921 lines (130% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "src/requests/sessions.py"
+        },
+        {
+          "detail": "3095 lines (674% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "tests/test_requests.py"
+        },
+        {
+          "detail": "1014 lines (154% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "tests/test_utils.py"
+        }
+      ],
+      "message": "6 source files exceed 400 lines",
+      "passed": false,
+      "primary": "tests/test_requests.py",
+      "scoreImpact": 25,
+      "severity": "hard_failure"
+    },
+    "C3": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "AUTHORS.rst"
+        },
+        {
+          "path": "HISTORY.md"
+        },
+        {
+          "path": "MANIFEST.in"
+        },
+        {
+          "path": "NOTICE"
+        },
+        {
+          "path": "docs"
+        },
+        {
+          "path": "ext"
+        },
+        {
+          "path": "pyproject.toml"
+        },
+        {
+          "path": "requirements-dev.txt"
+        },
+        {
+          "path": "setup.py"
+        },
+        {
+          "path": "src"
+        },
+        {
+          "path": "tests"
+        },
+        {
+          "path": "tox.ini"
+        }
+      ],
+      "message": "Root directory has 12 meaningful entries (limit: 10)",
+      "passed": false,
+      "primary": "AUTHORS.rst",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root README found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Source and config files are properly segregated",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility dumping ground files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No files exceed 5 directory levels",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No file-system route handlers found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No route or controller files exceed 300 lines",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No component files to check",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility files exceed 20 exports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No package boundary enforcement detected (no tsconfig paths, eslint import rules, or exports field)",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No library packages to check",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No CLAUDE.md, AGENTS.md, or clarx-manifest.json found",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No verification commands found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No common task locations found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 35,
+  "sha": "8f8b212de8c2129d7954c6cd373762880375620a",
+  "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
+}

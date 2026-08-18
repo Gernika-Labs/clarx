@@ -1,0 +1,381 @@
+{
+  "confidence": "medium",
+  "confidenceCaveat": null,
+  "engineVersion": "0.1.9",
+  "filesScanned": 188,
+  "gitTrackedFiles": 188,
+  "hardFailures": [
+    "O1"
+  ],
+  "importGraphResolved": true,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 100,
+    "context_efficiency": 75,
+    "discoverability": 75,
+    "edit_safety": 100,
+    "operational_guidance": 50
+  },
+  "repo": "next-app-router-shadcn",
+  "rules": {
+    "B1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces to check for circular imports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces detected to check for public API surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No test files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated artifacts are excluded from the source tree",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No source file exceeds 400 lines",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C3": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "22 imports — components (3), lib (2) +17 pkg",
+          "path": "components/editor.tsx"
+        }
+      ],
+      "message": "1 file has a large import surface (more than 15 modules) — harder to navigate and expensive for LLM context windows",
+      "passed": false,
+      "primary": "components/editor.tsx",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Add a clarx-manifest.json to document high fan-in files once adopted",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Maximum import depth is 3 hops (limit: 8)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "8 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(auth)/login/page.tsx"
+        },
+        {
+          "detail": "13 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(dashboard)/dashboard/billing/page.tsx"
+        },
+        {
+          "detail": "8 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(dashboard)/dashboard/layout.tsx"
+        },
+        {
+          "detail": "11 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(dashboard)/dashboard/page.tsx"
+        },
+        {
+          "detail": "8 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(dashboard)/dashboard/settings/page.tsx"
+        },
+        {
+          "detail": "14 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(docs)/docs/[[...slug]]/page.tsx"
+        },
+        {
+          "detail": "16 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(docs)/guides/[...slug]/page.tsx"
+        },
+        {
+          "detail": "9 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(docs)/layout.tsx"
+        },
+        {
+          "detail": "11 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(marketing)/[...slug]/page.tsx"
+        },
+        {
+          "detail": "14 imports, 0 infrastructure-style relative imports, no local boundary surface",
+          "path": "app/(marketing)/blog/[...slug]/page.tsx"
+        }
+      ],
+      "message": "13 entry files appear to coordinate data/state directly without a local boundary surface",
+      "passed": false,
+      "primary": "app/(auth)/login/page.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root directory has 15 meaningful entries (≤17, next.js)",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root README found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Source and config files are properly segregated",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility dumping ground files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No files exceed 5 directory levels",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "same leaf segment as app/api/webhooks/stripe/route.ts",
+          "path": "app/api/users/stripe/route.ts"
+        },
+        {
+          "detail": "same leaf segment as app/api/users/stripe/route.ts",
+          "path": "app/api/webhooks/stripe/route.ts"
+        }
+      ],
+      "message": "Route 'stripe': app/api/users/stripe/route.ts vs app/api/webhooks/stripe/route.ts appears at multiple URL depths with no documented distinction",
+      "passed": false,
+      "primary": "app/api/users/stripe/route.ts",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No route or controller files exceed 300 lines",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "app/(auth)/layout.tsx"
+        },
+        {
+          "path": "app/(auth)/login/page.tsx"
+        },
+        {
+          "path": "app/(auth)/register/page.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/billing/loading.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/billing/page.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/layout.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/loading.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/page.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/settings/loading.tsx"
+        },
+        {
+          "path": "app/(dashboard)/dashboard/settings/page.tsx"
+        }
+      ],
+      "message": "94/94 component files have no co-located test or type file",
+      "passed": false,
+      "primary": "app/(auth)/layout.tsx",
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility files exceed 20 exports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Package boundaries enforced by tooling: tsconfig paths, eslint config",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No library packages to check",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No CLAUDE.md, AGENTS.md, or clarx-manifest.json found",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Verification commands found in package.json scripts",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No common task locations found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 65,
+  "sha": "298a8857c7128a0d121e7f699dfd729f23b3966d",
+  "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
+}

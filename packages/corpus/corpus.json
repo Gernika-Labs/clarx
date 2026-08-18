@@ -1,0 +1,53 @@
+{
+  "$comment": "The publishable corpus. Every entry is pinned by SHA and public, so this file can ship with the benchmark unchanged. Local-only and synthetic entries live in src/fixtures.ts and are never published. Shapes here exist because a real bug lived in them — see the rationale on each entry and docs/scan-regression-harness-plan.md in clarx-cloud.",
+  "repos": [
+    {
+      "id": "next-app-router-shadcn",
+      "rationale": "Next.js App Router with a components/ui shadcn directory. Covers the framework the engine once assumed by default (PA-001) and the C2 false positives on generated shadcn files (PA-004).",
+      "source": { "kind": "git", "url": "https://github.com/shadcn-ui/taxonomy", "sha": "298a8857c7128a0d121e7f699dfd729f23b3966d" },
+      "maxFiles": 1500
+    },
+    {
+      "id": "vite-react-spa",
+      "rationale": "Vite + React SPA monorepo with genuinely oversized files. Covers the framework the engine once assumed away (PA-001) and the C2 severity gradient between marginally-over and clearly-over files (PA-002).",
+      "source": { "kind": "git", "url": "https://github.com/excalidraw/excalidraw", "sha": "e160ff7ba0641fba729c528482de5277ffb19c58" },
+      "maxFiles": 4000
+    },
+    {
+      "id": "ts-lib-barrels",
+      "rationale": "Small TypeScript library with barrel-style re-exports. Covers export counting on `export * from` files (PA-005).",
+      "source": { "kind": "git", "url": "https://github.com/pmndrs/zustand", "sha": "b126c338444a328d729f07ca9c192596d003c2cb" },
+      "maxFiles": 800
+    },
+    {
+      "id": "ts-server-framework",
+      "rationale": "Mid-size TypeScript framework with deep module structure. Exercises the import graph and boundary rules on thin-route-style code (KUA-003, KUA-007).",
+      "source": { "kind": "git", "url": "https://github.com/honojs/hono", "sha": "eea9735fe308e6549509c312d80e13cd9e18898b" },
+      "maxFiles": 2000
+    },
+    {
+      "id": "ts-monorepo-workspaces",
+      "rationale": "pnpm monorepo with real workspaces. Exercises cross-package import resolution and the workspaces manifest key.",
+      "source": { "kind": "git", "url": "https://github.com/TanStack/query", "sha": "279bb5508b81ce0d88b8f0f72441d96abf7ca03c" },
+      "maxFiles": 4000
+    },
+    {
+      "id": "ts-tiny-lib",
+      "rationale": "The small end of the size distribution. A repo this small should not accumulate structural findings; if it does, a threshold is miscalibrated.",
+      "source": { "kind": "git", "url": "https://github.com/sindresorhus/ky", "sha": "3419113b48e034fdcf8fa6bd3be3da7b3d0d758f" },
+      "maxFiles": 200
+    },
+    {
+      "id": "python-lib",
+      "rationale": "Non-JS repository. The JS-only rules must report `inapplicable` rather than failing — a rule silently flipping to inapplicable is the change this corpus exists to catch.",
+      "source": { "kind": "git", "url": "https://github.com/psf/requests", "sha": "8f8b212de8c2129d7954c6cd373762880375620a" },
+      "maxFiles": 400
+    },
+    {
+      "id": "go-lib",
+      "rationale": "A second non-JS stack, so `inapplicable` behaviour is not validated against Python alone.",
+      "source": { "kind": "git", "url": "https://github.com/spf13/cobra", "sha": "adbc8813901bba65827259daa8e22ff94ec1f30e" },
+      "maxFiles": 400
+    }
+  ]
+}

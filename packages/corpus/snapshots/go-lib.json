@@ -1,0 +1,401 @@
+{
+  "confidence": "low",
+  "confidenceCaveat": "Hard failures detected, but scan confidence is low — the import graph did not resolve fully and no manifest was found. These findings are real but may shift once a clarx-manifest.json is added. Treat them as soft-critical rather than confirmed blockers.",
+  "engineVersion": "0.1.9",
+  "filesScanned": 66,
+  "gitTrackedFiles": 66,
+  "hardFailures": [
+    "C2",
+    "O1"
+  ],
+  "importGraphResolved": false,
+  "manifestFound": false,
+  "pillars": {
+    "boundary_clarity": 100,
+    "context_efficiency": 100,
+    "discoverability": 75,
+    "edit_safety": 100,
+    "operational_guidance": 25
+  },
+  "repo": "go-lib",
+  "rules": {
+    "B1": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "hard_failure"
+    },
+    "B2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Only one workspace — no cross-package duplication possible",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No workspaces detected to check for public API surface",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "B4": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "UI primitives and application logic are in separate directories",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "B5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No test files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated artifacts are excluded from the source tree",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "C2": {
+      "confidence": "high",
+      "inapplicable": false,
+      "locations": [
+        {
+          "detail": "4130 lines (932% over), 0 exports — single complex component, consider reducing internal complexity rather than splitting",
+          "path": "completions_test.go"
+        }
+      ],
+      "message": "1 source file exceeds 400 lines",
+      "passed": false,
+      "primary": "completions_test.go",
+      "scoreImpact": 25,
+      "severity": "hard_failure"
+    },
+    "C3": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "warning"
+    },
+    "C4": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C5": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "C6": {
+      "confidence": "low",
+      "inapplicable": true,
+      "locations": [],
+      "message": "Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [
+        {
+          "path": "CONDUCT.md"
+        },
+        {
+          "path": "LICENSE.txt"
+        },
+        {
+          "path": "MAINTAINERS"
+        },
+        {
+          "path": "active_help.go"
+        },
+        {
+          "path": "active_help_test.go"
+        },
+        {
+          "path": "args.go"
+        },
+        {
+          "path": "args_test.go"
+        },
+        {
+          "path": "assets"
+        },
+        {
+          "path": "bash_completions.go"
+        },
+        {
+          "path": "bash_completionsV2.go"
+        },
+        {
+          "path": "bash_completionsV2_test.go"
+        },
+        {
+          "path": "bash_completions_test.go"
+        },
+        {
+          "path": "cobra.go"
+        },
+        {
+          "path": "cobra_test.go"
+        },
+        {
+          "path": "command.go"
+        },
+        {
+          "path": "command_notwin.go"
+        },
+        {
+          "path": "command_test.go"
+        },
+        {
+          "path": "command_win.go"
+        },
+        {
+          "path": "completions.go"
+        },
+        {
+          "path": "completions_test.go"
+        },
+        {
+          "path": "doc"
+        },
+        {
+          "path": "fish_completions.go"
+        },
+        {
+          "path": "fish_completions_test.go"
+        },
+        {
+          "path": "flag_groups.go"
+        },
+        {
+          "path": "flag_groups_test.go"
+        },
+        {
+          "path": "go.mod"
+        },
+        {
+          "path": "go.sum"
+        },
+        {
+          "path": "powershell_completions.go"
+        },
+        {
+          "path": "powershell_completions_test.go"
+        },
+        {
+          "path": "shell_completions.go"
+        },
+        {
+          "path": "site"
+        },
+        {
+          "path": "zsh_completions.go"
+        },
+        {
+          "path": "zsh_completions_test.go"
+        }
+      ],
+      "message": "Root directory has 33 meaningful entries (limit: 10)",
+      "passed": false,
+      "primary": "CONDUCT.md",
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Root README found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D3": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Source and config files are properly segregated",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility dumping ground files found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "D5": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No files exceed 5 directory levels",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "D6": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No file-system route handlers found",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No route or controller files exceed 300 lines",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E2": {
+      "confidence": "low",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No component files to check",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No utility files exceed 20 exports",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "E4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No package boundary enforcement detected (no tsconfig paths, eslint import rules, or exports field)",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    },
+    "E5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No library packages to check",
+      "passed": true,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O1": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No CLAUDE.md, AGENTS.md, or clarx-manifest.json found",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 100,
+      "severity": "hard_failure"
+    },
+    "O2": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "Generated directories not declared in clarx-manifest.json — agents cannot tell which dirs to skip",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O3": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No verification commands found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O4": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No common task locations found in manifest or guidance files",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 25,
+      "severity": "warning"
+    },
+    "O5": {
+      "confidence": "medium",
+      "inapplicable": false,
+      "locations": [],
+      "message": "No high-risk files identified in manifest or architecture document",
+      "passed": false,
+      "primary": null,
+      "scoreImpact": 0,
+      "severity": "recommendation"
+    }
+  },
+  "score": 50,
+  "sha": "adbc8813901bba65827259daa8e22ff94ec1f30e",
+  "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
+}
