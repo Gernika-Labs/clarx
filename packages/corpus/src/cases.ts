@@ -160,7 +160,7 @@ export const CASES: RegressionCase[] = [
     id: 'C1-reachability',
     title: 'C1 detects generated output that is actually committed to git',
     repo: 'fixture-committed-build-output',
-    status: 'open',
+    status: 'holds',
     source: 'found by the corpus 2026-08-17',
     assert(s) {
       const c1 = rule(s, 'C1');
@@ -168,12 +168,31 @@ export const CASES: RegressionCase[] = [
       return {
         ok: c1.passed === false,
         detail: c1.passed
-          ? 'dist/bundle.js is committed with no .gitignore, and C1 reports "Generated artifacts are excluded from the source tree". ' +
-            'scanFilesystem strips dist/ (and build, out, .next, coverage, .turbo, .cache, storybook-static, __pycache__) via DEFAULT_GENERATED_PATTERNS ' +
-            'before C1 runs, so C1 only ever sees .mypy_cache, target, and .gradle. For the JS ecosystem it is a hard_failure rule that cannot fail — ' +
-            'and it asserts a pass it has not verified. C1 already receives gitTrackedPaths and could ask git directly; that would newly hard-fail real repos, so it is a decision, not a patch.'
-          : 'committed build output detected',
+          ? 'dist/bundle.js is committed with no .gitignore and C1 still reports it excluded — the rule is reading the file scan again instead of git'
+          : 'committed build output detected from git',
       };
+    },
+  },
+  {
+    id: 'C1-build-scripts',
+    title: 'A build/ directory of build scripts is not committed output',
+    repo: 'ts-server-framework',
+    status: 'holds',
+    source: 'found by the corpus 2026-08-18 while making C1 reachable',
+    assert(s) {
+      const c1 = rule(s, 'C1')
+      if (!c1) return { ok: false, detail: 'C1 missing from snapshot' }
+      // hono commits build/build.ts and build/validate-exports.ts — hand-written
+      // TypeScript that performs the build. The first version of the C1
+      // reachability fix flagged them, telling the maintainers to delete their
+      // tooling at hard_failure severity and dropping the repo 50 → 35. This is
+      // the guard against loosening that discrimination again.
+      return {
+        ok: c1.passed === true,
+        detail: c1.passed
+          ? 'build/ recognised as source tooling, not output'
+          : `hono's build scripts were reported as committed generated output: ${c1.message}`,
+      }
     },
   },
   {

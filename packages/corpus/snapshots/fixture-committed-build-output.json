@@ -5,6 +5,7 @@
   "filesScanned": 3,
   "gitTrackedFiles": 5,
   "hardFailures": [
+    "C1",
     "O1"
   ],
   "importGraphResolved": true,
@@ -69,11 +70,11 @@
       "severity": "recommendation"
     },
     "C1": {
-      "confidence": "medium",
+      "confidence": "high",
       "inapplicable": false,
       "locations": [],
-      "message": "Generated artifacts are excluded from the source tree",
-      "passed": true,
+      "message": "Generated artifacts committed to source control: dist",
+      "passed": false,
       "primary": null,
       "scoreImpact": 100,
       "severity": "hard_failure"
@@ -289,7 +290,7 @@
       "severity": "recommendation"
     }
   },
-  "score": 65,
+  "score": 50,
   "sha": null,
   "tip": "Add a clarx-manifest.json to improve scan confidence and unlock operational guidance rules (O1–O5)."
 }
