@@ -138,6 +138,25 @@ export const CASES: RegressionCase[] = [
     },
   },
   {
+    id: 'C1-dotfiles',
+    title: 'Root dotfiles are not mistaken for generated directories',
+    repo: 'fixture-dotfile-config',
+    status: 'holds',
+    source: 'found by the corpus on psf/requests, 2026-08-17',
+    assert(s) {
+      const c1 = rule(s, 'C1');
+      if (!c1) return { ok: false, detail: 'C1 missing from snapshot' };
+      const flagged = c1.locations.map(l => l.path);
+      const dotfiles = flagged.filter(p => /^\.(coveragerc|cachefile|buildrc)$/.test(p));
+      return {
+        ok: dotfiles.length === 0,
+        detail: dotfiles.length
+          ? `config dotfiles reported as generated artifacts: ${dotfiles.join(', ')} — C1 is a hard failure worth 100 score impact, so this caps a repo's score for committing a coverage config`
+          : 'config dotfiles correctly ignored by C1',
+      };
+    },
+  },
+  {
     id: 'PA-006',
     title: 'Unknown manifest keys surface as the scan tip instead of being ignored',
     repo: 'fixture-malformed-manifest',

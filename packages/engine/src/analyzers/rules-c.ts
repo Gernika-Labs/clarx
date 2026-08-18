@@ -23,8 +23,16 @@ export function evaluateC1(
     files
       .filter(f => {
         if (f.isGenerated) return false;
+        // Only a path with a separator has a top-level *directory*. A root-level
+        // file would otherwise contribute its own filename as the "directory",
+        // which is how `.coveragerc` came to be reported as a committed build
+        // artifact — a hard failure worth 100 score impact, for a coverage config.
+        if (!f.relativePath.includes('/')) return false;
         const topDir = f.relativePath.split('/')[0];
-        const looksGenerated = GENERATED_PATTERNS.some(p => topDir === p || topDir?.startsWith(`.${p}`));
+        // Exact match only. `startsWith` treated every name beginning with a
+        // generated prefix as generated: `.coveragerc` matched `.coverage`,
+        // `.buildrc` matched `.build`.
+        const looksGenerated = GENERATED_PATTERNS.some(p => topDir === p || topDir === `.${p}`);
         if (!looksGenerated) return false;
         return !declaredPatterns.some(p => minimatch(f.relativePath, p, { dot: true }));
       })

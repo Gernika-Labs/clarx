@@ -178,6 +178,23 @@ export const FIXTURE_REPOS: CorpusRepo[] = [
     maxFiles: 40,
   },
   {
+    id: 'fixture-dotfile-config',
+    rationale:
+      'Root-level dotfiles whose names begin with a generated-directory prefix — .coveragerc, .cachefile, .buildrc. These are configuration, committed on purpose. C1 must not report them as generated artifacts (found on the real psf/requests entry, where .coveragerc was a hard failure capping the score).',
+    source: {
+      kind: 'fixture',
+      files: {
+        'package.json': JSON.stringify({ name: 'fixture-dotfile-config', type: 'module' }, null, 2) + '\n',
+        'README.md': '# Fixture: dotfile config vs generated dirs\n',
+        '.coveragerc': '[run]\nbranch = True\n',
+        '.cachefile': 'not a cache directory\n',
+        '.buildrc': 'not a build directory\n',
+        'src/index.ts': 'export const value = 1;\n',
+      },
+    },
+    maxFiles: 20,
+  },
+  {
     id: 'local-clarx',
     rationale:
       'The engine repo itself. Dogfood: it ships a real clarx-manifest.json, so it pins the high-confidence path end to end.',
