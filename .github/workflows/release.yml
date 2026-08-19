@@ -40,17 +40,24 @@ jobs:
       # Engine first: the CLI bundles it and pnpm rewrites `workspace:*` to the
       # engine's version on publish. Publishing the CLI first could ship a CLI
       # pointing at an engine version that never made it to npm.
+      #
+      # Each package is skipped when that exact version is already on npm, and
+      # fails loudly on anything else. Without this, the packages are chained:
+      # they version independently, so a CLI-only fix would fail at the engine
+      # step and never publish, and the workaround — bumping the engine for a
+      # change it does not contain — puts a lie in the version history.
+      #
+      # There is deliberately no continue-on-error. It used to be set on the
+      # engine step, so a failed publish left the release green while npm kept an
+      # older engine, which is how engine 0.1.8 and CLI 0.1.10 came to be
+      # published out of step with nothing complaining.
       - name: Publish @clarxai/engine
-        run: pnpm --filter @clarxai/engine publish --no-git-checks
+        run: ./scripts/publish-if-new.sh @clarxai/engine
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # No continue-on-error. It used to be set here, so a failed engine publish
-      # left the release green while npm kept an older engine — which is how
-      # engine 0.1.8 and CLI 0.1.10 came to be published out of step. A release
-      # that only half-happened must fail loudly.
       - name: Publish @clarxai/cli
-        run: pnpm --filter @clarxai/cli publish --no-git-checks
+        run: ./scripts/publish-if-new.sh @clarxai/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
