@@ -3,7 +3,6 @@
 **For:** the model not building the benchmark
 **Blocks:** writing tasks, and any paid run
 **Effort:** small — a few prompts per repo
-**Artefact:** `packages/benchmark/canary/` — paste-ready prompts, scoring key, transcript template. This brief is not the prompts.
 
 ## Why this exists
 
