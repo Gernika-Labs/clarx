@@ -4,12 +4,13 @@
   "kind": "cross_file",
   "difficulty": "hard",
   "prompt": "Several places in this project build a compound GraphQL type name by converting two or more fragments to PascalCase and concatenating them, for example combining a table name with a column name, or a field name with a key. The same two-step pattern is repeated in more than one package.\n\nIntroduce a single shared helper that takes any number of string fragments, converts each to PascalCase, and joins them, then use it at the existing call sites that currently perform that conversion-and-concatenation by hand. The helper belongs next to the other string converters and must be reachable from the public entry point the same way they are. Generated names must come out byte-identical to what they are today, and the full test suite must still pass.",
-  "checkCommand": "pnpm vitest run --dir packages/core/src",
+  "checkCommand": "pnpm vitest run .clarx-bench/task_04.spec.ts",
   "rubric": null,
   "touches": [
     "packages/core/src/utils/string.ts",
     "packages/core/src/schema/input.ts",
     "packages/drizzle/src/helper.ts"
   ],
-  "contaminationNote": "No such helper exists at the pinned commit and no issue proposes one; the duplication was located by reading call sites across packages during task authoring."
+  "contaminationNote": "No such helper exists at the pinned commit and no issue proposes one; the duplication was located by reading call sites across packages during task authoring.",
+  "checkSpec": "task_04.spec.ts"
 }

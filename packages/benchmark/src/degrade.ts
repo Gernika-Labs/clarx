@@ -97,15 +97,50 @@ async function allDocWords(root: string): Promise<number> {
   return total
 }
 
-export async function degradeRepo(highDir: string, lowDir: string): Promise<DegradeResult> {
+export interface DegradeOptions {
+  /**
+   * Structure-only contrast: flatten exactly these documents and touch nothing
+   * else — no manifest conversion, no other files.
+   *
+   * The default whole-repo mode applies two manipulations at once (a manifest
+   * becomes prose AND every other document is flattened), which cannot support
+   * a claim about either one. This mode exists so a single, named document is
+   * the only thing that differs between twins.
+   */
+  onlyFlatten?: string[]
+}
+
+export async function degradeRepo(
+  highDir: string,
+  lowDir: string,
+  options: DegradeOptions = {},
+): Promise<DegradeResult> {
   await rm(lowDir, { recursive: true, force: true })
   await cp(highDir, lowDir, { recursive: true })
-  await rm(join(lowDir, '.git'), { recursive: true, force: true })
+
+  // .git is deliberately KEPT. An earlier version deleted it from twin_low
+  // only, which handed one arm a working `git log`, `git blame`, and `git grep`
+  // and the other nothing. That is a tooling difference, not a documentation
+  // one, and it would have been the most plausible explanation for any measured
+  // effect. The source-identity assertion could not see it either, because .git
+  // paths do not carry source extensions.
 
   const changedFiles: string[] = []
   /** Files rewritten in place — the set the drift guard is computed over. */
   const rewritten: string[] = []
   let manifestProseWords = 0
+
+  if (options.onlyFlatten) {
+    for (const rel of options.onlyFlatten) {
+      const path = join(lowDir, rel)
+      if (!existsSync(path)) {
+        throw new DegradationError(`${rel} does not exist in ${highDir} — a structure-only contrast needs the document it is degrading`)
+      }
+      await writeFile(path, flattenMarkdown(await readFile(path, 'utf-8')), 'utf-8')
+      changedFiles.push(rel)
+      rewritten.push(rel)
+    }
+  } else {
 
   // 1. The machine-readable manifest becomes prose in a generically-named file.
   //    Nothing is deleted: an agent can still learn every fact, just not by
@@ -142,6 +177,7 @@ export async function degradeRepo(highDir: string, lowDir: string): Promise<Degr
     await writeFile(file, flattenMarkdown(await readFile(file, 'utf-8')), 'utf-8')
     changedFiles.push(rel)
     rewritten.push(rel)
+  }
   }
 
   const highRewrittenWords = await wordsIn(highDir, rewritten)

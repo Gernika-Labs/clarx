@@ -1,7 +1,9 @@
+// Hidden grader test. Staged by the harness at <repo>/.clarx-bench/ and run
+// from there, which is why imports resolve one directory up.
 // Hidden grader test. Imports through the public entry point on purpose: the
 // task requires the helper to be reachable the same way its siblings are.
 import { describe, expect, it } from "vitest"
-import * as core from "../../packages/core/src/index"
+import * as core from "../packages/core/src/index"
 
 describe("gqloom-03: kebabCase", () => {
   it("is exported from the public entry point", () => {

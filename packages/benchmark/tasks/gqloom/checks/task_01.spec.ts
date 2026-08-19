@@ -1,6 +1,8 @@
+// Hidden grader test. Staged by the harness at <repo>/.clarx-bench/ and run
+// from there, which is why imports resolve one directory up.
 // Hidden grader test. Copied into the repo at grade time; never shown to the agent.
 import { describe, expect, it } from "vitest"
-import { pascalCase, screamingSnakeCase } from "../../packages/core/src/utils/string"
+import { pascalCase, screamingSnakeCase } from "../packages/core/src/utils/string"
 
 describe("gqloom-01: separator handling agrees across converters", () => {
   it("ignores leading separators in both", () => {

@@ -65,7 +65,7 @@ async function main(): Promise<void> {
     const manifestPath = join(TWINS, repo, 'twin_high', 'clarx-manifest.json')
     const manifestJson = existsSync(manifestPath) ? await readFile(manifestPath, 'utf-8') : null
 
-    const violations = validateSuite(tasks, repoRoot, manifestJson)
+    const violations = validateSuite(tasks, repoRoot, manifestJson, join(TASKS_DIR, repo, 'checks'))
     allViolations.push(...violations)
 
     console.log(

@@ -93,65 +93,123 @@ export function manifestToProse(manifest: ClarxManifest): string {
 /**
  * Flattens structured markdown into continuous prose.
  *
- * Headings become ordinary sentences and list items are joined into running
- * text. The words survive; the scannable shape does not — which is precisely
+ * Headings become sentences, list items join into running text, and table rows
+ * become sentences. The words survive; the scannable shape does not — which is
  * the variable under test.
  *
- * Fenced code blocks are left intact: turning a command into prose would
- * destroy information rather than restructure it, and the manifest prose above
- * already covers commands in sentence form.
+ * **Fenced code is preserved verbatim, including its line breaks.** An earlier
+ * version claimed this and did not do it: a final pass joined every newline not
+ * followed by a backtick, which collapsed the inside of every fence too. A
+ * README's entire code sample became one line. That is information destruction
+ * rather than restructuring, and it would have made any measured effect
+ * unattributable — the degraded twin was simply worse, not differently shaped.
+ *
+ * The transform is therefore block-based: fenced blocks are carried through
+ * untouched, and only prose blocks are joined.
  */
 export function flattenMarkdown(markdown: string): string {
   const lines = markdown.split('\n')
+  const blocks: Array<{ kind: 'fence' | 'prose'; lines: string[] }> = []
+  let current: { kind: 'fence' | 'prose'; lines: string[] } = { kind: 'prose', lines: [] }
+  let inFence = false
+
+  const pushBlock = () => {
+    if (current.lines.length > 0) blocks.push(current)
+    current = { kind: inFence ? 'fence' : 'prose', lines: [] }
+  }
+
+  for (const raw of lines) {
+    if (/^\s*```/.test(raw)) {
+      pushBlock()
+      inFence = !inFence
+      // The fence marker belongs to the fenced block on both sides.
+      if (inFence) current = { kind: 'fence', lines: [raw] }
+      else { blocks.push({ kind: 'fence', lines: [raw] }); current = { kind: 'prose', lines: [] } }
+      continue
+    }
+    current.lines.push(raw)
+  }
+  pushBlock()
+
+  const out: string[] = []
+  for (const block of blocks) {
+    if (block.kind === 'fence') {
+      // Untouched, byte for byte. Every normalisation below is applied per
+      // prose block rather than to the assembled document, because a global
+      // pass cannot tell code from prose: an earlier `/ {2,}/` collapse ate the
+      // indentation inside fences even after the newline bug was fixed. Two
+      // instances of the same mistake — a whole-document regex is the wrong
+      // tool once the document has structure worth keeping.
+      out.push(block.lines.join('\n'))
+      continue
+    }
+    const prose = flattenProse(block.lines).replace(/ {2,}/g, ' ').trim()
+    if (prose) out.push(prose)
+  }
+
+  return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n'
+}
+
+/** Prose, lists, headings and tables — everything outside a code fence. */
+function flattenProse(lines: string[]): string {
   const out: string[] = []
   let pendingList: string[] = []
-  let inFence = false
+  let pendingTable: string[] = []
+  let paragraph: string[] = []
 
   const flushList = () => {
     if (pendingList.length === 0) return
     out.push(`${sentenceList(pendingList)}.`)
     pendingList = []
   }
+  const flushTable = () => {
+    if (pendingTable.length === 0) return
+    out.push(`${sentenceList(pendingTable)}.`)
+    pendingTable = []
+  }
+  const flushParagraph = () => {
+    if (paragraph.length === 0) return
+    out.push(paragraph.join(' '))
+    paragraph = []
+  }
+  const flushAll = () => { flushList(); flushTable(); flushParagraph() }
 
   for (const raw of lines) {
     const line = raw.trimEnd()
 
-    if (/^\s*```/.test(line)) {
-      flushList()
-      inFence = !inFence
-      out.push(line)
-      continue
-    }
-    if (inFence) {
-      out.push(line)
-      continue
-    }
+    if (line.trim() === '') { flushAll(); continue }
 
     const heading = line.match(/^\s*#{1,6}\s+(.*)$/)
     if (heading) {
-      flushList()
-      const text = heading[1]!.replace(/[.:]\s*$/, '')
-      // Kept as a sentence rather than dropped: the heading text is
-      // information, and removing it would shorten the twin.
-      out.push(`${text}.`)
+      flushAll()
+      out.push(`${heading[1]!.replace(/[.:]\s*$/, '')}.`)
+      continue
+    }
+
+    // Table separator rows (|---|---|) carry no words; the header and body rows
+    // become sentences so their content survives without the grid.
+    if (/^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(line) && line.includes('-')) {
+      continue
+    }
+    if (/^\s*\|.*\|\s*$/.test(line)) {
+      flushList(); flushParagraph()
+      const cells = line.split('|').map(c => c.trim()).filter(Boolean)
+      if (cells.length > 0) pendingTable.push(cells.join(' — '))
       continue
     }
 
     const item = line.match(/^\s*(?:[-*+]|\d+\.)\s+(.*)$/)
     if (item) {
+      flushTable(); flushParagraph()
       pendingList.push(item[1]!.replace(/[.]\s*$/, ''))
       continue
     }
 
-    flushList()
-    out.push(line)
+    flushList(); flushTable()
+    paragraph.push(line.trim())
   }
-  flushList()
-
-  // Collapse the blank lines that separated the removed structure, so the
-  // result reads as continuous prose rather than a list with the bullets shaved
-  // off.
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/\n(?!\n)(?![`])/g, ' ').replace(/ {2,}/g, ' ').trim() + '\n'
+  flushAll()
+  return out.join(' ')
 }
 
 /**
