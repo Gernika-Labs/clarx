@@ -116,12 +116,32 @@ answer is that the score is the **treatment label**, not the outcome. The
 outcome is agent token cost and task success, and nothing about that is
 definitional. Put this in the paper before someone asks.
 
-### Adoption is not a pure gain
+### Adoption is not a pure gain — CORRECTED 2026-08-19
 
-Two rules moved the wrong way on every repo: B2 and C4 flip pass → fail once a
-manifest exists, because the engine can finally evaluate things it previously
-could not. Net +15 despite two new failures. Report it — a treatment that only
-ever helps looks rigged, and this one visibly does not.
+**The original claim here was wrong and is retained so the error is visible.**
+
+It said: "Two rules moved the wrong way on every repo: B2 and C4 flip pass → fail
+once a manifest exists... Net +15 despite two new failures."
+
+Both halves are false. Measured across all four repos:
+
+| Repo | B2 | C4 |
+|---|---|---|
+| gqloom | pass → fail | pass → fail, **scoreImpact 0** |
+| SDEverywhere | pass → fail | pass → fail, **scoreImpact 0** |
+| neocmakelsp | no change | inapplicable |
+| fuse-backend-rs | no change | inapplicable |
+
+B2 moves only on the two JavaScript monorepos. C4 is inapplicable on both Rust
+repos, and its `scoreImpact` is 0 everywhere — it cannot move the score at all.
+
+So there were no "two new failures" offsetting the gain. **The +15 is entirely
+the graduated hard-failure floor**: every repo goes from two hard failures
+{C2, O1} to one {C2}, which is 50 → 65 by definition. SDEverywhere starts with
+only {C2} and therefore cannot move.
+
+The error was generalising from a single repo (gqloom) to "every repo" without
+checking the other three. Found by an independent reviewer, not by us.
 
 ## 3. A hard failure can mask adoption entirely
 
