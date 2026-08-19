@@ -74,8 +74,8 @@ problems that model already knows about. Say so in the brief.
 
 | Brief | For | Status |
 |---|---|---|
-| `briefs/memorization-canary.md` | second model | ready |
-| `briefs/task-authoring.md` | second model | ready |
+| `briefs/memorization-canary.md` | second model | drafted in `canary/` — administer, do not sit as subject |
+| `briefs/task-authoring.md` | second model | blocked on the canary |
 
 `REVIEW_BRIEF.md` and `REVIEW_FOLLOWUP.md` are the two completed review rounds.
 Read them before starting: they contain the reasoning behind most of the
