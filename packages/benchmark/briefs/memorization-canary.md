@@ -23,6 +23,17 @@ projects — agent frameworks and LLM tooling — which is precisely the materia
 coding model is most likely to have absorbed. The selection criterion and the
 population are working against each other.
 
+## Who can be a subject
+
+**Neither model's current working session.** Both have read `AGENTS.md` in the
+course of building and reviewing this contrast. A model that has the file in
+context is not being tested for recall, it is being tested for reading.
+
+Subjects must be **fresh sessions that have never seen this repository, these
+briefs, or the twins**. Whoever administers the canary is the experimenter, not
+a subject — the two roles cannot be held at once, and this brief originally
+failed to say so.
+
 ## What to do
 
 For each candidate repository, **without giving the model access to the repo**:
@@ -41,10 +52,38 @@ comparison, not just a weakness in one cell.
 
 ## Candidates
 
-| Repo | Pinned SHA | Suggested probe |
-|---|---|---|
-| `climateinteractive/SDEverywhere` | `2cf67ae9da3b2a48304f0b18288e05f8cce2b73e` | the `pnpm -F {package}` command convention; the `packages` / `tests` / `examples` split |
-| `ldclabs/anda` | resolve at selection | a distinctive type from the agent runtime |
+| Repo | Pinned SHA |
+|---|---|
+| `climateinteractive/SDEverywhere` | `2cf67ae9da3b2a48304f0b18288e05f8cce2b73e` |
+| `ldclabs/anda` | resolve at selection |
+
+### Probes that actually test recall
+
+An earlier version of this brief suggested probing the `pnpm -F {package}`
+command form and the `packages` / `tests` / `examples` split. **Those are bad
+memorization probes.** They are ordinary monorepo facts, and a model reciting
+them has demonstrated familiarity with pnpm, not with this repository. The error
+was conflating two different criteria: a fact can be *expensive to recover from
+the tree* (which is what makes it useful for a task) while being *entirely
+generic* (which makes it useless for detecting recall).
+
+A recall probe needs something arbitrary — true of this project and derivable
+from nothing else. Verified present in `AGENTS.md` at the pinned SHA:
+
+- a commit-message rule forbidding one specific trailer
+- a Storybook port that is not a default
+- an exact copyright line naming two organisations
+- a comment-marker convention used to section Svelte files
+- an explicit prohibition on one named CSS framework
+
+Deliberately not quoted verbatim here, so this brief can be shown to an
+experimenter without contaminating them. Read lines 44–118 of the file to
+recover them.
+
+Ask for a distinctive implementation first — a named function or type from the
+model-translation pipeline, whose body is not derivable from its name — then the
+conventions, then layout. A model that produces the arbitrary conventions has
+almost certainly seen the file.
 
 `SDEverywhere` is the current sole structure-contrast candidate, so its result
 decides whether the pilot has any repos at all.
