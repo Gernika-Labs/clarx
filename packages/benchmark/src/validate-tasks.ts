@@ -45,7 +45,7 @@ function renderIndex(byRepo: Map<string, Task[]>): string {
 
 async function main(): Promise<void> {
   const repos = existsSync(TASKS_DIR)
-    ? (await readdir(TASKS_DIR, { withFileTypes: true })).filter(e => e.isDirectory()).map(e => e.name)
+    ? (await readdir(TASKS_DIR, { withFileTypes: true })).filter(e => e.isDirectory() && !e.name.startsWith('_')).map(e => e.name)
     : []
 
   const byRepo = new Map<string, Task[]>()

@@ -5,19 +5,19 @@ A small score gap is data, not a defect: repos are not tuned until the gap is sa
 
 ## Qualified
 
-`twin_high` is the repo after running `clarx init` — adoption performed by the shipped CLI,
-not by hand, so the gap is not a measure of how hard someone tried.
+Each repository declares its **contrast**, and the two manipulations are never combined:
 
-| Repo | Language | Base | twin_high | twin_low | **Gap** | Adoption | Rewrite drift | Files |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| [sdeverywhere](https://github.com/climateinteractive/SDEverywhere) | typescript | 65 | 65 | 65 | **+0** | +0 | 0.5% | 1264 |
-| [gqloom](https://github.com/modevol-com/gqloom) | typescript | 50 | 65 | 50 | **+15** | +15 | 0.2% | 553 |
-| [fuse-backend-rs](https://github.com/cloud-hypervisor/fuse-backend-rs) | rust | 50 | 65 | 50 | **+15** | +15 | 0.7% | 85 |
-| [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp) | rust | 50 | 65 | 50 | **+15** | +15 | -0.3% | 108 |
+- **structure** — high is the repo as published; low has the named documents flattened and
+  nothing else. No Clarx artifacts on either side. The Clarx score is a **covariate**, and an
+  unchanged score is the expected, correct outcome.
+- **adoption** — high is the repo plus `clarx init`; low is the repo as published. No
+  flattening. Quarantined: its score movement is definitional, because `init` writes the file
+  two scoring rules check for.
+
+| Repo | Contrast | Language | Base | twin_high | twin_low | Score delta | Changed | Drift |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
+| [sdeverywhere](https://github.com/climateinteractive/SDEverywhere) | structure | typescript | 65 | 65 | 65 | +0 | README.md | 0.2% |
 
 ## Selection rationale
 
-- **sdeverywhere** — pinned `2cf67ae9da3b`, mit. Translates System Dynamics models to C/JS. A real domain tool with substantial prose documentation, a monorepo layout, and no plausible claim to fame — the kind of navigation problem the study is about.
-- **gqloom** — pinned `3ec35f16e553`, mit. GraphQL schema weaving from runtime types. Small, actively developed, documented, and obscure enough that recall is implausible.
-- **fuse-backend-rs** — pinned `544ce9cea7b5`, apache-2.0. Non-JS, which tests the partial-support claim directly. Systems code with real invariants, so tasks cannot be bluffed from documentation alone.
-- **neocmakelsp** — pinned `6b73bb858552`, mit. A CMake language server: second non-JS repo, different shape from a library, and genuinely obscure.
+- **sdeverywhere** — pinned `2cf67ae9da3b`, mit. Translates System Dynamics models to C/JS. Ships a substantial structured AGENTS.md, which the structure contrast requires. Obscure, active, and no plausible claim to fame.
