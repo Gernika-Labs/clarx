@@ -1,0 +1,23 @@
+{
+  "name": "@clarxai/benchmark",
+  "version": "0.0.0",
+  "description": "Paired-twin causal benchmark: does Clarx-shaped structure make agent work cheaper?",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "twins": "tsc && node dist/build-twins.js"
+  },
+  "dependencies": {
+    "@clarxai/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0",
+    "@jest/globals": "^29.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  }
+}
