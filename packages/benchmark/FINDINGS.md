@@ -229,3 +229,37 @@ again; the hidden test requires an export name the prompt never states),
 gqloom-04 drop until the grader matches the prompt (it accepts an unused helper
 and never inspects the call sites the task is about). The suite is also four
 tasks in one module, which is not a sample of work.
+
+
+---
+
+## 5. Memorization canary drafted, not administered
+
+**Date:** 2026-08-19 · **Status:** drafted — blocks tasks and any paid run until the four cells are filled
+
+The second model wrote the canary it was briefed to write. Nothing has been asked of a subject. The artefact is `packages/benchmark/canary/`. Inaki administers; Claude verifies the prompts against the trees; neither working session is a subject.
+
+### What was checked rather than taken from the brief
+
+PR #14 replaced generic monorepo probes with arbitrary conventions, “verified present” at the pinned SHA, “lines 44–118,” and deliberately not quoted. Four of the five listed facts live in that range. **The Storybook port does not** — it is on line 24 of `AGENTS.md`, and in `packages/check-ui-shell/package.json` as `storybook dev -p 6010`. The non-verbatim treatment is usable for an experimenter who has the tree; the stated line range is not a complete recovery instruction.
+
+The commit-trailer prohibition is present. It is also the weakest of the five as a recall test: forbidding that trailer is becoming a generic reaction to agent tooling. The canary scores conventions as a set and will not disqualify on that hit alone. Said here rather than after a convenient pass.
+
+### Candidates
+
+| Repo | SHA | Why it is here |
+|---|---|---|
+| `climateinteractive/SDEverywhere` | `2cf67ae9da3b2a48304f0b18288e05f8cce2b73e` | Sole structure-contrast repo. Its result decides whether the pilot has any repos at all. |
+| `ldclabs/anda` | `dd8ca6af7f2fd5f78933eb264a8dfeda1b03ba5d` | Pinned at selection (latest `main` as of 2026-08-07). Ships `AGENTS.md`, sits in the star band, and is the AI-adjacent population the brief warned is most likely absorbed — a reason to test it, not to drop it before the test. |
+
+`anda` is not in the twin builder. Passing its canary does not add it; that is a later selection decision.
+
+### What the canary is built to catch
+
+A named implementation that is not derivable from its name (`canonicalId`; `validate_function_name`), a set of arbitrary house rules, layout as supporting evidence only, and a short excerpt whose distinctive continuation is not in the prefix (`TABBED ARRAY`; `Path::parse` rather than `Path::from`).
+
+A vendor split is a confound, not a weak cell. A pass still has to be written as lowering the probability, not as proof.
+
+### Not yet true
+
+No transcripts exist. Until they do, this finding is a protocol, not a control.
