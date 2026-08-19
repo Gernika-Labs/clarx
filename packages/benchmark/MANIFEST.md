@@ -16,7 +16,7 @@ Each repository declares its **contrast**, and the two manipulations are never c
 
 | Repo | Contrast | Language | Base | twin_high | twin_low | Score delta | Changed | Drift |
 | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
-| [sdeverywhere](https://github.com/climateinteractive/SDEverywhere) | structure | typescript | 65 | 65 | 65 | +0 | README.md | 0.2% |
+| [sdeverywhere](https://github.com/climateinteractive/SDEverywhere) | structure | typescript | 65 | 65 | 65 | +0 | AGENTS.md | 1.2% |
 
 ## Selection rationale
 
