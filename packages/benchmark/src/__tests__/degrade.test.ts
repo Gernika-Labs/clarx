@@ -235,3 +235,82 @@ describe('assertOnlyDocumentationChanged', () => {
     expect(() => assertOnlyDocumentationChanged(patch)).not.toThrow()
   })
 })
+
+describe('flattenMarkdown — fence preservation (regression)', () => {
+  // An earlier version claimed fences were intact while a final newline-joining
+  // pass collapsed their contents onto one line. The old test only checked that
+  // ``` and one word survived, which it did — so the test passed while the
+  // transform destroyed every code sample in the corpus.
+  const WITH_FENCE = `# Title
+
+Some prose here.
+
+\`\`\`ts
+const a = 1
+const b = 2
+export function go() {
+  return a + b
+}
+\`\`\`
+
+- item one
+- item two
+`
+
+  it('keeps every line of a fenced block on its own line', () => {
+    const flat = flattenMarkdown(WITH_FENCE)
+    const fence = flat.slice(flat.indexOf('```'), flat.lastIndexOf('```'))
+    expect(fence).toContain('const a = 1\nconst b = 2')
+    expect(fence).toContain('export function go() {\n  return a + b\n}')
+  })
+
+  it('still flattens the prose around the fence', () => {
+    const flat = flattenMarkdown(WITH_FENCE)
+    expect(flat).not.toMatch(/^\s*#{1,6}\s/m)
+    expect(flat).not.toMatch(/^\s*[-*+]\s/m)
+    expect(flat).toContain('item one and item two')
+  })
+
+  it('converts table rows to sentences rather than mangling the grid', () => {
+    const table = `| Package | Purpose |\n| --- | --- |\n| core | Domain logic |\n| ui | Components |\n`
+    const flat = flattenMarkdown(table)
+    expect(flat).not.toContain('|')
+    expect(flat).toContain('core — Domain logic')
+  })
+})
+
+describe('twin symmetry', () => {
+  it('keeps .git in both twins', async () => {
+    // A twin with git and a twin without hands one arm working history tools and
+    // the other nothing — a tooling confound, not a documentation one.
+    const high = await makeHighTwin('repo-git')
+    await mkdir(join(high, '.git'), { recursive: true })
+    await writeFile(join(high, '.git', 'HEAD'), 'ref: refs/heads/main\n', 'utf-8')
+
+    const low = join(ROOT, 'repo-git-low')
+    await degradeRepo(high, low)
+    expect(existsSync(join(low, '.git', 'HEAD'))).toBe(true)
+  })
+})
+
+describe('structure-only degradation', () => {
+  it('flattens exactly the named document and nothing else', async () => {
+    const high = await makeHighTwin('repo-solo')
+    const low = join(ROOT, 'repo-solo-low')
+    const result = await degradeRepo(high, low, { onlyFlatten: ['CLAUDE.md'] })
+
+    expect(result.changedFiles).toEqual(['CLAUDE.md'])
+    // The manifest must survive untouched: in this contrast it is not the
+    // treatment, so converting it would stack a second manipulation.
+    expect(existsSync(join(low, 'clarx-manifest.json'))).toBe(true)
+    expect(await readFile(join(low, 'README.md'), 'utf-8')).toBe(await readFile(join(high, 'README.md'), 'utf-8'))
+    expect(await readFile(join(low, 'CLAUDE.md'), 'utf-8')).not.toBe(await readFile(join(high, 'CLAUDE.md'), 'utf-8'))
+  })
+
+  it('fails loudly when the named document is absent', async () => {
+    const high = await makeHighTwin('repo-absent')
+    await expect(
+      degradeRepo(high, join(ROOT, 'repo-absent-low'), { onlyFlatten: ['NOPE.md'] }),
+    ).rejects.toThrow(/does not exist/)
+  })
+})

@@ -1,8 +1,10 @@
+// Hidden grader test. Staged by the harness at <repo>/.clarx-bench/ and run
+// from there, which is why imports resolve one directory up.
 // Hidden grader test. Checks the helper exists and is correct; the requirement
 // that call sites actually use it is enforced by the unchanged-output tests in
 // the repo's own suite, which the task requires to keep passing.
 import { describe, expect, it } from "vitest"
-import * as core from "../../packages/core/src/index"
+import * as core from "../packages/core/src/index"
 
 type Joiner = (...parts: string[]) => string
 

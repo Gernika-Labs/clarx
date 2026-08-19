@@ -15,10 +15,10 @@ is never shown to the agent.
 
 | ID | Kind | Difficulty | Check |
 | --- | --- | --- | --- |
-| gqloom-01 | bug fix | moderate | `pnpm vitest run --dir packages/core/src/utils` |
-| gqloom-02 | refactor | easy | `pnpm vitest run --dir packages/core/src/utils` |
-| gqloom-03 | small feature | easy | `pnpm vitest run --dir packages/core/src/utils` |
-| gqloom-04 | cross file | hard | `pnpm vitest run --dir packages/core/src` |
+| gqloom-01 | bug fix | moderate | `pnpm vitest run .clarx-bench/task_01.spec.ts` |
+| gqloom-02 | refactor | easy | `pnpm vitest run .clarx-bench/task_02.spec.ts` |
+| gqloom-03 | small feature | easy | `pnpm vitest run .clarx-bench/task_03.spec.ts` |
+| gqloom-04 | cross file | hard | `pnpm vitest run .clarx-bench/task_04.spec.ts` |
 
 ### gqloom-01 — bug fix
 

@@ -33,6 +33,15 @@ export interface Task {
   difficulty: Difficulty
   /** Shown to the agent verbatim, identical in both twins. */
   prompt: string
+  /**
+   * Hidden grader spec, relative to the task's `checks/` directory. The harness
+   * copies it into the repo at grade time and runs it — the agent never sees it.
+   *
+   * Required whenever `checkCommand` is used. Without it the "check" was the
+   * repository's own test suite, which by definition does not cover the change
+   * being asked for: the first version of these tasks passed on unfixed code.
+   */
+  checkSpec?: string | null
   /** Shell command that must exit 0, or null when a rubric is used instead. */
   checkCommand: string | null
   /** Required when checkCommand is null. Each item is independently judgeable. */
@@ -59,7 +68,23 @@ const MANIFEST_ONLY_TERMS = [
   'AI-readiness', 'manifest',
 ]
 
-export function validateTask(task: Task, repoRoot: string, manifestJson: string | null): TaskViolation[] {
+/**
+ * Where the harness stages hidden grader specs inside the repo under test.
+ * Fixed so a task's checkCommand can name the path it will run.
+ */
+export const GRADER_DIR = '.clarx-bench'
+
+export function resolveCheck(task: Task): { copyTo: string; command: string } | null {
+  if (!task.checkSpec || !task.checkCommand) return null
+  return { copyTo: `${GRADER_DIR}/${task.checkSpec}`, command: task.checkCommand }
+}
+
+export function validateTask(
+  task: Task,
+  repoRoot: string,
+  manifestJson: string | null,
+  specDir = '',
+): TaskViolation[] {
   const violations: TaskViolation[] = []
   const v = (rule: string, detail: string) => violations.push({ taskId: task.id, rule, detail })
 
@@ -80,6 +105,14 @@ export function validateTask(task: Task, repoRoot: string, manifestJson: string 
     }
   }
 
+  // A checkCommand with no hidden spec grades the change against tests written
+  // before the change was asked for. gqloom-01 passed on unfixed code that way.
+  if (task.checkCommand && !task.checkSpec) {
+    v('check-without-spec', 'a checkCommand needs a hidden spec; the repo\'s own suite does not cover the change being requested')
+  }
+  if (task.checkSpec && !existsSync(join(specDir, task.checkSpec))) {
+    v('missing-check-spec', `${task.checkSpec} not found in the task's checks/ directory`)
+  }
   if (!task.checkCommand && (!task.rubric || task.rubric.length === 0)) {
     v('no-objective-check', 'a task needs a command that exits 0 or an explicit rubric; otherwise it is graded by opinion')
   }
@@ -119,8 +152,13 @@ function manifestValues(manifestJson: string): string[] {
   return out
 }
 
-export function validateSuite(tasks: Task[], repoRoot: string, manifestJson: string | null): TaskViolation[] {
-  const violations = tasks.flatMap(task => validateTask(task, repoRoot, manifestJson))
+export function validateSuite(
+  tasks: Task[],
+  repoRoot: string,
+  manifestJson: string | null,
+  specDir = '',
+): TaskViolation[] {
+  const violations = tasks.flatMap(task => validateTask(task, repoRoot, manifestJson, specDir))
 
   const kinds = new Set(tasks.map(t => t.kind))
   for (const required of ['bug_fix', 'small_feature', 'refactor', 'cross_file'] as TaskKind[]) {

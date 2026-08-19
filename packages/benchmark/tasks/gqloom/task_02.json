@@ -3,9 +3,12 @@
   "repo": "gqloom",
   "kind": "refactor",
   "difficulty": "easy",
-  "prompt": "One of the string-conversion helpers in this project contains a conditional expression whose two branches are identical — both compute the same value, so the condition decides nothing. Remove the redundancy.\n\nThe observable behaviour of the helper must not change for any input. Do not alter its signature, its name, or where it is exported from, and do not rewrite the surrounding helpers while you are there.",
-  "checkCommand": "pnpm vitest run --dir packages/core/src/utils",
+  "prompt": "One of the string-conversion helpers in this project contains a conditional expression whose two branches are identical \u2014 both compute the same value, so the condition decides nothing. Remove the redundancy.\n\nThe observable behaviour of the helper must not change for any input. Do not alter its signature, its name, or where it is exported from, and do not rewrite the surrounding helpers while you are there.",
+  "checkCommand": "pnpm vitest run .clarx-bench/task_02.spec.ts",
   "rubric": null,
-  "touches": ["packages/core/src/utils/string.ts"],
-  "contaminationNote": "The redundant ternary is visible in the current source and is not referenced by any commit message or issue; an agent must locate it by reading the code rather than by recalling a fix."
+  "touches": [
+    "packages/core/src/utils/string.ts"
+  ],
+  "contaminationNote": "The redundant ternary is visible in the current source and is not referenced by any commit message or issue; an agent must locate it by reading the code rather than by recalling a fix.",
+  "checkSpec": "task_02.spec.ts"
 }
