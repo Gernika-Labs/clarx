@@ -7,7 +7,7 @@ find the problems that would have wasted the confirmatory run.
 
 ## 1. The degradation does not move the Clarx score at all
 
-**Date:** 2026-08-19 · **Status:** blocking, needs a design decision
+**Date:** 2026-08-19 · **Status:** RESOLVED — see finding 2
 
 Ran the unmodified degradation script over four pinned public repositories:
 
@@ -79,3 +79,69 @@ SHAs, real git checkouts, mechanical degradation, a saved `twin_diff.patch` per
 repo asserted to contain no source files, and drift accounting. The pipeline
 reported a zero gap honestly instead of being tuned until it showed one — which
 is the behaviour the whole design is built around.
+
+
+---
+
+## 2. Resolved: `twin_high` is built by `clarx init`, not by hand
+
+**Date:** 2026-08-19 · **Status:** resolved, pipeline rewired
+
+Adoption is now performed by the shipped CLI. `twin_high` is the repo after
+`clarx init`; `twin_low` degrades that manifest back to prose. Source files stay
+byte-identical throughout.
+
+This removes the objection that sank the hand-authoring option: nobody decides
+how good the good twin is. The transformation is mechanical, published, applied
+identically to every repo, and is exactly what a user gets from thirty seconds
+of adoption. It is also the conservative floor — `clarx init` emits a thin
+manifest with empty workspace descriptions, so an effect visible here is
+stronger than one that needed a polished manifest to appear.
+
+| Repo | Base | twin_high | twin_low | Gap |
+|---|---:|---:|---:|---:|
+| SDEverywhere | 65 | 65 | 65 | **0** |
+| gqloom | 50 | 65 | 50 | **+15** |
+| fuse-backend-rs | 50 | 65 | 50 | **+15** |
+| neocmakelsp | 50 | 65 | 50 | **+15** |
+
+The manipulation is symmetric: adoption adds 15, degradation removes exactly the
+same 15. That is the behaviour a clean instrument should show.
+
+### The score gap is partly definitional — say so first
+
+O1 and O2 check whether a manifest exists, so adding one necessarily moves them.
+A skeptic will point this out, and they will be right about the *score*. The
+answer is that the score is the **treatment label**, not the outcome. The
+outcome is agent token cost and task success, and nothing about that is
+definitional. Put this in the paper before someone asks.
+
+### Adoption is not a pure gain
+
+Two rules moved the wrong way on every repo: B2 and C4 flip pass → fail once a
+manifest exists, because the engine can finally evaluate things it previously
+could not. Net +15 despite two new failures. Report it — a treatment that only
+ever helps looks rigged, and this one visibly does not.
+
+## 3. A hard failure can mask adoption entirely
+
+**Date:** 2026-08-19 · **Status:** affects the analysis plan
+
+SDEverywhere scores 65 before adoption and 65 after. It looks like a null case,
+and it is not: **confidence rises medium → high and three rules flip (B2, C4,
+O2)**. It already passed O1 without a `clarx-manifest.json`, and it carries a C2
+hard failure whose cap dominates the score.
+
+So a repo can be genuinely treated while its score does not move, because the
+hard-failure floor absorbs the change.
+
+**Consequence for the analysis:** the independent variable must be the
+**assignment** (twin_high vs twin_low), not the observed score gap. Analysing by
+score gap would silently drop SDEverywhere's data while keeping its cost, and
+would let the engine's capping behaviour decide which repos count. Assignment is
+also the cleaner paired design.
+
+Per the design's own instruction, SDEverywhere stays in. A repo whose honest
+degradation produces no score movement is data about where the score is
+sensitive, and dropping it would be the first step toward a corpus selected for
+agreeable results.

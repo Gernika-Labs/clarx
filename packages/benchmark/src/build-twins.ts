@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -22,9 +22,13 @@ export interface TwinReport {
   candidate: Candidate
   qualified: boolean
   disqualifiedBecause?: string
+  /** The repo exactly as published, before adoption. */
+  baseScore?: number
   highScore?: number
   lowScore?: number
   scoreGap?: number
+  /** What adopting Clarx moved on its own, before any degradation. */
+  adoptionDelta?: number
   degrade?: DegradeResult
   filesScanned?: number
 }
@@ -36,8 +40,32 @@ function git(args: string[], cwd: string): boolean {
   return r.status === 0 && !r.error
 }
 
+const CLI = new URL('../../cli/dist/cli.js', import.meta.url).pathname
+
+/**
+ * twin_high is the repo *after adopting Clarx*, and adoption is performed by the
+ * shipped CLI rather than by hand.
+ *
+ * This is the load-bearing choice in the whole design. Authoring a "good" twin
+ * manually would make the measured gap partly a measure of the author's effort —
+ * and the author sells the product under test. Running `clarx init` removes the
+ * judgement entirely: the transformation is mechanical, published, identical for
+ * every repo, and is literally what a user gets from thirty seconds of adoption.
+ *
+ * The manifest it emits is thin — empty workspace descriptions, generic
+ * defaults. That is deliberate. It is the conservative floor, not a polished
+ * ceiling, so an effect visible here is stronger than one that needed a
+ * hand-tuned manifest to appear.
+ */
+function adoptClarx(dir: string): void {
+  const result = spawnSync('node', [CLI, 'init', '.'], { cwd: dir, encoding: 'utf-8' })
+  if (result.status !== 0) {
+    throw new Error(`clarx init failed in ${dir}: ${result.stderr || result.stdout}`)
+  }
+}
+
 async function fetchAtSha(candidate: Candidate): Promise<string> {
-  const dir = join(CACHE, candidate.id, 'twin_high')
+  const dir = join(CACHE, candidate.id, 'base')
   await mkdir(dir, { recursive: true })
   if (!existsSync(join(dir, '.git'))) {
     if (!git(['init', '--quiet'], dir)) throw new Error(`git init failed for ${candidate.id}`)
@@ -55,11 +83,28 @@ async function fetchAtSha(candidate: Candidate): Promise<string> {
 }
 
 export async function buildTwins(candidate: Candidate): Promise<TwinReport> {
-  let high: string
+  let base: string
   try {
-    high = await fetchAtSha(candidate)
+    base = await fetchAtSha(candidate)
   } catch (err) {
     return { candidate, qualified: false, disqualifiedBecause: err instanceof Error ? err.message : String(err) }
+  }
+
+  const baseResult = await analyze({ root: base })
+
+  // twin_high = the repo with Clarx adopted, built by the product's own tooling.
+  const high = join(CACHE, candidate.id, 'twin_high')
+  await rm(high, { recursive: true, force: true })
+  await cp(base, high, { recursive: true })
+  try {
+    adoptClarx(high)
+  } catch (err) {
+    return {
+      candidate,
+      qualified: false,
+      disqualifiedBecause: err instanceof Error ? err.message : String(err),
+      baseScore: baseResult.score,
+    }
   }
 
   const highResult = await analyze({ root: high })
@@ -76,6 +121,7 @@ export async function buildTwins(candidate: Candidate): Promise<TwinReport> {
         candidate,
         qualified: false,
         disqualifiedBecause: err.message,
+        baseScore: baseResult.score,
         highScore: highResult.score,
         filesScanned: highResult.meta.filesScanned,
       }
@@ -89,9 +135,11 @@ export async function buildTwins(candidate: Candidate): Promise<TwinReport> {
   return {
     candidate,
     qualified: true,
+    baseScore: baseResult.score,
     highScore: highResult.score,
     lowScore: lowResult.score,
     scoreGap: highResult.score - lowResult.score,
+    adoptionDelta: highResult.score - baseResult.score,
     degrade,
     filesScanned: highResult.meta.filesScanned,
   }
@@ -106,15 +154,18 @@ export function renderManifest(reports: TwinReport[]): string {
     '',
     '## Qualified',
     '',
-    '| Repo | Language | Score high | Score low | Gap | Rewrite drift | Manifest prose | Files |',
-    '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |',
+    '`twin_high` is the repo after running `clarx init` — adoption performed by the shipped CLI,',
+    'not by hand, so the gap is not a measure of how hard someone tried.',
+    '',
+    '| Repo | Language | Base | twin_high | twin_low | **Gap** | Adoption | Rewrite drift | Files |',
+    '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |',
   ]
   for (const r of reports.filter(r => r.qualified)) {
     const d = r.degrade!
     lines.push(
-      `| [${r.candidate.id}](${r.candidate.url}) | ${r.candidate.language} | ${r.highScore} | ${r.lowScore} | ` +
-      `${(r.scoreGap ?? 0) >= 0 ? '+' : ''}${r.scoreGap} | ${(d.rewriteDrift * 100).toFixed(1)}% | ` +
-      `+${d.manifestProseWords}w | ${r.filesScanned} |`,
+      `| [${r.candidate.id}](${r.candidate.url}) | ${r.candidate.language} | ${r.baseScore} | ${r.highScore} | ` +
+      `${r.lowScore} | **${(r.scoreGap ?? 0) >= 0 ? '+' : ''}${r.scoreGap}** | ` +
+      `${(r.adoptionDelta ?? 0) >= 0 ? '+' : ''}${r.adoptionDelta} | ${(d.rewriteDrift * 100).toFixed(1)}% | ${r.filesScanned} |`,
     )
   }
   const disqualified = reports.filter(r => !r.qualified)
@@ -142,7 +193,7 @@ async function main(): Promise<void> {
     reports.push(report)
     process.stdout.write(
       report.qualified
-        ? `high ${report.highScore} · low ${report.lowScore} · gap ${report.scoreGap}\n`
+        ? `base ${report.baseScore} → high ${report.highScore} → low ${report.lowScore} · gap ${report.scoreGap}\n`
         : `DISQUALIFIED — ${report.disqualifiedBecause?.slice(0, 90)}\n`,
     )
   }

@@ -5,12 +5,15 @@ A small score gap is data, not a defect: repos are not tuned until the gap is sa
 
 ## Qualified
 
-| Repo | Language | Score high | Score low | Gap | Rewrite drift | Manifest prose | Files |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| [sdeverywhere](https://github.com/climateinteractive/SDEverywhere) | typescript | 65 | 65 | +0 | 0.5% | +0w | 1263 |
-| [gqloom](https://github.com/modevol-com/gqloom) | typescript | 50 | 50 | +0 | 0.2% | +0w | 552 |
-| [fuse-backend-rs](https://github.com/cloud-hypervisor/fuse-backend-rs) | rust | 50 | 50 | +0 | 0.7% | +0w | 84 |
-| [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp) | rust | 50 | 50 | +0 | -0.3% | +0w | 107 |
+`twin_high` is the repo after running `clarx init` — adoption performed by the shipped CLI,
+not by hand, so the gap is not a measure of how hard someone tried.
+
+| Repo | Language | Base | twin_high | twin_low | **Gap** | Adoption | Rewrite drift | Files |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| [sdeverywhere](https://github.com/climateinteractive/SDEverywhere) | typescript | 65 | 65 | 65 | **+0** | +0 | 0.5% | 1264 |
+| [gqloom](https://github.com/modevol-com/gqloom) | typescript | 50 | 65 | 50 | **+15** | +15 | 0.2% | 553 |
+| [fuse-backend-rs](https://github.com/cloud-hypervisor/fuse-backend-rs) | rust | 50 | 65 | 50 | **+15** | +15 | 0.7% | 85 |
+| [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp) | rust | 50 | 65 | 50 | **+15** | +15 | -0.3% | 108 |
 
 ## Selection rationale
 
