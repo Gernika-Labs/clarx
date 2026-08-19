@@ -1,0 +1,11 @@
+{
+  "id": "gqloom-03",
+  "repo": "gqloom",
+  "kind": "small_feature",
+  "difficulty": "easy",
+  "prompt": "This project has helpers that convert a string into PascalCase and into SCREAMING_SNAKE_CASE. Add a third that converts into kebab-case, following the same conventions the existing ones follow: it should accept space-, hyphen-, and underscore-separated input as well as camelCase, split camelCase boundaries into separate words, lower-case every word, and join with single hyphens. \"helloWorld\", \"hello_world\", and \"Hello World\" should all produce \"hello-world\", and empty input should produce an empty string.\n\nPlace it alongside the existing converters and make it reachable from the package's public entry point in the same way they are.",
+  "checkCommand": "pnpm vitest run --dir packages/core/src/utils",
+  "rubric": null,
+  "touches": ["packages/core/src/utils/string.ts", "packages/core/src/utils/index.ts", "packages/core/src/index.ts"],
+  "contaminationNote": "kebab-case conversion does not exist anywhere in the repository at the pinned commit, so it cannot be recalled from the project's own source; the required behaviour is stated in the prompt rather than recoverable from history."
+}

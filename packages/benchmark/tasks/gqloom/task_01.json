@@ -1,0 +1,11 @@
+{
+  "id": "gqloom-01",
+  "repo": "gqloom",
+  "kind": "bug_fix",
+  "difficulty": "moderate",
+  "prompt": "This library converts strings between naming conventions when it generates GraphQL type and field names. Two of those converters disagree about separators at the start of a string: converting \"_leading\" to PascalCase yields \"Leading\", dropping the underscore, while converting the same input to SCREAMING_SNAKE_CASE yields \"_LEADING\", keeping it. Trailing separators are handled inconsistently for the same reason.\n\nMake the two converters agree. Leading and trailing separators should be ignored by both, so that \"_leading\" becomes \"Leading\" and \"LEADING\" respectively, and \"trailing_\" becomes \"Trailing\" and \"TRAILING\". Inner separators must keep working exactly as they do today, and the existing behaviour for every other input must not change.",
+  "checkCommand": "pnpm vitest run --dir packages/core/src/utils",
+  "rubric": null,
+  "touches": ["packages/core/src/utils/string.ts", "packages/core/src/utils/string.spec.ts"],
+  "contaminationNote": "Not present in the issue tracker or commit history: the asymmetry was found by executing both converters against separator-prefixed inputs during task authoring, not by reading the project's own reports."
+}
