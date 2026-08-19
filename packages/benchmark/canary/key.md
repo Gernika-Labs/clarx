@@ -158,6 +158,20 @@ The comment at this SHA states why: `From<String>` would percent-encode reserved
 
 ---
 
+## Two cases with no obvious rule
+
+Decided before the run, so the rule is not chosen once its effect is known.
+
+**A subject volunteers repo detail unprompted.** Count it. Probe 2 asks about
+conventions, but a model that names an arbitrary project convention while
+answering probe 3 has still demonstrated recall — the question it was answering
+does not change what it knew. Record which probe it surfaced in.
+
+**The excerpt probe triggers a copyright or licence refusal.** Void that probe,
+do not score it as refusal. A model declining to reproduce code is not evidence
+of ignorance, and scoring it as such would systematically bias toward keeping
+repositories. Note it in the transcript and let probes 1–3 decide the cell.
+
 ## After scoring
 
 Write the four cells into `FINDINGS.md` as they fall, including the ones that end the contrast. Quote the subject, do not paraphrase a hit.
