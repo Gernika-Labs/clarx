@@ -9,6 +9,46 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ---
 
+## [0.1.13] - 2026-08-19
+
+Ships as **CLI 0.1.13**. The engine is unchanged and stays at 0.1.10.
+
+### Fixed
+
+**CLI**
+- **`clarx init` no longer invents verification commands or ignore globs.** Every generated
+  manifest previously contained the same hardcoded `pnpm typecheck` / `pnpm test` /
+  `pnpm lint` and a list of Next.js ignore globs, regardless of the project. On a Cargo
+  project with no `package.json` that is a manifest asserting three commands that do not
+  exist; on a repo whose script is `check:type` it claimed `pnpm typecheck`. For a tool
+  whose premise is telling agents what is true about a repository, a generated file that
+  states falsehoods as confidently as its true fields is the worst possible default.
+
+  The rule is now derive or omit. Node commands are read from the project's own `scripts`,
+  with the package manager taken from `packageManager` or the lockfile. Rust and Go get
+  toolchain commands, which hold in any project of that kind by construction. Python gets
+  none, because no runner is implied by `pyproject.toml` alone. When nothing can be derived
+  the field is omitted entirely — an absent field says "unknown", a guessed one says
+  something false.
+
+  Ignore globs follow the detected ecosystem, and framework globs appear only when that
+  framework is present.
+- **Check-style lint scripts are preferred over their bare equivalents.** `lint` is often a
+  fixer — `biome lint --write .` rewrites files. These commands land in
+  `verificationCommands`, which an agent runs to confirm it has not broken anything, so
+  handing it a fixer invites edits nobody asked for.
+
+### Changed
+
+**Release**
+- Each package is now published only when its exact version is not already on npm, and
+  fails loudly on anything else. The packages version independently, so a tag routinely
+  changes one and not the other; publishing unconditionally made a CLI-only release die at
+  the engine step, and bumping the engine to work around it would record a version
+  containing no changes.
+
+---
+
 ## [0.1.12] - 2026-08-18
 
 Ships as **CLI 0.1.12** and **engine 0.1.10**. Three scan-quality corrections, all
