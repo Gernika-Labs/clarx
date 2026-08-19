@@ -1,0 +1,89 @@
+# Brief: memorization canary
+
+**For:** the model not building the benchmark
+**Blocks:** writing tasks, and any paid run
+**Effort:** small — a few prompts per repo
+
+## Why this exists
+
+The study measures whether documentation structure changes how expensively an
+agent navigates an unfamiliar repository. If the agent already knows the
+repository from training, it is not navigating — it is recalling, and the
+measurement is of something else entirely.
+
+Selection so far uses a GitHub star band (60–900) as a proxy for "obscure enough
+not to be memorized." That proxy is weak and known to be weak: `gqloom` is
+published to npm with a documentation site, `fuse-backend-rs` sits under the
+`cloud-hypervisor` org, and `SDEverywhere` has existed since 2016. Star count
+does not track training-set presence.
+
+A search for candidate repositories with substantial `AGENTS.md` files made this
+sharper. The qualifying population skews heavily toward recent, AI-adjacent
+projects — agent frameworks and LLM tooling — which is precisely the material a
+coding model is most likely to have absorbed. The selection criterion and the
+population are working against each other.
+
+## What to do
+
+For each candidate repository, **without giving the model access to the repo**:
+
+1. Name the project and ask it to reproduce a distinctive, non-generic function
+   or type from that project — one whose implementation is not derivable from
+   the name. Suggested targets are listed below.
+2. Ask it to describe the project's directory layout and its build/test commands.
+3. Ask it to name the project's less obvious conventions.
+
+Then compare against the real repository at the pinned SHA.
+
+Run each prompt against **both** models that will participate in the study. A
+repo memorized by one vendor and not the other is a confound in the arm
+comparison, not just a weakness in one cell.
+
+## Candidates
+
+| Repo | Pinned SHA | Suggested probe |
+|---|---|---|
+| `climateinteractive/SDEverywhere` | `2cf67ae9da3b2a48304f0b18288e05f8cce2b73e` | the `pnpm -F {package}` command convention; the `packages` / `tests` / `examples` split |
+| `ldclabs/anda` | resolve at selection | a distinctive type from the agent runtime |
+
+`SDEverywhere` is the current sole structure-contrast candidate, so its result
+decides whether the pilot has any repos at all.
+
+## How to judge
+
+There is no clean threshold, so record the evidence rather than a verdict:
+
+- **Clear recall** — reproduces a distinctive implementation closely, or names
+  conventions that appear nowhere but this repo. Disqualify.
+- **Plausible reconstruction** — produces something idiomatic for the domain that
+  does not match the actual code. Not evidence of memorization.
+- **Refusal or invention** — no knowledge. Keep.
+
+Record the transcripts. "We ran a canary" without transcripts is not a control,
+and a reader cannot check a judgement they cannot see.
+
+## What NOT to do
+
+- Do not paste repository contents into the prompt. That defeats the test.
+- Do not accept "I am not sure" as absence of knowledge without probing — ask
+  for the layout and conventions too.
+- Do not treat a passing canary as proof of no contamination. It lowers the
+  probability; it does not eliminate it. Say so in whatever you write.
+
+## Claims to verify rather than accept
+
+- That `SDEverywhere`'s `AGENTS.md` states things not recoverable from the tree.
+  The previous review found most of its facts *are* recoverable — `pnpm` from the
+  lockfile, `.spec.ts` from hundreds of files, `type-check` from every package
+  manifest. **One** fact looked genuinely non-obvious: the root `pnpm test` runs
+  every package plus integration suites, while the file directs you to the scoped
+  `pnpm -F {package}` form. Check whether that holds.
+- That the star band is the only selection rule in use. It is; the sampling rule
+  from the search result set was never recorded, which is itself a gap.
+
+## Open
+
+- Is a canary even the right instrument, or is there a better test for training
+  contamination?
+- If most qualifying repos fail the canary, does that end the structure contrast?
+  That would be a real finding and should be written down, not worked around.
