@@ -263,3 +263,67 @@ A vendor split is a confound, not a weak cell. A pass still has to be written as
 ### Not yet true
 
 No transcripts exist. Until they do, this finding is a protocol, not a control.
+
+
+---
+
+## 5. The canary ran. Both repositories are out.
+
+**Date:** 2026-08-20 · **Status:** the structure contrast has no usable repositories
+**Transcripts:** `canary/transcripts/*-2026-08-20.md`, four cells, none voided
+
+| Cell | Verdict | Decisive evidence |
+|---|---|---|
+| SDEverywhere × Claude | **clear recall** | volunteered `decanonicalize`, the `*-vm.ts` view-model convention, "Climate Interactive / New Venture Fund", `canonicalVarId`, and the leading `_` on canonical ids |
+| SDEverywhere × Grok | keep | no distinctive marker in any reply |
+| anda × Claude | keep | refused; its hypothesis was explicit domain inference (OpenAI tool-name shape) and produced no error string |
+| anda × Grok | **clear recall** | reproduced all four error strings verbatim — `empty string`, `exceeds the limit 64`, `lowercase letter`, `invalid character` |
+
+Every hit was checked against the repository at the pinned SHA. `*-vm.ts` is a real
+convention across **46 files**. `decanonicalize` is a real export. The copyright
+pairing is exact. The anda error strings are byte-for-byte.
+
+### Why this ends the contrast rather than trimming it
+
+Each repository is recalled by exactly one vendor. The scoring key already
+anticipated this: a repo one vendor recalls and the other does not is an **arm
+confound**, not a keep. Any cost difference between arms could be recall rather
+than structure, and no analysis separates them.
+
+So a two-vendor study has zero usable repositories, from the only two candidates
+that qualified on documentation grounds.
+
+### Two things the run taught that the design had wrong
+
+**A calibrated refusal is not absence of knowledge.** SDEverywhere × Claude
+declined to reproduce the function, hedged every claim, offered to fetch the file
+— and volunteered a 46-file naming convention and an obscure exported helper
+anyway. The probe design implicitly treated refusal as non-recall. Those come
+apart, and only checking the volunteered specifics separates them. Scoring on
+tone would have passed this cell.
+
+**It knows the code and not the guide.** The same session confidently denied
+Storybook exists in the project. `packages/check-ui-shell/package.json` runs
+`storybook dev -p 6010` — the exact port stated in `AGENTS.md`, the file the whole
+contrast manipulates. So the contamination is in the codebase, not in the
+artifact being degraded.
+
+That looks at first like a reprieve: the manipulated document is not memorized.
+It is the opposite. A model that already knows the code does not need the guide,
+which is the reversibility objection in its strongest form — the treatment cannot
+matter to a subject who is not navigating.
+
+### What remains, none of it chosen here
+
+- **Single-vendor cells.** SDEverywhere with Grok, anda with Claude. Loses
+  cross-vendor replication, which was the defence against one vendor's habits
+  explaining the result.
+- **More repositories.** The qualifying population — obscure, permissively
+  licensed, shipping a substantial agent guide — ran at roughly one candidate per
+  twenty screened, and skews toward recent AI-adjacent projects. That skew is what
+  got `anda` recalled.
+- **Stop.** Record that the population is too contaminated to support the study,
+  and that the canary is what established it.
+
+The canary cost four chat sessions and no tokens of agent work. It was supposed
+to be a cheap gate in front of the expensive part, and it closed.
