@@ -12,6 +12,7 @@ AI-first codebase standard, analysis engine, and CLI.
 | `standard/`       | —                 | Versioned Clarx AI-First Standard spec and rubric                  |
 | `packages/ui`     | —                 | Internal reference components (not published)                      |
 | `packages/corpus` | —                 | Regression harness: scores pinned real repos, diffs vs snapshots   |
+| `packages/benchmark`| —                 | Paired-twin causal benchmark — not run; see its POSTMORTEM.md      |
 
 ## Prerequisites
 
