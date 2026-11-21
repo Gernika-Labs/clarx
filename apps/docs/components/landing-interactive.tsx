@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 export function CopyButton() {
   const [copied, setCopied] = useState(false)
@@ -21,45 +21,4 @@ export function CopyButton() {
       {copied ? 'copied' : 'copy'}
     </button>
   )
-}
-
-export function ScoreCounter({ target }: { target: number }) {
-  const [value, setValue] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const reduceMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    if (reduceMotion) {
-      setValue(target)
-      return
-    }
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0].isIntersecting) return
-        io.disconnect()
-        const dur = 900
-        const t0 = performance.now()
-        const tick = (t: number) => {
-          const p = Math.min(1, (t - t0) / dur)
-          const eased = 1 - Math.pow(1 - p, 3)
-          setValue(Math.round(target * eased))
-          if (p < 1) requestAnimationFrame(tick)
-          else setValue(target)
-        }
-        requestAnimationFrame(tick)
-      },
-      { threshold: 0.4 },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [target])
-
-  return <span ref={ref}>{value}</span>
 }

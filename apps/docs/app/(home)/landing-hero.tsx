@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { CopyButton, ScoreCounter } from '@/components/landing-interactive'
+import { BrandMark } from '@/components/brand-mark'
+import { CopyButton } from '@/components/landing-interactive'
 import { formatClarxVersion } from '@/lib/version'
 
 export function Nav() {
@@ -7,7 +8,7 @@ export function Nav() {
     <header className="nav">
       <div className="nav-inner">
         <Link className="brand" href="/">
-          <span className="brand-mark" />
+          <BrandMark />
           Clarx
           <span className="ver mono">{formatClarxVersion()}</span>
         </Link>
@@ -37,21 +38,15 @@ export function HeroSection() {
   return (
     <section className="hero" style={{ borderTop: 0 }}>
       <div className="wrap">
-        <div className="eyebrow">
-          <span className="accent">CLARX</span>
-          <span>The standard for AI-first codebases</span>
-        </div>
-
         <h1 className="hero-title">
-          Make your codebase
+          Is your codebase built
           <br className="break-md" />{' '}
-          legible <span className="em">to AI.</span>
+          <span className="em">for AI agents?</span>
         </h1>
 
         <p className="hero-sub">
-          <strong>Clarx</strong> scores your repository against five structural pillars, ships a
-          manifest agents can follow, and gives you open-source tools to measure and improve any
-          codebase — any language, any stack.
+          <strong>Clarx</strong> scores how well your repository is structured for agents to find
+          the right files, make safe changes, and verify their work.
         </p>
 
         <div className="hero-cmd-row">
@@ -69,7 +64,7 @@ export function HeroSection() {
           <div className="score-side">
             <span className="lbl">Overall score</span>
             <div className="num mono">
-              <ScoreCounter target={83} />
+              83
               <span className="of">/100</span>
             </div>
             <div className="conf">

@@ -1,4 +1,3 @@
-import styles from './landing.module.css'
 import { JSON_BODY } from './landing-content'
 import { formatClarxVersion } from '@/lib/version'
 
@@ -79,7 +78,6 @@ export function CliSection() {
             </div>
             <div className="summary">
               Run <span className="acc">clarx explain C3</span> for details
-              <span className={styles.cursor} />
             </div>
           </div>
         </div>
