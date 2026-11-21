@@ -29,10 +29,12 @@ import {
 } from '../analyzers/index.js';
 import type { Manifest, RuleId, RuleResult } from '../types.js';
 import { resolveThresholds } from '../thresholds.js';
+import { computeGraphCoverage, describeCoverageGap, type GraphCoverage } from '../analyzers/graph-coverage.js';
 
 export type EvaluationResult = {
   rules: Partial<Record<RuleId, RuleResult>>;
   importGraphResolved: boolean;
+  graphCoverage: GraphCoverage;
 };
 
 async function readGuidanceContent(root: string, files: FileEntry[]): Promise<string> {
@@ -64,7 +66,7 @@ async function readRootPkgScripts(root: string, files: FileEntry[]): Promise<Set
 // silently — declared thinness, not phantom health.
 const IMPORT_GRAPH_RULES: RuleId[] = ['B1', 'C3', 'C4', 'C5', 'C6'];
 
-function markInapplicable(rule: RuleResult): RuleResult {
+function markInapplicable(rule: RuleResult, reason: string): RuleResult {
   return {
     id: rule.id,
     passed: true,
@@ -72,7 +74,7 @@ function markInapplicable(rule: RuleResult): RuleResult {
     confidence: 'low',
     scoreImpact: 0,
     inapplicable: true,
-    message: 'Not evaluated — no resolvable JS/TS import graph for this stack. Guidance and filesystem rules still apply.',
+    message: `Not evaluated — ${reason}. Guidance and filesystem rules still apply.`,
   };
 }
 
@@ -85,7 +87,10 @@ export async function evaluateRules(
 ): Promise<EvaluationResult> {
   const rules: Partial<Record<RuleId, RuleResult>> = {};
   const thresholds = resolveThresholds(manifest);
-  const importGraphResolved = importGraph.edges.size > 0;
+  const graphCoverage = computeGraphCoverage(files, thresholds.graphCoverageMin);
+  // Resolved = the graph has JS/TS sources AND they cover enough of the repo.
+  // `edges.size > 0` alone let one stray config file stand in for a Python repo.
+  const importGraphResolved = importGraph.edges.size > 0 && graphCoverage.eligible;
 
   // ── Discoverability ───────────────────────────────────────────────────────
 
@@ -200,10 +205,13 @@ export async function evaluateRules(
   rules['E5'] = await evaluateE5(root, files, manifest);
 
   if (!importGraphResolved) {
+    const reason = describeCoverageGap(graphCoverage);
     for (const id of IMPORT_GRAPH_RULES) {
-      if (rules[id]) rules[id] = markInapplicable(rules[id]!);
+      // Keep verified failures (e.g. a cycle inside an analyzed workspace); only
+      // a pass over uncovered code is converted to "not evaluated".
+      if (rules[id]?.passed) rules[id] = markInapplicable(rules[id]!, reason);
     }
   }
 
-  return { rules, importGraphResolved };
+  return { rules, importGraphResolved, graphCoverage };
 }

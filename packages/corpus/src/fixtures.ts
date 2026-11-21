@@ -178,6 +178,69 @@ export const FIXTURE_REPOS: CorpusRepo[] = [
     maxFiles: 40,
   },
   {
+    id: 'fixture-python-stray-js',
+    rationale:
+      'A Python repo whose only JS is one tailwind.config.js. The import graph parses JS/TS only, so it used to count as "resolved" and pass B1/C3–C6 over a one-file graph. Graph rules must report not-evaluated here (graph coverage).',
+    source: {
+      kind: 'fixture',
+      files: {
+        'README.md': '# Fixture: Python repo with a stray JS config\n',
+        'CLAUDE.md': '# Guide\n\nRun `pytest ` before committing.\n',
+        'tailwind.config.js': 'module.exports = { content: [] };\n',
+        'app/models.py': 'import os\n\n\ndef load():\n    return os.getcwd()\n',
+        'app/views.py': 'from app import models\n\n\ndef index():\n    return models.load()\n',
+        'app/utils.py': 'def helper():\n    return 1\n',
+      },
+    },
+    maxFiles: 20,
+  },
+  {
+    id: 'fixture-ts-with-py-scripts',
+    rationale:
+      'A TypeScript project with one Python tooling script (90% JS/TS). Polyglot but overwhelmingly JS/TS: graph rules must still be evaluated, or every repo with a helper script loses B1 and C3–C6. Pins the eligible side of graphCoverageMin.',
+    source: {
+      kind: 'fixture',
+      files: {
+        'package.json': JSON.stringify({ name: 'fixture-ts-with-py-scripts', type: 'module' }, null, 2) + '\n',
+        'README.md': '# Fixture: TypeScript with a Python script\n',
+        'scripts/gen.py': 'def main():\n    return 1\n',
+        ...Object.fromEntries(Array.from({ length: 9 }, (_, i) => [`src/mod${i}.ts`, `export const v${i} = ${i};\n`])),
+      },
+    },
+    maxFiles: 30,
+  },
+  {
+    id: 'fixture-fullstack-split',
+    rationale:
+      'A Python backend and a TypeScript frontend in equal parts (50% JS/TS). The graph sees only the frontend, so repo-wide graph rules must report not-evaluated instead of speaking for the backend. Pins the ineligible side of graphCoverageMin.',
+    source: {
+      kind: 'fixture',
+      files: {
+        'README.md': '# Fixture: Python API plus TypeScript web\n',
+        'CLAUDE.md': '# Guide\n',
+        ...Object.fromEntries(Array.from({ length: 5 }, (_, i) => [`api/mod${i}.py`, `def f${i}():\n    return ${i}\n`])),
+        ...Object.fromEntries(Array.from({ length: 5 }, (_, i) => [`web/src/mod${i}.ts`, `export const v${i} = ${i};\n`])),
+      },
+    },
+    maxFiles: 30,
+  },
+  {
+    id: 'fixture-vue-components',
+    rationale:
+      'A Vue app: two .ts files and eight .vue components. .vue/.svelte are outside the language census (their scripts are JS/TS but unparsed), so this repo is judged on its .ts files and stays eligible. Pins that choice so it is a decision, not an accident.',
+    source: {
+      kind: 'fixture',
+      files: {
+        'package.json': JSON.stringify({ name: 'fixture-vue-components', type: 'module' }, null, 2) + '\n',
+        'README.md': '# Fixture: Vue components\n',
+        'src/main.ts': "import './store';\n",
+        'src/store.ts': 'export const store = {};\n',
+        ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`src/components/C${i}.vue`, '<template><div /></template>\n'])),
+      },
+    },
+    maxFiles: 30,
+  },
+  {
     id: 'fixture-dotfile-config',
     rationale:
       'Root-level dotfiles whose names begin with a generated-directory prefix — .coveragerc, .cachefile, .buildrc. These are configuration, committed on purpose. C1 must not report them as generated artifacts (found on the real psf/requests entry, where .coveragerc was a hard failure capping the score).',

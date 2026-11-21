@@ -8,7 +8,8 @@
         "D2": { "description": "Every workspace or package has a one-line purpose statement", "severity": "warning", "scoreImpact": 20 },
         "D3": { "description": "Source, test, config, and generated directories are segregated", "severity": "warning", "scoreImpact": 25 },
         "D4": { "description": "No utility dumping ground files (utils.ts, helpers.ts, misc.ts, common.ts)", "severity": "warning", "scoreImpact": 20 },
-        "D5": { "description": "Directory depth does not exceed 5 levels before a module boundary", "severity": "recommendation", "scoreImpact": 15 }
+        "D5": { "description": "Directory depth does not exceed 5 levels before a module boundary", "severity": "recommendation", "scoreImpact": 0 },
+        "D6": { "description": "No route name appears at multiple URL depths (shadow routes)", "severity": "warning", "scoreImpact": 25 }
       }
     },
     "boundary_clarity": {
@@ -17,19 +18,19 @@
         "B1": { "description": "No circular imports between packages or workspaces", "severity": "hard_failure", "scoreImpact": 100 },
         "B2": { "description": "Shared code lives in a declared shared package", "severity": "warning", "scoreImpact": 25 },
         "B3": { "description": "Each package or workspace declares a public API surface (index.ts)", "severity": "warning", "scoreImpact": 25 },
-        "B4": { "description": "UI primitives and application logic are in separate locations", "severity": "recommendation", "scoreImpact": 25 },
-        "B5": { "description": "Test files mirror source structure or are co-located", "severity": "recommendation", "scoreImpact": 15 }
+        "B4": { "description": "UI primitives and application logic are in separate locations", "severity": "recommendation", "scoreImpact": 0 },
+        "B5": { "description": "Test files mirror source structure or are co-located", "severity": "recommendation", "scoreImpact": 0 }
       }
     },
     "context_efficiency": {
       "weight": 0.20,
       "rules": {
         "C1": { "description": "Generated artifacts are excluded from the source tree", "severity": "hard_failure", "scoreImpact": 100 },
-        "C2": { "description": "No source file exceeds 400 lines", "severity": "warning", "scoreImpact": 25 },
+        "C2": { "description": "No source file exceeds 400 lines (hard failure above 600)", "severity": "warning", "scoreImpact": 25, "escalatesToHardFailureAbove": 600 },
         "C3": { "description": "No file imports from more than 15 distinct modules", "severity": "warning", "scoreImpact": 20 },
-        "C4": { "description": "High fan-in files (10+ dependents) are documented", "severity": "recommendation", "scoreImpact": 20 },
-        "C5": { "description": "Import graph depth does not exceed 8 hops from entry to leaf", "severity": "recommendation", "scoreImpact": 15 },
-        "C6": { "description": "Entry files expose a local boundary surface before infrastructure", "severity": "recommendation", "scoreImpact": 15 }
+        "C4": { "description": "High fan-in files (10+ dependents) are documented", "severity": "recommendation", "scoreImpact": 0 },
+        "C5": { "description": "Import graph depth does not exceed 8 hops from entry to leaf", "severity": "recommendation", "scoreImpact": 0 },
+        "C6": { "description": "Entry files expose a local boundary surface before infrastructure", "severity": "recommendation", "scoreImpact": 0 }
       }
     },
     "operational_guidance": {
@@ -39,22 +40,27 @@
         "O2": { "description": "Guidance file declares generated directories", "severity": "warning", "scoreImpact": 25 },
         "O3": { "description": "Guidance file declares verification commands", "severity": "warning", "scoreImpact": 25 },
         "O4": { "description": "Guidance file declares where common changes belong", "severity": "warning", "scoreImpact": 25 },
-        "O5": { "description": "Architecture document identifies high-risk files", "severity": "recommendation", "scoreImpact": 15 }
+        "O5": { "description": "Architecture document identifies high-risk files", "severity": "recommendation", "scoreImpact": 0 }
       }
     },
     "edit_safety": {
       "weight": 0.20,
       "rules": {
         "E1": { "description": "No multi-purpose controller or route files exceeding 300 lines", "severity": "warning", "scoreImpact": 25 },
-        "E2": { "description": "Related files are co-located or grouped predictably", "severity": "recommendation", "scoreImpact": 20 },
+        "E2": { "description": "Related files are co-located or grouped predictably", "severity": "recommendation", "scoreImpact": 0 },
         "E3": { "description": "No utility file exports more than 20 unrelated functions", "severity": "warning", "scoreImpact": 25 },
-        "E4": { "description": "Package boundaries are enforced by tooling", "severity": "recommendation", "scoreImpact": 20 },
+        "E4": { "description": "Package boundaries are enforced by tooling", "severity": "recommendation", "scoreImpact": 0 },
         "E5": { "description": "Each package has a single declared entry point", "severity": "warning", "scoreImpact": 20 }
       }
     }
   },
   "hardFailures": ["B1", "C1", "O1"],
-  "hardFailureScoreFloor": 50,
+  "hardFailureScoreFloor": { "1": 65, "2": 50, "3": 35, "4+": 25 },
+  "inapplicableRules": {
+    "rules": ["B1", "C3", "C4", "C5", "C6"],
+    "when": "no resolvable JS/TS import graph",
+    "effect": "reported as not evaluated; never move the score"
+  },
   "confidenceLevels": {
     "high": "Manifest file, full import graph, and filesystem all available",
     "medium": "Filesystem and partial import graph available",
