@@ -1,4 +1,4 @@
-import { JetBrains_Mono } from 'next/font/google'
+import { Chakra_Petch, JetBrains_Mono } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 const jbMono = JetBrains_Mono({
@@ -8,6 +8,13 @@ const jbMono = JetBrains_Mono({
   display: 'swap',
 })
 
+const chakra = Chakra_Petch({
+  subsets: ['latin'],
+  variable: '--font-chakra',
+  weight: ['500', '600', '700'],
+  display: 'swap',
+})
+
 export default function HomeLayout({ children }: { children: ReactNode }) {
-  return <div className={jbMono.variable}>{children}</div>
+  return <div className={`${jbMono.variable} ${chakra.variable}`}>{children}</div>
 }

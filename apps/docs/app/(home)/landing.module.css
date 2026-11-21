@@ -1,26 +1,27 @@
 /* ============ ROOT — CSS vars + base (mobile-first) ============ */
 .root {
-  --bg: #fafafa;
-  --bg-elev: #f4f4f5;
-  --bg-deep: #ececee;
-  --fg: #111111;
-  --fg-muted: #5f5f66;
-  --fg-subtle: #9a9aa0;
-  --border: #e5e5e7;
-  --border-strong: #d4d4d7;
-  --accent: #1f6feb;
-  --accent-soft: #e8f0fe;
-  --accent-ink: #0e3a8a;
-  --term-bg: #0d0d0f;
-  --term-fg: #e6e6e9;
-  --term-dim: #8a8a92;
+  --bg: #f6f7fb;
+  --bg-elev: #ffffff;
+  --bg-deep: #eff1f7;
+  --fg: #141a2c;
+  --fg-muted: #3a4258;
+  --fg-subtle: #6a728a;
+  --border: #dfe3ed;
+  --border-strong: #c9cfde;
+  --accent: #1c2236;
+  --accent-soft: #eff1f7;
+  --accent-ink: #1c2236;
+  --term-bg: #080a12;
+  --term-fg: #eef1fa;
+  --term-dim: #98a1bb;
   --term-good: #6bd2a0;
   --term-warn: #e6c36b;
   --term-bad: #e68585;
-  --term-blue: #7fb3ff;
+  --term-blue: #00e5ff;
   --success: #2c8e5c;
   --warn: #b5851a;
   --bad: #b6443b;
+  --font-display: var(--font-chakra), sans-serif;
   --font-mono: var(--font-jb-mono, 'JetBrains Mono', ui-monospace, monospace);
   --gutter: 16px;
   --section-y: 56px;
@@ -28,7 +29,6 @@
 
   background: var(--bg);
   color: var(--fg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -59,8 +59,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in oklab, var(--bg) 90%, transparent);
-  backdrop-filter: blur(8px);
+  background: var(--bg);
   border-bottom: 1px solid var(--border);
   padding-top: env(safe-area-inset-top, 0px);
 }
@@ -85,21 +84,6 @@
   font-size: 15px;
   flex-shrink: 0;
   min-width: 0;
-}
-.root :global(.brand-mark) {
-  width: 18px;
-  height: 18px;
-  background: var(--fg);
-  border-radius: 4px;
-  position: relative;
-  flex-shrink: 0;
-}
-.root :global(.brand-mark::after) {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  background: var(--bg);
-  border-radius: 1px;
 }
 .root :global(.brand .ver) {
   font-family: var(--font-mono);
@@ -172,6 +156,7 @@
 }
 .root :global(.eyebrow .accent) { color: var(--accent); }
 .root :global(h1.hero-title) {
+  font-family: var(--font-display);
   margin: 0;
   font-size: clamp(32px, 9vw, 40px);
   line-height: 1.05;
@@ -218,7 +203,7 @@
   font-size: 11.5px;
   line-height: 1;
   background: transparent;
-  border: 1px solid #2a2a2f;
+  border: 1px solid #262c42;
   padding: 6px 10px;
   border-radius: 4px;
   transition: color 0.15s, border-color 0.15s;
@@ -356,7 +341,6 @@
   height: 100%;
   background: var(--fg);
   border-radius: 3px;
-  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .root :global(.score-bar.warn .track > span) { background: var(--warn); }
 .root :global(.score-bar.bad .track > span) { background: var(--bad); }
@@ -394,6 +378,7 @@
   flex-shrink: 0;
 }
 .root :global(h2.section-title) {
+  font-family: var(--font-display);
   margin: 0;
   font-size: clamp(24px, 6.5vw, 32px);
   letter-spacing: -0.025em;
@@ -561,14 +546,14 @@
   gap: 6px;
   padding: 10px 12px;
   border-bottom: 1px solid #1a1a1d;
-  background: #131316;
+  background: #101423;
   min-width: 0;
 }
 .root :global(.term-bar .dot) {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #2a2a2f;
+  background: #262c42;
   flex-shrink: 0;
 }
 .root :global(.term-bar .label) {
@@ -632,7 +617,6 @@
   border-radius: 2px;
   overflow: hidden;
   min-width: 0;
-  background-image: radial-gradient(circle, rgba(200, 200, 215, 0.28) 1.5px, transparent 1.5px);
   background-size: 6px 6px;
 }
 .root :global(.term-body .bar-fill) {
@@ -686,17 +670,6 @@
 .root :global(.term-body .summary .warn) { color: var(--term-warn); }
 .root :global(.term-body .acc) { color: var(--term-blue); }
 
-/* cursor — module-scoped so keyframes stay local */
-.cursor {
-  display: inline-block;
-  width: 7px;
-  height: 14px;
-  background: var(--term-fg);
-  vertical-align: -2px;
-  margin-left: 4px;
-  animation: blink 1s steps(2) infinite;
-}
-@keyframes blink { 50% { opacity: 0; } }
 
 /* ---- command pills (1-col base) ---- */
 .root :global(.cmd-pills) {
@@ -774,7 +747,7 @@
 .root :global(.json-tabs) {
   display: flex;
   border-bottom: 1px solid #1a1a1d;
-  background: #131316;
+  background: #101423;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -1508,7 +1481,6 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .cursor { animation: none; opacity: 1; }
 
   .root :global(.score-bar .track > span),
   .root :global(.pillar),
