@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ## [Unreleased]
 
+---
+
+## [0.1.14] - 2026-11-22
+
+Ships as **engine 0.1.11** and **CLI 0.1.14** (the CLI bundles the engine, so CLI users need
+the new CLI to get the engine fix).
+
 ### Fixed
 
 **Engine**
