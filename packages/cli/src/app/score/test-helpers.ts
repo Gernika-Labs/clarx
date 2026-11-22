@@ -59,6 +59,7 @@ export function makeResult(input: {
       filesScanned: 1,
       manifestFound: true,
       importGraphResolved: true,
+      graphCoverage: { languages: [{ language: 'js-ts', files: 1, covered: true }], coveredShare: 1, minShare: 0.8, eligible: true },
     },
   };
 }

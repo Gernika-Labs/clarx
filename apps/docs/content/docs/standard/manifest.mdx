@@ -102,9 +102,9 @@ The standard's rules use numeric limits — lines per file, imports per file, an
 }
 ```
 
-Available keys (defaults in parentheses): `d1RootEntries` (10), `d1RootEntriesNextjs` (17), `d1RootEntriesMonorepo` (20), `d4MinLines` (30), `c2FileLines` (400), `c2FileLinesHard` (600), `c3ImportLimit` (15), `c4FanInThreshold` (10), `c5ImportDepth` (8), `c6ImportThreshold` (8), `c6InfraThreshold` (2), `e1RouteFileLines` (300), `e3UtilityExports` (20).
+Available keys (defaults in parentheses): `d1RootEntries` (10), `d1RootEntriesNextjs` (17), `d1RootEntriesMonorepo` (20), `d4MinLines` (30), `c2FileLines` (400), `c2FileLinesHard` (600), `c3ImportLimit` (15), `c4FanInThreshold` (10), `c5ImportDepth` (8), `c6ImportThreshold` (8), `c6InfraThreshold` (2), `e1RouteFileLines` (300), `e3UtilityExports` (20), `graphCoverageMin` (0.8).
 
-Only finite positive numbers are honored — a malformed override can never disable a rule. Each default's rationale is documented in the engine's `thresholds.ts`; overrides are per-repo tuning, not a change to the standard itself.
+Only finite positive numbers are honored — a malformed override can never disable a rule. (`graphCoverageMin` is a share between 0 and 1; larger values are ignored.) Each default's rationale is documented in the engine's `thresholds.ts`; overrides are per-repo tuning, not a change to the standard itself.
 
 ---
 

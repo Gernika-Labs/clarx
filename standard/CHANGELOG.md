@@ -6,8 +6,10 @@
   disclaimer: not a measure of code quality, security, or correctness.
 - **New rule state: `inapplicable`** — rules that cannot run on a repo's stack
   (B1, C3, C4, C5, C6 without a resolvable JS/TS import graph) are reported as
-  *not evaluated* instead of silently passing. They never move the score.
-- **Manifest v0.1 gains a `thresholds` key** — per-repo overrides for all 13
+  *not evaluated* instead of silently passing. They never move the score. They also
+  report not evaluated when JS/TS covers less than `graphCoverageMin` (default 0.8) of
+  a polyglot repo's source files; verified failures are kept.
+- **Manifest v0.1 gains a `thresholds` key** — per-repo overrides for all 14
   numeric thresholds in the standard, validated (finite positive numbers only;
   overrides can never disable a rule). Defaults and rationale live in the
   engine's `thresholds.ts`.

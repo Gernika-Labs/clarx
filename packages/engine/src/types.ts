@@ -42,7 +42,8 @@ export type RuleResult = {
   locations?: Location[];
   /**
    * True when the rule could not be evaluated for this repo's stack (e.g.
-   * import-graph rules on a repo with no resolvable JS/TS sources). Distinct
+   * import-graph rules on a repo with no resolvable JS/TS sources, or where
+   * JS/TS covers too little of a polyglot repo — see graphCoverageMin). Distinct
    * from a pass: the rule neither passed nor failed — it did not run. Such
    * rules carry `passed: true` and `scoreImpact: 0` so they never move the
    * score, and UIs should report them as "not evaluated" rather than "passing".
@@ -89,6 +90,7 @@ export type AnalysisResult = {
     filesScanned: number;
     manifestFound: boolean;
     importGraphResolved: boolean;
+    graphCoverage: import('./analyzers/graph-coverage.js').GraphCoverage;
   };
 };
 

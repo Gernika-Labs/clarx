@@ -7,6 +7,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com). Versioning follow
 
 ## [Unreleased]
 
+### Fixed
+
+**Engine**
+- **A stray JS file no longer makes a non-JS repo pass the import-graph rules.** B1 and
+  C3–C6 were evaluated whenever *any* JS/TS file existed, so a Python repo with one
+  `tailwind.config.js` passed them over a one-file graph and reported higher confidence.
+  They now run only when JS/TS covers at least `graphCoverageMin` (default 0.8, a new
+  manifest-overridable threshold) of detected source files; otherwise passes become
+  *not evaluated*, with a message naming what was not covered. Verified failures are kept.
+  Repos that are wholly JS/TS — including ones with no resolvable imports — are unaffected.
+  Existing corpus entries are unchanged.
+
+### Added
+
+**Engine**
+- `meta.graphCoverage`: detected source languages (file counts, whether the graph covers
+  each), the covered share, the threshold, and whether graph rules were eligible.
+  `.vue` / `.svelte` files are outside the census (their scripts are JS/TS but unparsed).
+
 ---
 
 ## [0.1.13] - 2026-08-19

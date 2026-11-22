@@ -250,4 +250,75 @@ export const CASES: RegressionCase[] = [
       };
     },
   },
+  {
+    id: 'TRUST-graph-coverage-partial',
+    title: 'A stray JS config does not make a Python repo pass the graph rules',
+    repo: 'fixture-python-stray-js',
+    status: 'holds',
+    source: 'graph coverage (engine 0.1.11)',
+    assert(s) {
+      const expected = ['B1', 'C3', 'C4', 'C5', 'C6'];
+      const wrong = expected.filter(id => rule(s, id)?.inapplicable !== true);
+      return {
+        ok: wrong.length === 0,
+        detail: wrong.length ? `passed over a fragment instead of reporting not-evaluated: ${wrong.join(', ')}` : 'B1, C3–C6 not evaluated (JS/TS covers 25% of source files)',
+      };
+    },
+  },
+  {
+    id: 'TRUST-graph-coverage-no-imports',
+    title: 'A JS repo with no resolvable imports is still evaluated, not marked not-evaluated',
+    repo: 'fixture-no-manifest',
+    status: 'holds',
+    source: 'graph coverage (engine 0.1.11)',
+    assert(s) {
+      const wrong = ['B1', 'C3', 'C4', 'C5', 'C6'].filter(id => rule(s, id)?.inapplicable === true);
+      return {
+        ok: wrong.length === 0,
+        detail: wrong.length ? `fully-JS repo wrongly marked not-evaluated: ${wrong.join(', ')}` : 'graph rules evaluated',
+      };
+    },
+  },
+  {
+    id: 'TRUST-graph-coverage-mostly-js',
+    title: 'A mostly-TS repo with one Python script keeps its graph rules',
+    repo: 'fixture-ts-with-py-scripts',
+    status: 'holds',
+    source: 'graph coverage (engine 0.1.11)',
+    assert(s) {
+      const wrong = ['B1', 'C3', 'C4', 'C5', 'C6'].filter(id => rule(s, id)?.inapplicable === true);
+      return {
+        ok: wrong.length === 0,
+        detail: wrong.length ? `wrongly marked not-evaluated: ${wrong.join(', ')}` : 'graph rules evaluated at 90% JS/TS',
+      };
+    },
+  },
+  {
+    id: 'TRUST-graph-coverage-split',
+    title: 'An even Python/TS split reports graph rules as not evaluated',
+    repo: 'fixture-fullstack-split',
+    status: 'holds',
+    source: 'graph coverage (engine 0.1.11)',
+    assert(s) {
+      const wrong = ['B1', 'C3', 'C4', 'C5', 'C6'].filter(id => rule(s, id)?.inapplicable !== true);
+      return {
+        ok: wrong.length === 0,
+        detail: wrong.length ? `passed over a half-covered repo: ${wrong.join(', ')}` : 'graph rules not evaluated at 50% JS/TS',
+      };
+    },
+  },
+  {
+    id: 'TRUST-graph-coverage-vue',
+    title: 'Vue components sit outside the census; the repo stays eligible',
+    repo: 'fixture-vue-components',
+    status: 'holds',
+    source: 'graph coverage (engine 0.1.11)',
+    assert(s) {
+      const wrong = ['B1', 'C3', 'C4', 'C5', 'C6'].filter(id => rule(s, id)?.inapplicable === true);
+      return {
+        ok: wrong.length === 0,
+        detail: wrong.length ? `wrongly marked not-evaluated: ${wrong.join(', ')}` : 'graph rules evaluated (.vue outside census)',
+      };
+    },
+  },
 ];

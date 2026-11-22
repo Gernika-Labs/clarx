@@ -53,7 +53,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
   const { files, stats } = await scanFilesystem(root, { ignore, manifest });
   const gitTrackedPaths = getGitTrackedPaths(root);
   const importGraph = await buildImportGraph(root, files, manifest?.workspaces ?? null);
-  const { rules, importGraphResolved } = await evaluateRules(root, files, manifest, importGraph, gitTrackedPaths);
+  const { rules, importGraphResolved, graphCoverage } = await evaluateRules(root, files, manifest, importGraph, gitTrackedPaths);
   filterLocationPaths(rules, buildValidPathSet(files));
   const viewModelMigrations = await findViewModelMigrationOpportunities(root, files);
   const { score, confidence, hardFailures, pillars } = computeScore(rules, { importGraphResolved, manifestFound: manifest !== null });
@@ -89,6 +89,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalysisResult> 
       filesScanned: stats.filesScanned,
       manifestFound: manifest !== null,
       importGraphResolved,
+      graphCoverage,
     },
   };
 }

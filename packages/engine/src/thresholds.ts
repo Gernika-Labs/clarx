@@ -90,6 +90,14 @@ export type Thresholds = {
    * utility file has no coherent domain and therefore no safe edit surface.
    */
   e3UtilityExports: number;
+  /**
+   * Graph rules (B1, C3–C6) — minimum share (0–1) of detected source files the
+   * import graph must cover before those rules speak for the whole repo.
+   * Below it they report "not evaluated" instead of passing over a fragment
+   * (a Python repo with one tailwind.config.js is not a JS/TS repo). Verified
+   * failures are kept regardless. Must be in (0, 1].
+   */
+  graphCoverageMin: number;
 };
 
 export const DEFAULT_THRESHOLDS: Thresholds = {
@@ -106,6 +114,7 @@ export const DEFAULT_THRESHOLDS: Thresholds = {
   c6InfraThreshold: 2,
   e1RouteFileLines: 300,
   e3UtilityExports: 20,
+  graphCoverageMin: 0.8,
 };
 
 /**
@@ -121,6 +130,8 @@ export function resolveThresholds(manifest: Manifest | null): Thresholds {
   for (const key of Object.keys(DEFAULT_THRESHOLDS) as Array<keyof Thresholds>) {
     const value = overrides[key];
     if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      // A share above 1 could never be met and would silently disable the graph rules.
+      if (key === 'graphCoverageMin' && value > 1) continue;
       resolved[key] = value;
     }
   }
